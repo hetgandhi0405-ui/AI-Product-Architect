@@ -1,4 +1,6 @@
 from fastapi import APIRouter
+
+from backend.agents.graph import build_agent_graph
 from backend.schemas.requirement import RequirementRequest
 
 router = APIRouter(
@@ -6,12 +8,24 @@ router = APIRouter(
     tags=["Requirements"]
 )
 
+agent_graph = build_agent_graph()
+
 
 @router.post("/")
-def create_requirement(requirement: RequirementRequest):
+def process_requirement(request: RequirementRequest):
+    state = {
+        "project_id": "api-demo-001",
+        "project_name": request.project_name,
+        "requirements": request.description,
+        "suggestions": [],
+        "architecture": {}
+    }
+
+    result = agent_graph.invoke(state)
 
     return {
-        "status": "received",
-        "message": "Customer requirement received successfully",
-        "requirement": requirement.model_dump()
+        "project_name": result["project_name"],
+        "requirements": result["requirements"],
+        "suggestions": result["suggestions"],
+        "architecture": result["architecture"]
     }
