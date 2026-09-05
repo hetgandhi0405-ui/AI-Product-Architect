@@ -1,7 +1,6 @@
 import os
 
 from google import genai
-
 from backend.agents.state import AgentState
 
 
@@ -12,13 +11,16 @@ client = genai.Client(
 
 def suggestion_agent(state: AgentState) -> AgentState:
     """
-    Generate AI-powered technical suggestions
-    from the customer requirements and previous
-    requirement analysis.
+    Generate AI-powered technical architecture
+    recommendations.
     """
 
     requirements = state["requirements"]
-    previous_analysis = state.get("suggestions", [])
+
+    previous_analysis = state.get(
+        "suggestions",
+        []
+    )
 
     prompt = f"""
 You are a senior cloud solution architect.
@@ -49,15 +51,30 @@ Cover:
 10. Scalability
 
 For an e-commerce application, consider suitable
-AWS services such as S3, CloudFront, API Gateway,
-Lambda, ECS/Fargate, Aurora, DynamoDB, ElastiCache,
-Cognito, VPC, CloudWatch, WAF, KMS, EventBridge
-and SQS.
+AWS services such as:
+
+S3
+CloudFront
+API Gateway
+Lambda
+ECS/Fargate
+Aurora
+DynamoDB
+ElastiCache
+Cognito
+VPC
+CloudWatch
+WAF
+KMS
+EventBridge
+SQS
 
 Choose services according to the actual requirements.
+
 Do not simply list every AWS service.
 
 Return a clear, structured technical recommendation.
+
 Do not return JSON.
 """
 
@@ -68,13 +85,15 @@ Do not return JSON.
 
     suggestions = response.text.strip()
 
-    # Replace old rule-based suggestions with the
-    # actual AI-generated recommendation.
     state["suggestions"] = [
-        f"AI Requirement Analysis: {previous_analysis[0]}"
+        (
+            f"AI Requirement Analysis:\n"
+            f"{previous_analysis[0]}"
+        )
         if previous_analysis
         else "AI Requirement Analysis: Not available",
-        f"AI Architecture Suggestions: {suggestions}"
+
+        f"AI Architecture Suggestions:\n{suggestions}"
     ]
 
     return state

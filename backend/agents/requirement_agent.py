@@ -1,7 +1,6 @@
 import os
 
 from google import genai
-
 from backend.agents.state import AgentState
 
 
@@ -37,8 +36,10 @@ Cover:
 7. Scalability requirements
 8. Important technical considerations
 
-Do not repeat the customer requirement as the answer.
+Do not simply repeat the customer requirement.
+
 Do not use phrases such as:
+
 "Requirement received"
 "Analyze required application components"
 "Identify cloud services needed"

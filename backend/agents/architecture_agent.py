@@ -3,7 +3,6 @@ import json
 import time
 
 from google import genai
-
 from backend.agents.state import AgentState
 
 
@@ -14,57 +13,69 @@ client = genai.Client(
 
 def architecture_agent(state: AgentState) -> AgentState:
     """
-    Generate an AI-powered AWS cloud architecture
-    with automatic retry handling for temporary API errors.
+    Generate an AWS cloud architecture using Gemini.
     """
 
     requirements = state["requirements"]
     suggestions = state.get("suggestions", [])
 
     prompt = f"""
-You are a senior AWS cloud architect.
+You are a senior AWS cloud solution architect.
 
 Design a production-ready AWS cloud architecture
-for the following application.
+for the following customer application.
 
 CUSTOMER REQUIREMENTS:
 {requirements}
 
-AI RECOMMENDATIONS:
+AI TECHNICAL ANALYSIS AND SUGGESTIONS:
 {suggestions}
+
+Design the architecture using AWS services that
+actually fit the requirements.
+
+Consider services such as:
+
+- Amazon S3
+- Amazon CloudFront
+- Amazon API Gateway
+- AWS Lambda
+- Amazon ECS / Fargate
+- Amazon Aurora
+- Amazon DynamoDB
+- Amazon ElastiCache
+- Amazon Cognito
+- Amazon VPC
+- Amazon CloudWatch
+- AWS X-Ray
+- AWS WAF
+- AWS KMS
+- AWS Secrets Manager
+- Amazon SQS
+- Amazon EventBridge
+
+Do NOT use every service automatically.
+Choose only appropriate services.
 
 Return ONLY valid JSON.
 
-Use exactly these fields:
+The JSON must contain exactly these fields:
 
 {{
-    "frontend": "",
-    "backend": "",
-    "database": "",
-    "storage": "",
-    "authentication": "",
-    "networking": "",
-    "compute": "",
-    "monitoring": "",
-    "security": "",
-    "scalability": ""
+  "frontend": "...",
+  "backend": "...",
+  "database": "...",
+  "storage": "...",
+  "authentication": "...",
+  "networking": "...",
+  "compute": "...",
+  "monitoring": "...",
+  "security": "...",
+  "scalability": "..."
 }}
 
-Choose AWS services based on the actual requirements.
-
-For an e-commerce application, consider services such as:
-Amazon S3, CloudFront, API Gateway, ECS/Fargate,
-Lambda, Aurora PostgreSQL, DynamoDB, ElastiCache,
-Cognito, VPC, CloudWatch, WAF, KMS, Secrets Manager,
-EventBridge and SQS.
-
-Do not use generic values such as:
-"Web Application"
-"API Server"
-"Managed Database"
-"Cloud Object Storage"
-
-Return only the JSON object.
+Do not include Markdown.
+Do not include explanations outside the JSON.
 """
 
     max_retries = 3
@@ -78,7 +89,6 @@ Return only the JSON object.
 
             architecture_text = response.text.strip()
 
-            # Remove Markdown code fences if Gemini returns them
             if architecture_text.startswith("```"):
                 architecture_text = architecture_text.replace(
                     "```json", ""
@@ -95,13 +105,17 @@ Return only the JSON object.
             return state
 
         except Exception as error:
+
             if attempt < max_retries - 1:
                 wait_time = 2 ** attempt
+
                 print(
                     f"Gemini request failed. "
                     f"Retrying in {wait_time} seconds..."
                 )
+
                 time.sleep(wait_time)
+
             else:
                 raise error
 
