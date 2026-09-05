@@ -13,6 +13,11 @@ agent_graph = build_agent_graph()
 
 @router.post("/")
 def process_requirement(request: RequirementRequest):
+    """
+    Process customer requirements through the
+    Gemini-powered LangGraph workflow.
+    """
+
     state = {
         "project_id": "api-demo-001",
         "project_name": request.project_name,
