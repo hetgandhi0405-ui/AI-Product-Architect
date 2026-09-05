@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from backend.agents.graph import build_agent_graph
 from backend.schemas.requirement import RequirementRequest
 
+
 router = APIRouter(
     prefix="/requirements",
     tags=["Requirements"]
@@ -35,5 +36,6 @@ def process_requirement(request: RequirementRequest):
         "requirements": result["requirements"],
         "suggestions": result["suggestions"],
         "architecture": architecture,
-        "diagram": architecture.get("diagram", "")
+        "diagram": architecture.get("diagram", ""),
+        "infrastructure": architecture.get("infrastructure", {})
     }
