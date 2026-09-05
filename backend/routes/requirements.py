@@ -28,9 +28,12 @@ def process_requirement(request: RequirementRequest):
 
     result = agent_graph.invoke(state)
 
+    architecture = result.get("architecture", {})
+
     return {
         "project_name": result["project_name"],
         "requirements": result["requirements"],
         "suggestions": result["suggestions"],
-        "architecture": result["architecture"]
+        "architecture": architecture,
+        "diagram": architecture.get("diagram", "")
     }

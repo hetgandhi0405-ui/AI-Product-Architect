@@ -1,54 +1,99 @@
 import os
-from google import genai
 
+from google import genai
 from backend.agents.state import AgentState
 
 
-client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+client = genai.Client(
+    api_key=os.environ.get("GEMINI_API_KEY")
+)
 
 
 def suggestion_agent(state: AgentState) -> AgentState:
     """
-    Generate AI-powered technical suggestions
-    based on the requirement analysis.
+    Generate AI-powered technical architecture
+    recommendations.
     """
 
     requirements = state["requirements"]
-    previous_analysis = state.get("suggestions", [])
+
+    previous_analysis = state.get(
+        "suggestions",
+        []
+    )
 
     prompt = f"""
 You are a senior cloud solution architect.
 
-Customer requirement:
+Analyze the customer requirement and the previous
+AI requirement analysis.
+
+CUSTOMER REQUIREMENT:
 {requirements}
 
-Requirement analysis from the previous AI agent:
+PREVIOUS AI ANALYSIS:
 {previous_analysis}
 
-Based on this information, recommend the most appropriate:
+Generate practical technical recommendations for
+building this application.
 
-1. Application components
+Cover:
+
+1. Application architecture
 2. Cloud services
-3. Database technology
-4. Storage solution
-5. Authentication approach
-6. Monitoring and logging
-7. Security measures
-8. Scalability approach
+3. Database
+4. Storage
+5. Authentication
+6. Networking
+7. Compute
+8. Monitoring
+9. Security
+10. Scalability
 
-Keep the recommendations practical and suitable
-for a production-ready application.
+For an e-commerce application, consider suitable
+AWS services such as:
+
+S3
+CloudFront
+API Gateway
+Lambda
+ECS/Fargate
+Aurora
+DynamoDB
+ElastiCache
+Cognito
+VPC
+CloudWatch
+WAF
+KMS
+EventBridge
+SQS
+
+Choose services according to the actual requirements.
+
+Do not simply list every AWS service.
+
+Return a clear, structured technical recommendation.
+
+Do not return JSON.
 """
 
     response = client.models.generate_content(
-        model="gemini-3.6-flash",
+        model="gemini-3.5-flash-lite",
         contents=prompt
     )
 
-    suggestions = response.text
+    suggestions = response.text.strip()
 
-    state["suggestions"].append(
-        f"AI Architecture Suggestions: {suggestions}"
-    )
+    state["suggestions"] = [
+        (
+            f"AI Requirement Analysis:\n"
+            f"{previous_analysis[0]}"
+        )
+        if previous_analysis
+        else "AI Requirement Analysis: Not available",
+
+        f"AI Architecture Suggestions:\n{suggestions}"
+    ]
 
     return state
