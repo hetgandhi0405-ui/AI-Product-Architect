@@ -7,3 +7,7 @@ class AgentState(TypedDict):
     requirements: str
     suggestions: List[str]
     architecture: Dict[str, Any]
+
+    # Day 10 validation loop
+    correction_attempts: int
+    max_correction_attempts: int
