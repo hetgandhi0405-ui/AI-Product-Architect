@@ -8,6 +8,7 @@ from backend.agents.diagram_agent import diagram_agent
 from backend.agents.infrastructure_agent import infrastructure_agent
 from backend.agents.terraform_agent import terraform_agent
 from backend.agents.validation_agent import validation_agent
+from backend.agents.self_correction_agent import self_correction_agent
 
 
 def build_agent_graph():
@@ -25,6 +26,7 @@ def build_agent_graph():
     graph.add_node("infrastructure_agent", infrastructure_agent)
     graph.add_node("terraform_agent", terraform_agent)
     graph.add_node("validation_agent", validation_agent)
+    graph.add_node("self_correction_agent", self_correction_agent)
 
     # Connect workflow
     graph.add_edge(START, "requirement_agent")
@@ -34,6 +36,7 @@ def build_agent_graph():
     graph.add_edge("diagram_agent", "infrastructure_agent")
     graph.add_edge("infrastructure_agent", "terraform_agent")
     graph.add_edge("terraform_agent", "validation_agent")
-    graph.add_edge("validation_agent", END)
+    graph.add_edge("validation_agent", "self_correction_agent")
+    graph.add_edge("self_correction_agent", END)
 
     return graph.compile()
