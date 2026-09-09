@@ -6,8 +6,12 @@ class AgentState(TypedDict):
     project_name: str
     requirements: str
     suggestions: List[str]
+
+    # Day 12 - Product Planner
+    product_plan: Dict[str, Any]
+
     architecture: Dict[str, Any]
 
-    # Day 10 validation loop
+    # Validation and self-correction
     correction_attempts: int
     max_correction_attempts: int
