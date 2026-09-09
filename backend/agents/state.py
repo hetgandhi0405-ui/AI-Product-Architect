@@ -10,6 +10,7 @@ class AgentState(TypedDict):
     # Day 12 - Product Planner
     product_plan: Dict[str, Any]
     ui_specification: Dict[str, Any]
+    api_specification: Dict[str, Any]
 
     architecture: Dict[str, Any]
 

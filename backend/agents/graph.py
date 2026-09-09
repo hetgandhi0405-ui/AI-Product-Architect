@@ -5,6 +5,7 @@ from backend.agents.requirement_agent import requirement_agent
 from backend.agents.suggestion_agent import suggestion_agent
 from backend.agents.product_planner_agent import product_planner_agent
 from backend.agents.ui_ux_spec_agent import ui_ux_spec_agent
+from backend.agents.api_spec_agent import api_spec_agent
 from backend.agents.architecture_agent import architecture_agent
 from backend.agents.diagram_agent import diagram_agent
 from backend.agents.infrastructure_agent import infrastructure_agent
@@ -88,6 +89,11 @@ graph_builder.add_node(
 )
 
 graph_builder.add_node(
+    "api_spec",
+    api_spec_agent
+)
+
+graph_builder.add_node(
     "architecture",
     architecture_agent
 )
@@ -148,6 +154,11 @@ graph_builder.add_edge(
 
 graph_builder.add_edge(
     "ui_ux_spec",
+    "api_spec"
+)
+
+graph_builder.add_edge(
+    "api_spec",
     "architecture"
 )
 
