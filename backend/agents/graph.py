@@ -14,6 +14,7 @@ from backend.agents.code_generation_contract_agent import (
     code_generation_contract_agent
 )
 from backend.agents.code_quality_agent import code_quality_agent
+from backend.agents.testing_agent import test_agent
 from backend.agents.diagram_agent import diagram_agent
 from backend.agents.infrastructure_agent import infrastructure_agent
 from backend.agents.terraform_agent import terraform_agent
@@ -36,6 +37,7 @@ def validation_router(state: AgentState):
         return "end"
 
     correction_attempts = state.get("correction_attempts", 0)
+
     max_correction_attempts = state.get(
         "max_correction_attempts",
         3
@@ -111,6 +113,12 @@ def build_agent_graph():
     graph_builder.add_node(
         "code_quality",
         code_quality_agent
+    )
+
+    # Day 20: Test Agent
+    graph_builder.add_node(
+        "test",
+        test_agent
     )
 
     graph_builder.add_node(
@@ -192,14 +200,19 @@ def build_agent_graph():
         "code_generation_contract"
     )
 
-    # Day 19: Code Quality Agent
     graph_builder.add_edge(
         "code_generation_contract",
         "code_quality"
     )
 
+    # Day 20: Code Quality → Test Agent
     graph_builder.add_edge(
         "code_quality",
+        "test"
+    )
+
+    graph_builder.add_edge(
+        "test",
         "diagram"
     )
 
