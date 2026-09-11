@@ -8,6 +8,7 @@ from backend.agents.ui_ux_spec_agent import ui_ux_spec_agent
 from backend.agents.api_spec_agent import api_spec_agent
 from backend.agents.database_spec_agent import database_spec_agent
 from backend.agents.integration_agent import integration_agent
+from backend.agents.code_generation_contract_agent import code_generation_contract_agent
 from backend.agents.architecture_agent import architecture_agent
 from backend.agents.diagram_agent import diagram_agent
 from backend.agents.infrastructure_agent import infrastructure_agent
@@ -116,6 +117,11 @@ graph_builder.add_node(
 )
 
 graph_builder.add_node(
+    "code_generation_contract",
+    code_generation_contract_agent
+)
+
+graph_builder.add_node(
     "infrastructure",
     infrastructure_agent
 )
@@ -186,6 +192,11 @@ graph_builder.add_edge(
 
 graph_builder.add_edge(
     "integration",
+    "code_generation_contract"
+)
+
+graph_builder.add_edge(
+    "code_generation_contract",
     "diagram"
 )
 

@@ -12,6 +12,7 @@ class AgentState(TypedDict):
     ui_specification: Dict[str, Any]
     api_specification: Dict[str, Any]
     database_specification: Dict[str, Any]
+    code_generation_contract: Dict[str, Any]
 
     architecture: Dict[str, Any]
 
