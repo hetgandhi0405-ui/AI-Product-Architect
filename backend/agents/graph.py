@@ -15,6 +15,9 @@ from backend.agents.code_generation_contract_agent import (
 )
 from backend.agents.code_quality_agent import code_quality_agent
 from backend.agents.testing_agent import test_agent
+from backend.agents.integration_validation_agent import (
+    integration_validation_agent
+)
 from backend.agents.diagram_agent import diagram_agent
 from backend.agents.infrastructure_agent import infrastructure_agent
 from backend.agents.terraform_agent import terraform_agent
@@ -115,10 +118,22 @@ def build_agent_graph():
         code_quality_agent
     )
 
+    # --------------------------------------------------
     # Day 20: Test Agent
+    # --------------------------------------------------
+
     graph_builder.add_node(
         "test",
         test_agent
+    )
+
+    # --------------------------------------------------
+    # Day 21: Integration Validation Agent
+    # --------------------------------------------------
+
+    graph_builder.add_node(
+        "integration_validation",
+        integration_validation_agent
     )
 
     graph_builder.add_node(
@@ -205,14 +220,21 @@ def build_agent_graph():
         "code_quality"
     )
 
-    # Day 20: Code Quality → Test Agent
+    # Code Quality → Test Agent
     graph_builder.add_edge(
         "code_quality",
         "test"
     )
 
+    # Test Agent → Integration Validation
     graph_builder.add_edge(
         "test",
+        "integration_validation"
+    )
+
+    # Integration Validation → Diagram
+    graph_builder.add_edge(
+        "integration_validation",
         "diagram"
     )
 
