@@ -24,3 +24,5 @@ class AgentState(TypedDict):
     code_generation_contract: Dict[str, Any]
 
     dependency_specification: Dict[str, Any]
+
+    environment_configuration: Dict[str, Any]
