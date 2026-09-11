@@ -15,6 +15,7 @@ from backend.agents.code_generation_contract_agent import (
 )
 from backend.agents.code_quality_agent import code_quality_agent
 from backend.agents.testing_agent import test_agent
+from backend.agents.dependency_agent import dependency_agent
 from backend.agents.integration_validation_agent import (
     integration_validation_agent
 )
@@ -26,12 +27,8 @@ from backend.agents.self_correction_agent import self_correction_agent
 
 
 def validation_router(state: AgentState):
-    """
-    Decide whether the workflow should finish or
-    go through the self-correction process.
-    """
-
     architecture = state.get("architecture", {})
+
     validation = architecture.get("validation", {})
 
     status = validation.get("status", "INVALID")
@@ -39,7 +36,10 @@ def validation_router(state: AgentState):
     if status == "VALID":
         return "end"
 
-    correction_attempts = state.get("correction_attempts", 0)
+    correction_attempts = state.get(
+        "correction_attempts",
+        0
+    )
 
     max_correction_attempts = state.get(
         "max_correction_attempts",
@@ -53,14 +53,11 @@ def validation_router(state: AgentState):
 
 
 def build_agent_graph():
-    """
-    Build the complete AI Product Architect agent workflow.
-    """
 
     graph_builder = StateGraph(AgentState)
 
     # --------------------------------------------------
-    # Add Nodes
+    # Nodes
     # --------------------------------------------------
 
     graph_builder.add_node(
@@ -118,18 +115,16 @@ def build_agent_graph():
         code_quality_agent
     )
 
-    # --------------------------------------------------
-    # Day 20: Test Agent
-    # --------------------------------------------------
-
     graph_builder.add_node(
         "test",
         test_agent
     )
 
-    # --------------------------------------------------
-    # Day 21: Integration Validation Agent
-    # --------------------------------------------------
+    # Day 22
+    graph_builder.add_node(
+        "dependency",
+        dependency_agent
+    )
 
     graph_builder.add_node(
         "integration_validation",
@@ -162,7 +157,7 @@ def build_agent_graph():
     )
 
     # --------------------------------------------------
-    # Main Workflow
+    # Main workflow
     # --------------------------------------------------
 
     graph_builder.add_edge(
@@ -220,19 +215,29 @@ def build_agent_graph():
         "code_quality"
     )
 
-    # Code Quality → Test Agent
     graph_builder.add_edge(
         "code_quality",
         "test"
     )
 
-    # Test Agent → Integration Validation
+    # --------------------------------------------------
+    # Day 22 Dependency Agent
+    # --------------------------------------------------
+
     graph_builder.add_edge(
         "test",
+        "dependency"
+    )
+
+    graph_builder.add_edge(
+        "dependency",
         "integration_validation"
     )
 
-    # Integration Validation → Diagram
+    # --------------------------------------------------
+    # Remaining workflow
+    # --------------------------------------------------
+
     graph_builder.add_edge(
         "integration_validation",
         "diagram"
@@ -254,7 +259,7 @@ def build_agent_graph():
     )
 
     # --------------------------------------------------
-    # Validation / Self-Correction Loop
+    # Validation → Self-Correction loop
     # --------------------------------------------------
 
     graph_builder.add_conditional_edges(
@@ -270,5 +275,9 @@ def build_agent_graph():
         "self_correction",
         "validation"
     )
+
+    # --------------------------------------------------
+    # Compile graph
+    # --------------------------------------------------
 
     return graph_builder.compile()
