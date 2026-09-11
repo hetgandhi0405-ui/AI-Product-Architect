@@ -16,6 +16,9 @@ from backend.agents.code_generation_contract_agent import (
 from backend.agents.code_quality_agent import code_quality_agent
 from backend.agents.testing_agent import test_agent
 from backend.agents.dependency_agent import dependency_agent
+from backend.agents.environment_config_agent import (
+    environment_config_agent
+)
 from backend.agents.integration_validation_agent import (
     integration_validation_agent
 )
@@ -126,6 +129,12 @@ def build_agent_graph():
         dependency_agent
     )
 
+    # Day 23
+    graph_builder.add_node(
+        "environment_config",
+        environment_config_agent
+    )
+
     graph_builder.add_node(
         "integration_validation",
         integration_validation_agent
@@ -221,7 +230,7 @@ def build_agent_graph():
     )
 
     # --------------------------------------------------
-    # Day 22 Dependency Agent
+    # Day 22 — Dependency Agent
     # --------------------------------------------------
 
     graph_builder.add_edge(
@@ -229,8 +238,17 @@ def build_agent_graph():
         "dependency"
     )
 
+    # --------------------------------------------------
+    # Day 23 — Environment Configuration Agent
+    # --------------------------------------------------
+
     graph_builder.add_edge(
         "dependency",
+        "environment_config"
+    )
+
+    graph_builder.add_edge(
+        "environment_config",
         "integration_validation"
     )
 
