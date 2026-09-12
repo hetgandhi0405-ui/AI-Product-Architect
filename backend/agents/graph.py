@@ -15,18 +15,24 @@ from backend.agents.api_spec_agent import api_spec_agent
 from backend.agents.database_spec_agent import database_spec_agent
 from backend.agents.architecture_agent import architecture_agent
 from backend.agents.integration_agent import integration_agent
+from backend.agents.plugin_tool_agent import plugin_tool_agent
+
 from backend.agents.code_generation_contract_agent import (
     code_generation_contract_agent
 )
+
 from backend.agents.code_quality_agent import code_quality_agent
 from backend.agents.testing_agent import test_agent
 from backend.agents.dependency_agent import dependency_agent
+
 from backend.agents.environment_config_agent import (
     environment_config_agent
 )
+
 from backend.agents.integration_validation_agent import (
     integration_validation_agent
 )
+
 from backend.agents.diagram_agent import diagram_agent
 from backend.agents.infrastructure_agent import infrastructure_agent
 from backend.agents.terraform_agent import terraform_agent
@@ -35,6 +41,7 @@ from backend.agents.self_correction_agent import self_correction_agent
 
 
 def validation_router(state: AgentState):
+
     architecture = state.get(
         "architecture",
         {}
@@ -176,6 +183,19 @@ def build_agent_graph():
         integration_agent
     )
 
+    # --------------------------------------------------
+    # Plugin / Tool Agent
+    # --------------------------------------------------
+
+    graph_builder.add_node(
+        "plugin_tool",
+        plugin_tool_agent
+    )
+
+    # --------------------------------------------------
+    # Code Generation Contract
+    # --------------------------------------------------
+
     graph_builder.add_node(
         "code_generation_contract",
         code_generation_contract_agent
@@ -313,8 +333,21 @@ def build_agent_graph():
         "integration"
     )
 
+    # --------------------------------------------------
+    # Plugin / Tool Agent
+    # --------------------------------------------------
+
     graph_builder.add_edge(
         "integration",
+        "plugin_tool"
+    )
+
+    # --------------------------------------------------
+    # Code Generation Contract
+    # --------------------------------------------------
+
+    graph_builder.add_edge(
+        "plugin_tool",
         "code_generation_contract"
     )
 
