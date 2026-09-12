@@ -2,6 +2,11 @@ from langgraph.graph import StateGraph, START, END
 
 from backend.agents.state import AgentState
 
+from backend.agents.memory_manager import (
+    create_project_memory,
+    sync_project_memory
+)
+
 from backend.agents.requirement_agent import requirement_agent
 from backend.agents.suggestion_agent import suggestion_agent
 from backend.agents.product_planner_agent import product_planner_agent
@@ -30,14 +35,23 @@ from backend.agents.self_correction_agent import self_correction_agent
 
 
 def validation_router(state: AgentState):
-    architecture = state.get("architecture", {})
+    architecture = state.get(
+        "architecture",
+        {}
+    )
 
-    validation = architecture.get("validation", {})
+    validation = architecture.get(
+        "validation",
+        {}
+    )
 
-    status = validation.get("status", "INVALID")
+    status = validation.get(
+        "status",
+        "INVALID"
+    )
 
     if status == "VALID":
-        return "end"
+        return "memory_sync"
 
     correction_attempts = state.get(
         "correction_attempts",
@@ -52,7 +66,54 @@ def validation_router(state: AgentState):
     if correction_attempts < max_correction_attempts:
         return "self_correction"
 
-    return "end"
+    return "memory_sync"
+
+
+def memory_sync_node(state: AgentState):
+    """
+    Synchronize the complete generated project
+    into Project Memory after final validation.
+    """
+
+    state = sync_project_memory(state)
+
+    memory = state.get(
+        "project_memory",
+        {}
+    )
+
+    history = memory.setdefault(
+        "history",
+        []
+    )
+
+    validation = state.get(
+        "architecture",
+        {}
+    ).get(
+        "validation",
+        {}
+    )
+
+    history.append(
+        {
+            "event": "Project Validation Completed",
+            "details": {
+                "status": validation.get(
+                    "status",
+                    "UNKNOWN"
+                ),
+                "summary": validation.get(
+                    "summary",
+                    ""
+                )
+            }
+        }
+    )
+
+    state["project_memory"] = memory
+
+    return state
 
 
 def build_agent_graph():
@@ -60,13 +121,20 @@ def build_agent_graph():
     graph_builder = StateGraph(AgentState)
 
     # --------------------------------------------------
-    # Nodes
+    # Initialize Project Memory
     # --------------------------------------------------
 
     graph_builder.add_node(
         "initialize",
-        lambda state: state
+        lambda state: {
+            **state,
+            "project_memory": create_project_memory(state)
+        }
     )
+
+    # --------------------------------------------------
+    # Core Agents
+    # --------------------------------------------------
 
     graph_builder.add_node(
         "requirement",
@@ -123,22 +191,36 @@ def build_agent_graph():
         test_agent
     )
 
-    # Day 22
+    # --------------------------------------------------
+    # Dependency Agent
+    # --------------------------------------------------
+
     graph_builder.add_node(
         "dependency",
         dependency_agent
     )
 
-    # Day 23
+    # --------------------------------------------------
+    # Environment Configuration Agent
+    # --------------------------------------------------
+
     graph_builder.add_node(
         "environment_config",
         environment_config_agent
     )
 
+    # --------------------------------------------------
+    # Integration Validation
+    # --------------------------------------------------
+
     graph_builder.add_node(
         "integration_validation",
         integration_validation_agent
     )
+
+    # --------------------------------------------------
+    # Diagram / Infrastructure / Terraform
+    # --------------------------------------------------
 
     graph_builder.add_node(
         "diagram",
@@ -155,10 +237,18 @@ def build_agent_graph():
         terraform_agent
     )
 
+    # --------------------------------------------------
+    # Final Validation
+    # --------------------------------------------------
+
     graph_builder.add_node(
         "validation",
         validation_agent
     )
+
+    # --------------------------------------------------
+    # Self-Correction
+    # --------------------------------------------------
 
     graph_builder.add_node(
         "self_correction",
@@ -166,7 +256,16 @@ def build_agent_graph():
     )
 
     # --------------------------------------------------
-    # Main workflow
+    # Project Memory Synchronization
+    # --------------------------------------------------
+
+    graph_builder.add_node(
+        "memory_sync",
+        memory_sync_node
+    )
+
+    # --------------------------------------------------
+    # Main Workflow
     # --------------------------------------------------
 
     graph_builder.add_edge(
@@ -230,7 +329,7 @@ def build_agent_graph():
     )
 
     # --------------------------------------------------
-    # Day 22 — Dependency Agent
+    # Dependency
     # --------------------------------------------------
 
     graph_builder.add_edge(
@@ -239,7 +338,7 @@ def build_agent_graph():
     )
 
     # --------------------------------------------------
-    # Day 23 — Environment Configuration Agent
+    # Environment Configuration
     # --------------------------------------------------
 
     graph_builder.add_edge(
@@ -247,13 +346,17 @@ def build_agent_graph():
         "environment_config"
     )
 
+    # --------------------------------------------------
+    # Cross-Agent Validation
+    # --------------------------------------------------
+
     graph_builder.add_edge(
         "environment_config",
         "integration_validation"
     )
 
     # --------------------------------------------------
-    # Remaining workflow
+    # Diagram
     # --------------------------------------------------
 
     graph_builder.add_edge(
@@ -261,15 +364,27 @@ def build_agent_graph():
         "diagram"
     )
 
+    # --------------------------------------------------
+    # Infrastructure
+    # --------------------------------------------------
+
     graph_builder.add_edge(
         "diagram",
         "infrastructure"
     )
 
+    # --------------------------------------------------
+    # Terraform
+    # --------------------------------------------------
+
     graph_builder.add_edge(
         "infrastructure",
         "terraform"
     )
+
+    # --------------------------------------------------
+    # Final Validation
+    # --------------------------------------------------
 
     graph_builder.add_edge(
         "terraform",
@@ -277,7 +392,7 @@ def build_agent_graph():
     )
 
     # --------------------------------------------------
-    # Validation → Self-Correction loop
+    # Validation Routing
     # --------------------------------------------------
 
     graph_builder.add_conditional_edges(
@@ -285,9 +400,13 @@ def build_agent_graph():
         validation_router,
         {
             "self_correction": "self_correction",
-            "end": END
+            "memory_sync": "memory_sync"
         }
     )
+
+    # --------------------------------------------------
+    # Self-Correction → Validation
+    # --------------------------------------------------
 
     graph_builder.add_edge(
         "self_correction",
@@ -295,7 +414,16 @@ def build_agent_graph():
     )
 
     # --------------------------------------------------
-    # Compile graph
+    # Memory Sync → End
+    # --------------------------------------------------
+
+    graph_builder.add_edge(
+        "memory_sync",
+        END
+    )
+
+    # --------------------------------------------------
+    # Compile Graph
     # --------------------------------------------------
 
     return graph_builder.compile()
