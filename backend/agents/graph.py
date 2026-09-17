@@ -4,6 +4,7 @@ from backend.agents.api_spec_agent import api_spec_agent
 from backend.agents.architecture_agent import architecture_agent
 from backend.agents.architecture_alternatives_agent import architecture_alternatives_agent
 from backend.agents.architecture_evaluator_agent import architecture_evaluator_agent
+from backend.agents.architecture_knowledge_graph_agent import architecture_knowledge_graph_agent
 from backend.agents.code_generation_contract_agent import (
     code_generation_contract_agent,
 )
@@ -261,6 +262,11 @@ def build_agent_graph():
     )
 
     graph_builder.add_node(
+        "architecture_knowledge_graph",
+        architecture_knowledge_graph_agent,
+    )
+
+    graph_builder.add_node(
         "integration",
         integration_agent,
     )
@@ -418,6 +424,11 @@ def build_agent_graph():
 
     graph_builder.add_edge(
         "architecture_evaluator",
+        "architecture_knowledge_graph",
+    )
+
+    graph_builder.add_edge(
+        "architecture_knowledge_graph",
         "integration",
     )
 
