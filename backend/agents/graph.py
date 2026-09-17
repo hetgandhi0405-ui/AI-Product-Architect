@@ -2,6 +2,8 @@ from langgraph.graph import END, StateGraph
 
 from backend.agents.api_spec_agent import api_spec_agent
 from backend.agents.architecture_agent import architecture_agent
+from backend.agents.architecture_alternatives_agent import architecture_alternatives_agent
+from backend.agents.architecture_evaluator_agent import architecture_evaluator_agent
 from backend.agents.code_generation_contract_agent import (
     code_generation_contract_agent,
 )
@@ -249,6 +251,16 @@ def build_agent_graph():
     )
 
     graph_builder.add_node(
+        "architecture_alternatives",
+        architecture_alternatives_agent,
+    )
+
+    graph_builder.add_node(
+        "architecture_evaluator",
+        architecture_evaluator_agent,
+    )
+
+    graph_builder.add_node(
         "integration",
         integration_agent,
     )
@@ -396,6 +408,16 @@ def build_agent_graph():
 
     graph_builder.add_edge(
         "architecture",
+        "architecture_alternatives",
+    )
+
+    graph_builder.add_edge(
+        "architecture_alternatives",
+        "architecture_evaluator",
+    )
+
+    graph_builder.add_edge(
+        "architecture_evaluator",
         "integration",
     )
 
