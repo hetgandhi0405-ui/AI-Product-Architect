@@ -2,6 +2,9 @@ from langgraph.graph import END, StateGraph
 
 from backend.agents.api_spec_agent import api_spec_agent
 from backend.agents.architecture_agent import architecture_agent
+from backend.agents.architecture_alternatives_agent import architecture_alternatives_agent
+from backend.agents.architecture_evaluator_agent import architecture_evaluator_agent
+from backend.agents.architecture_knowledge_graph_agent import architecture_knowledge_graph_agent
 from backend.agents.code_generation_contract_agent import (
     code_generation_contract_agent,
 )
@@ -10,7 +13,6 @@ from backend.agents.database_spec_agent import database_spec_agent
 from backend.agents.dependency_agent import dependency_agent
 from backend.agents.diagram_agent import diagram_agent
 from backend.agents.dynamic_router_agent import dynamic_router_agent
-from backend.agents.digital_twin_agent import digital_twin_agent
 from backend.agents.environment_config_agent import environment_config_agent
 from backend.agents.infrastructure_agent import infrastructure_agent
 from backend.agents.integration_agent import integration_agent
@@ -250,8 +252,18 @@ def build_agent_graph():
     )
 
     graph_builder.add_node(
-        "digital_twin",
-        digital_twin_agent,
+        "architecture_alternatives",
+        architecture_alternatives_agent,
+    )
+
+    graph_builder.add_node(
+        "architecture_evaluator",
+        architecture_evaluator_agent,
+    )
+
+    graph_builder.add_node(
+        "architecture_knowledge_graph",
+        architecture_knowledge_graph_agent,
     )
 
     graph_builder.add_node(
@@ -402,11 +414,21 @@ def build_agent_graph():
 
     graph_builder.add_edge(
         "architecture",
-        "digital_twin",
+        "architecture_alternatives",
     )
 
     graph_builder.add_edge(
-        "digital_twin",
+        "architecture_alternatives",
+        "architecture_evaluator",
+    )
+
+    graph_builder.add_edge(
+        "architecture_evaluator",
+        "architecture_knowledge_graph",
+    )
+
+    graph_builder.add_edge(
+        "architecture_knowledge_graph",
         "integration",
     )
 
