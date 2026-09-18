@@ -10,6 +10,7 @@ from backend.agents.database_spec_agent import database_spec_agent
 from backend.agents.dependency_agent import dependency_agent
 from backend.agents.diagram_agent import diagram_agent
 from backend.agents.dynamic_router_agent import dynamic_router_agent
+from backend.agents.digital_twin_agent import digital_twin_agent
 from backend.agents.environment_config_agent import environment_config_agent
 from backend.agents.infrastructure_agent import infrastructure_agent
 from backend.agents.integration_agent import integration_agent
@@ -249,6 +250,11 @@ def build_agent_graph():
     )
 
     graph_builder.add_node(
+        "digital_twin",
+        digital_twin_agent,
+    )
+
+    graph_builder.add_node(
         "integration",
         integration_agent,
     )
@@ -396,6 +402,11 @@ def build_agent_graph():
 
     graph_builder.add_edge(
         "architecture",
+        "digital_twin",
+    )
+
+    graph_builder.add_edge(
+        "digital_twin",
         "integration",
     )
 
