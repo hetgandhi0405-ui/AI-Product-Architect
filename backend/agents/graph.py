@@ -14,6 +14,8 @@ from backend.agents.dependency_agent import dependency_agent
 from backend.agents.diagram_agent import diagram_agent
 from backend.agents.dynamic_router_agent import dynamic_router_agent
 from backend.agents.digital_twin_agent import digital_twin_agent
+from backend.agents.what_if_engine_agent import what_if_engine_agent
+from backend.agents.architecture_simulator_agent import architecture_simulator_agent
 from backend.agents.environment_config_agent import environment_config_agent
 from backend.agents.infrastructure_agent import infrastructure_agent
 from backend.agents.integration_agent import integration_agent
@@ -273,6 +275,16 @@ def build_agent_graph():
     )
 
     graph_builder.add_node(
+        "what_if_engine",
+        what_if_engine_agent,
+    )
+
+    graph_builder.add_node(
+        "architecture_simulator",
+        architecture_simulator_agent,
+    )
+
+    graph_builder.add_node(
         "integration",
         integration_agent,
     )
@@ -440,6 +452,16 @@ def build_agent_graph():
 
     graph_builder.add_edge(
         "digital_twin",
+        "what_if_engine",
+    )
+
+    graph_builder.add_edge(
+        "what_if_engine",
+        "architecture_simulator",
+    )
+
+    graph_builder.add_edge(
+        "architecture_simulator",
         "integration",
     )
 
