@@ -22,6 +22,8 @@ from backend.agents.integration_agent import integration_agent
 from backend.agents.integration_validation_agent import (
     integration_validation_agent,
 )
+from backend.agents.monitoring_agent import monitoring_agent
+from backend.agents.failure_detection_agent import failure_detection_agent
 from backend.agents.memory_manager import (
     create_project_memory,
     sync_project_memory,
@@ -164,7 +166,7 @@ def validation_router(state: AgentState):
     )
 
     if status == "VALID":
-        return "memory_sync"
+        return "monitoring"
 
     attempts = state.get(
         "correction_attempts",
@@ -375,6 +377,20 @@ def build_agent_graph():
     )
 
     # =========================================================
+    # DAY 32 - INFRASTRUCTURE MONITORING
+    # =========================================================
+
+    graph_builder.add_node(
+        "monitoring",
+        monitoring_agent,
+    )
+
+    graph_builder.add_node(
+        "failure_detection",
+        failure_detection_agent,
+    )
+
+    # =========================================================
     # GRAPH ENTRY
     # =========================================================
 
@@ -521,6 +537,15 @@ def build_agent_graph():
     )
 
     # =========================================================
+    # DAY 32 - INFRASTRUCTURE MONITORING PIPELINE
+    # =========================================================
+
+    graph_builder.add_edge(
+        "monitoring",
+        "failure_detection",
+    )
+
+    # =========================================================
     # VALIDATION LOOP
     # =========================================================
 
@@ -529,6 +554,7 @@ def build_agent_graph():
         validation_router,
         {
             "self_correction": "self_correction",
+            "monitoring": "monitoring",
             "memory_sync": "memory_sync",
         },
     )
@@ -536,6 +562,11 @@ def build_agent_graph():
     graph_builder.add_edge(
         "self_correction",
         "validation",
+    )
+
+    graph_builder.add_edge(
+        "failure_detection",
+        "memory_sync",
     )
 
     # =========================================================

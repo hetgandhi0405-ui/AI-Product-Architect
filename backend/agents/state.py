@@ -14,6 +14,8 @@ class AgentState(TypedDict):
     database_specification: Dict[str, Any]
 
     architecture: Dict[str, Any]
+    monitoring: Dict[str, Any]
+    failure_detection: Dict[str, Any]
 
     dynamic_routing: Dict[str, Any]
 
