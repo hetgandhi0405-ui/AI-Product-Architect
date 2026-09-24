@@ -64,6 +64,16 @@ def initialize_node(state: AgentState):
         {},
     )
 
+    state["tool_registry"] = state.get(
+        "tool_registry",
+        {},
+    )
+
+    state["selected_tools"] = state.get(
+        "selected_tools",
+        {},
+    )
+
     state["project_memory"] = create_project_memory(
         state
     )

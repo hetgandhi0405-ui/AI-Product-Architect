@@ -5,6 +5,7 @@ import os
 from google import genai
 
 from backend.agents.state import AgentState
+from backend.agents.tool_registry import get_tool_registry
 
 
 MODEL_NAME = "gemini-3.5-flash-lite"
@@ -98,6 +99,8 @@ def plugin_tool_agent(
         {}
     )
 
+    tool_registry = get_tool_registry()
+
     prompt = f"""
 You are the Plugin and Tool Selection Agent
 inside an autonomous AI software architecture platform.
@@ -123,6 +126,9 @@ DATABASE SPECIFICATION:
 
 ARCHITECTURE:
 {json.dumps(architecture, indent=2)}
+
+AVAILABLE TOOL REGISTRY:
+{json.dumps(tool_registry, indent=2)}
 
 Return ONLY valid JSON.
 
@@ -247,6 +253,18 @@ Rules:
                 "plugin_tool_specification"
             ] = result
 
+            selected_tools = {
+                "tools": result.get("tools", []),
+                "categories": result.get("categories", []),
+                "selection_summary": result.get("selection_summary", ""),
+            }
+
+            state["tool_registry"] = {
+                "total_tools": len(tool_registry),
+                "tools": tool_registry,
+            }
+
+            state["selected_tools"] = selected_tools
             state["architecture"] = architecture
 
             return state

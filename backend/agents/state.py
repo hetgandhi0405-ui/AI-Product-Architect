@@ -16,6 +16,8 @@ class AgentState(TypedDict):
     architecture: Dict[str, Any]
 
     dynamic_routing: Dict[str, Any]
+    tool_registry: Dict[str, Any]
+    selected_tools: Dict[str, Any]
 
     code_generation_contract: Dict[str, Any]
     dependency_specification: Dict[str, Any]

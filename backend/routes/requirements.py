@@ -37,5 +37,7 @@ def process_requirement(request: RequirementRequest):
         "suggestions": result["suggestions"],
         "architecture": architecture,
         "diagram": architecture.get("diagram", ""),
-        "infrastructure": architecture.get("infrastructure", {})
+        "infrastructure": architecture.get("infrastructure", {}),
+        "tool_registry": result.get("tool_registry", {}),
+        "selected_tools": result.get("selected_tools", {})
     }
