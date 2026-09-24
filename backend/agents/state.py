@@ -22,6 +22,7 @@ class AgentState(TypedDict):
     environment_configuration: Dict[str, Any]
 
     project_memory: Dict[str, Any]
+    security_analysis: Dict[str, Any]
 
     correction_attempts: int
     max_correction_attempts: int
