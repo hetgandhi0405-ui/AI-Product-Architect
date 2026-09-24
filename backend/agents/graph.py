@@ -32,6 +32,7 @@ from backend.agents.plugin_tool_agent import plugin_tool_agent
 from backend.agents.product_planner_agent import product_planner_agent
 from backend.agents.requirement_agent import requirement_agent
 from backend.agents.self_correction_agent import self_correction_agent
+from backend.agents.security_agent import security_agent
 from backend.agents.suggestion_agent import suggestion_agent
 from backend.agents.terraform_agent import terraform_agent
 from backend.agents.testing_agent import test_agent
@@ -287,6 +288,11 @@ def build_agent_graph():
     )
 
     graph_builder.add_node(
+        "security",
+        security_agent,
+    )
+
+    graph_builder.add_node(
         "integration",
         integration_agent,
     )
@@ -478,6 +484,11 @@ def build_agent_graph():
 
     graph_builder.add_edge(
         "architecture_simulator",
+        "security",
+    )
+
+    graph_builder.add_edge(
+        "security",
         "integration",
     )
 
