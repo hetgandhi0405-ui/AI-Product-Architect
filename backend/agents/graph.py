@@ -31,6 +31,7 @@ from backend.agents.memory_manager import (
 from backend.agents.plugin_tool_agent import plugin_tool_agent
 from backend.agents.product_planner_agent import product_planner_agent
 from backend.agents.requirement_agent import requirement_agent
+from backend.agents.requirement_traceability_agent import requirement_traceability_agent
 from backend.agents.self_correction_agent import self_correction_agent
 from backend.agents.security_agent import security_agent
 from backend.agents.suggestion_agent import suggestion_agent
@@ -341,6 +342,11 @@ def build_agent_graph():
     )
 
     graph_builder.add_node(
+        "requirement_traceability",
+        requirement_traceability_agent,
+    )
+
+    graph_builder.add_node(
         "environment_config",
         environment_config_agent,
     )
@@ -524,6 +530,11 @@ def build_agent_graph():
 
     graph_builder.add_edge(
         "test",
+        "requirement_traceability",
+    )
+
+    graph_builder.add_edge(
+        "requirement_traceability",
         "dependency",
     )
 
