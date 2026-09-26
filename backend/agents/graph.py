@@ -5,6 +5,7 @@ from backend.agents.architecture_agent import architecture_agent
 from backend.agents.architecture_alternatives_agent import architecture_alternatives_agent
 from backend.agents.architecture_evaluator_agent import architecture_evaluator_agent
 from backend.agents.architecture_knowledge_graph_agent import architecture_knowledge_graph_agent
+from backend.agents.architecture_recommendation_agent import architecture_recommendation_agent
 from backend.agents.code_generation_contract_agent import (
     code_generation_contract_agent,
 )
@@ -310,6 +311,11 @@ def build_agent_graph():
     )
 
     graph_builder.add_node(
+        "architecture_recommendation",
+        architecture_recommendation_agent,
+    )
+
+    graph_builder.add_node(
         "integration",
         integration_agent,
     )
@@ -516,6 +522,11 @@ def build_agent_graph():
 
     graph_builder.add_edge(
         "cost_intelligence",
+        "architecture_recommendation",
+    )
+
+    graph_builder.add_edge(
+        "architecture_recommendation",
         "integration",
     )
 

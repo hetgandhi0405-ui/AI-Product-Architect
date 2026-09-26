@@ -28,6 +28,7 @@ class AgentState(TypedDict):
     project_memory: Dict[str, Any]
     security_analysis: Dict[str, Any]
     cost_analysis: Dict[str, Any]
+    architecture_recommendation: Dict[str, Any]
     requirement_traceability: Dict[str, Any]
 
     correction_attempts: int
