@@ -193,6 +193,8 @@ Rules:
                 "security_analysis"
             ] = security_report
 
+            state["security_analysis"] = security_report
+
             return state
 
         except Exception as exc:
