@@ -9,6 +9,7 @@ from backend.agents.code_generation_contract_agent import (
     code_generation_contract_agent,
 )
 from backend.agents.code_quality_agent import code_quality_agent
+from backend.agents.cost_intelligence_agent import cost_intelligence_agent
 from backend.agents.database_spec_agent import database_spec_agent
 from backend.agents.dependency_agent import dependency_agent
 from backend.agents.diagram_agent import diagram_agent
@@ -304,6 +305,11 @@ def build_agent_graph():
     )
 
     graph_builder.add_node(
+        "cost_intelligence",
+        cost_intelligence_agent,
+    )
+
+    graph_builder.add_node(
         "integration",
         integration_agent,
     )
@@ -505,6 +511,11 @@ def build_agent_graph():
 
     graph_builder.add_edge(
         "security",
+        "cost_intelligence",
+    )
+
+    graph_builder.add_edge(
+        "cost_intelligence",
         "integration",
     )
 
