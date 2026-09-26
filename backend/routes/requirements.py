@@ -9,6 +9,7 @@ router = APIRouter(
     tags=["Requirements"]
 )
 
+# Build the LangGraph workflow once when the API starts.
 agent_graph = build_agent_graph()
 
 
@@ -23,21 +24,104 @@ def process_requirement(request: RequirementRequest):
         "project_id": "api-demo-001",
         "project_name": request.project_name,
         "requirements": request.description,
+
+        # Customer-provided requirements
+        "users": request.users,
+        "features": request.features,
+        "security_level": request.security_level,
+        "availability": request.availability,
+
+        # Initial workflow values
         "suggestions": [],
-        "architecture": {}
+        "architecture": {},
     }
 
+    # Execute the complete AI Product Architect pipeline.
     result = agent_graph.invoke(state)
 
     architecture = result.get("architecture", {})
 
     return {
-        "project_name": result["project_name"],
-        "requirements": result["requirements"],
-        "suggestions": result["suggestions"],
+        # Basic project information
+        "project_name": result.get(
+            "project_name",
+            request.project_name
+        ),
+        "requirements": result.get(
+            "requirements",
+            request.description
+        ),
+        "suggestions": result.get(
+            "suggestions",
+            []
+        ),
+
+        # Customer requirements
+        "users": result.get(
+            "users",
+            request.users
+        ),
+        "features": result.get(
+            "features",
+            request.features
+        ),
+        "security_level": result.get(
+            "security_level",
+            request.security_level
+        ),
+        "availability": result.get(
+            "availability",
+            request.availability
+        ),
+
+        # Architecture
         "architecture": architecture,
-        "diagram": architecture.get("diagram", ""),
-        "infrastructure": architecture.get("infrastructure", {}),
-        "tool_registry": result.get("tool_registry", {}),
-        "selected_tools": result.get("selected_tools", {})
+        "diagram": architecture.get(
+            "diagram",
+            ""
+        ),
+        "infrastructure": architecture.get(
+            "infrastructure",
+            {}
+        ),
+
+        # Tools
+        "tool_registry": result.get(
+            "tool_registry",
+            {}
+        ),
+        "selected_tools": result.get(
+            "selected_tools",
+            {}
+        ),
+
+        # Member 2 intelligence
+        "security_analysis": result.get(
+            "security_analysis",
+            {}
+        ),
+        "cost_analysis": result.get(
+            "cost_analysis",
+            {}
+        ),
+        "architecture_recommendation": result.get(
+            "architecture_recommendation",
+            {}
+        ),
+        "requirement_traceability": result.get(
+            "requirement_traceability",
+            {}
+        ),
+        "dependency_specification": result.get(
+            "dependency_specification",
+            {}
+        ),
+        "environment_configuration": result.get(
+            "environment_configuration",
+            {}
+        ),
+        "code_generation_contract": result.get(
+            "code_generation_contract",
+            {}
+        ),
     }

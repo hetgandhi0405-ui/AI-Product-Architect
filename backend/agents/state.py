@@ -6,6 +6,12 @@ class AgentState(TypedDict):
     project_name: str
     requirements: str
 
+    # Customer requirement inputs
+    users: Any
+    features: List[str]
+    security_level: str
+    availability: str
+
     suggestions: List[str]
 
     product_plan: Dict[str, Any]
