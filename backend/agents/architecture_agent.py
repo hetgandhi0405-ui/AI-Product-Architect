@@ -1,3 +1,4 @@
+from backend.core.model_router import get_strong_model
 import os
 import json
 import time
@@ -86,7 +87,7 @@ Do not include explanations outside the JSON.
             response = cached_generate_content(
                 client,
                 "architecture",
-                model="gemini-3.5-flash-lite",
+                model=get_strong_model(),
                 contents=prompt
             )
 

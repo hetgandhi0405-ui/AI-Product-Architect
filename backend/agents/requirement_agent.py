@@ -1,3 +1,4 @@
+from backend.core.model_router import get_fast_model
 import os
 
 from google import genai
@@ -55,7 +56,7 @@ structured text.
     response = cached_generate_content(
                 client,
                 "requirement",
-        model="gemini-3.5-flash-lite",
+        model=get_fast_model(),
         contents=prompt
     )
 

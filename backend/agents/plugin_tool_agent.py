@@ -1,3 +1,4 @@
+from backend.core.model_router import get_fast_model
 from typing import Any, Dict
 import json
 import os
@@ -9,7 +10,7 @@ from backend.agents.tool_registry import get_tool_registry
 from backend.core.llm_cache import cached_generate_content
 
 
-MODEL_NAME = "gemini-3.5-flash-lite"
+MODEL_NAME = get_fast_model()
 
 
 def _get_client():

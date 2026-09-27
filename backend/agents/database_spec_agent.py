@@ -1,3 +1,4 @@
+from backend.core.model_router import get_fast_model
 import os
 import json
 import time
@@ -95,7 +96,7 @@ Do not use code fences.
             response = cached_generate_content(
                 client,
                 "database_spec",
-                model="gemini-3.5-flash-lite",
+                model=get_fast_model(),
                 contents=prompt
             )
 

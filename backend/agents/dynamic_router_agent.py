@@ -1,3 +1,4 @@
+from backend.core.model_router import get_strong_model
 from typing import Any, Dict
 import json
 import os
@@ -8,7 +9,7 @@ from backend.agents.state import AgentState
 from backend.core.llm_cache import cached_generate_content
 
 
-MODEL_NAME = "gemini-3.5-flash-lite"
+MODEL_NAME = get_strong_model()
 
 
 VALID_AGENTS = {

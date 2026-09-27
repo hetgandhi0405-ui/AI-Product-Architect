@@ -1,3 +1,4 @@
+from backend.core.model_router import get_fast_model
 import os
 import json
 import time
@@ -157,7 +158,7 @@ Each check must be one of:
             response = cached_generate_content(
                 client,
                 "integration_validation",
-                model="gemini-3.5-flash-lite",
+                model=get_fast_model(),
                 contents=prompt
             )
 

@@ -1,3 +1,4 @@
+from backend.core.model_router import get_strong_model
 import os
 import json
 import time
@@ -129,7 +130,7 @@ Score must be an integer from 0 to 100.
             response = cached_generate_content(
                 client,
                 "code_quality",
-                model="gemini-3.5-flash-lite",
+                model=get_strong_model(),
                 contents=prompt
             )
 

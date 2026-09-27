@@ -1,3 +1,4 @@
+from backend.core.model_router import get_fast_model
 import os
 
 from google import genai
@@ -82,7 +83,7 @@ Do not return JSON.
     response = cached_generate_content(
                 client,
                 "suggestion",
-        model="gemini-3.5-flash-lite",
+        model=get_fast_model(),
         contents=prompt
     )
 
