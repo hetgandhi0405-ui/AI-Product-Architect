@@ -8,9 +8,6 @@ from backend.core.llm_cache import cached_generate_content
 from backend.core.model_router import get_fast_model
 from backend.core.prompt_utils import compact_json
 
-client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
-
-
 def _strip_code_fence(text: str) -> str:
     text = text.strip()
     if text.startswith("```"):
@@ -32,6 +29,10 @@ def generate_file_content(state: AgentState, path: str, kind: str, feedback: str
     )
     if feedback:
         prompt += f"\nPrevious validation failures:\n{feedback}\nRegenerate the complete corrected file."
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise RuntimeError("GEMINI_API_KEY is not configured.")
+    client = genai.Client(api_key=api_key)
     response = cached_generate_content(
         client,
         f"code_generation:{path}",
