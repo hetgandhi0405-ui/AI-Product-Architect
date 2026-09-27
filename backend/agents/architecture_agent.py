@@ -4,6 +4,7 @@ import time
 
 from google import genai
 from backend.agents.state import AgentState
+from backend.core.llm_cache import cached_generate_content
 
 
 client = genai.Client(
@@ -82,7 +83,9 @@ Do not include explanations outside the JSON.
 
     for attempt in range(max_retries):
         try:
-            response = client.models.generate_content(
+            response = cached_generate_content(
+                client,
+                "architecture",
                 model="gemini-3.5-flash-lite",
                 contents=prompt
             )

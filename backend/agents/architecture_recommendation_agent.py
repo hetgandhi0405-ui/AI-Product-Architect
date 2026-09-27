@@ -6,6 +6,7 @@ from typing import Any, Dict
 from google import genai
 
 from backend.agents.state import AgentState
+from backend.core.llm_cache import cached_generate_content
 
 
 MODEL_NAME = "gemini-3.5-flash-lite"
@@ -239,7 +240,9 @@ Return exactly this structure:
 
         try:
 
-            response = client.models.generate_content(
+            response = cached_generate_content(
+                client,
+                "architecture_recommendation",
                 model=MODEL_NAME,
                 contents=prompt,
                 config={

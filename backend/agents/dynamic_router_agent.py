@@ -5,6 +5,7 @@ import os
 from google import genai
 
 from backend.agents.state import AgentState
+from backend.core.llm_cache import cached_generate_content
 
 
 MODEL_NAME = "gemini-3.5-flash-lite"
@@ -362,7 +363,9 @@ Rules:
 
     for _ in range(3):
         try:
-            response = client.models.generate_content(
+            response = cached_generate_content(
+                client,
+                "dynamic_router",
                 model=MODEL_NAME,
                 contents=prompt
             )

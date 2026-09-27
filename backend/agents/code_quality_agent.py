@@ -4,6 +4,7 @@ import time
 
 from google import genai
 from backend.agents.state import AgentState
+from backend.core.llm_cache import cached_generate_content
 
 
 client = genai.Client(
@@ -125,7 +126,9 @@ Score must be an integer from 0 to 100.
 
     for attempt in range(max_retries):
         try:
-            response = client.models.generate_content(
+            response = cached_generate_content(
+                client,
+                "code_quality",
                 model="gemini-3.5-flash-lite",
                 contents=prompt
             )

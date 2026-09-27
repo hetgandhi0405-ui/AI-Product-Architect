@@ -2,6 +2,7 @@ import os
 
 from google import genai
 from backend.agents.state import AgentState
+from backend.core.llm_cache import cached_generate_content
 
 
 client = genai.Client(
@@ -78,7 +79,9 @@ Return a clear, structured technical recommendation.
 Do not return JSON.
 """
 
-    response = client.models.generate_content(
+    response = cached_generate_content(
+                client,
+                "suggestion",
         model="gemini-3.5-flash-lite",
         contents=prompt
     )
