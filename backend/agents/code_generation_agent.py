@@ -17,33 +17,39 @@ def _strip_code_fence(text: str) -> str:
         lines = text.splitlines()[1:]
         if lines and lines[-1].strip() == "```":
             lines = lines[:-1]
-        return "\n".join(lines).strip()
-    return text
+        text = "\n".join(lines)
+    return text.strip()
 
 
 def generate_file_content(state: AgentState, path: str, kind: str, feedback: str = "") -> str:
-    prompt = f"""Generate exactly one complete raw file for an AI Product Architect project.
-Path: {path}
-Kind: {kind}
-Customer requirement:
-{state.get("requirements", "")}
-Code generation contract:
-{compact_json(state.get("code_generation_contract", {}))}
-Architecture:
-{compact_json(state.get("architecture", {}))}
-Return only file contents, with no explanation or Markdown fences.
-"""
-    if feedback: prompt += f"Previous validation failures:\n[feedback]"
-    response = cached_generate_content(client, f"code_generation:{path}", model=get_fast_model(), contents=prompt)
+    prompt = (
+        "Generate exactly one complete raw file for an AI Product Architect project.\n"
+        f"Path: {path}\nKind: {kind}\n"
+        f"Customer requirement:\n{state.get('requirements', '')}\n"
+        f"Code generation contract:\n{compact_json(state.get('code_generation_contract', {}))}\n"
+        f"Architecture:\n{compact_json(state.get('architecture', {}))}\n"
+        "Return only file contents, with no explanation or Markdown fences."
+    )
+    if feedback:
+        prompt += f"\nPrevious validation failures:\n{feedback}\nRegenerate the complete corrected file."
+    response = cached_generate_content(
+        client,
+        f"code_generation:{path}",
+        model=get_fast_model(),
+        contents=prompt,
+    )
     return _strip_code_fence(response.text or "")
+
 
 def code_generation_agent(state: AgentState) -> AgentState:
     manifest = state.get("file_manifest", {}).get("files", [])
-    generated = dict(state.get("generated_files", {}))
+    generated: Dict[str, str] = dict(state.get("generated_files", {}))
     feedback = state.get("generated_code_validation", {}).get("file_issues", {})
     for item in manifest:
         path = item["path"]
-        generated[path] = generate_file_content(state, path, item.get("kind", "source"), "\n".join(feedback.get(path, []))
+        generated[path] = generate_file_content(
+            state, path, item.get("kind", "source"), "\n".join(feedback.get(path, []))
+        )
     state["generated_files"] = generated
     state["generation_status"] = "GENERATED"
     return state
