@@ -1,3 +1,4 @@
+from uuid import uuid4
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
@@ -146,6 +147,11 @@ def process_requirement(
         "generated_code_validation": result.get("generated_code_validation", {}),
         "generated_project_path": result.get("generated_project_path", ""),
         "project_export": result.get("project_export", {}),
+        "project_build": result.get("project_build", {}),
+        "api_contract_validation": result.get("api_contract_validation", {}),
+        "database_integration_validation": result.get("database_integration_validation", {}),
+        "docker_runtime_validation": result.get("docker_runtime_validation", {}),
+        "release_gate": result.get("release_gate", {}),
     }
 
 
