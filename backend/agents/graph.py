@@ -9,6 +9,12 @@ from backend.agents.architecture_recommendation_agent import architecture_recomm
 from backend.agents.code_generation_contract_agent import (
     code_generation_contract_agent,
 )
+from backend.agents.file_manifest_agent import file_manifest_agent
+from backend.agents.code_generation_agent import code_generation_agent
+from backend.agents.file_assembler_agent import file_assembler_agent
+from backend.agents.generated_code_validator_agent import generated_code_validator_agent
+from backend.agents.generated_code_self_correction_agent import generated_code_self_correction_agent
+from backend.agents.project_export_agent import project_export_agent
 from backend.agents.code_quality_agent import code_quality_agent
 from backend.agents.cost_intelligence_agent import cost_intelligence_agent
 from backend.agents.database_spec_agent import database_spec_agent
@@ -244,7 +250,7 @@ def validation_router(state: AgentState):
     )
 
     if status == "VALID":
-        return "monitoring"
+        return "file_manifest"
 
     attempts = state.get(
         "correction_attempts",
@@ -257,9 +263,20 @@ def validation_router(state: AgentState):
     )
 
     if attempts >= max_attempts:
-        return "memory_sync"
+        return "file_manifest"
 
     return "self_correction"
+
+
+def generated_code_validation_router(state: AgentState):
+    validation = state.get("generated_code_validation", {})
+    if validation.get("status") == "VALID":
+        return "project_export"
+    attempts = state.get("generated_code_correction_attempts", 0)
+    max_attempts = state.get("max_generated_code_correction_attempts", 3)
+    if attempts >= max_attempts:
+        return "project_export"
+    return "generated_code_self_correction"
 
 
 def build_agent_graph():
@@ -397,6 +414,13 @@ def build_agent_graph():
         "code_generation_contract",
         timed_conditional_node("code_generation_contract", code_generation_contract_agent),
     )
+
+    graph_builder.add_node("file_manifest", timed_conditional_node("file_manifest", file_manifest_agent))
+    graph_builder.add_node("code_generation", timed_conditional_node("code_generation", code_generation_agent))
+    graph_builder.add_node("file_assembler", timed_conditional_node("file_assembler", file_assembler_agent))
+    graph_builder.add_node("generated_code_validation", timed_conditional_node("generated_code_validation", generated_code_validator_agent))
+    graph_builder.add_node("generated_code_self_correction", timed_conditional_node("generated_code_self_correction", generated_code_self_correction_agent))
+    graph_builder.add_node("project_export", timed_conditional_node("project_export", project_export_agent))
 
     graph_builder.add_node(
         "code_quality",
@@ -672,10 +696,23 @@ def build_agent_graph():
         validation_router,
         {
             "self_correction": "self_correction",
-            "monitoring": "monitoring",
-            "memory_sync": "memory_sync",
+            "file_manifest": "file_manifest",
         },
     )
+
+    graph_builder.add_edge("file_manifest", "code_generation")
+    graph_builder.add_edge("code_generation", "file_assembler")
+    graph_builder.add_edge("file_assembler", "generated_code_validation")
+    graph_builder.add_conditional_edges(
+        "generated_code_validation",
+        generated_code_validation_router,
+        {
+            "generated_code_self_correction": "generated_code_self_correction",
+            "project_export": "project_export",
+        },
+    )
+    graph_builder.add_edge("generated_code_self_correction", "file_assembler")
+    graph_builder.add_edge("project_export", "monitoring")
 
     graph_builder.add_edge(
         "self_correction",
