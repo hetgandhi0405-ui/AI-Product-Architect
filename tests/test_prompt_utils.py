@@ -10,4 +10,4 @@ def test_compact_json_is_semantically_equivalent():
 
     compact = compact_json(value)
 
-    assert compact == '{"name":"demo","items":["a","b"],"nested":{"enabled":true}'
+    assert compact == '{"name":"demo","items":["a","b"],"nested":{"enabled":true}}'
