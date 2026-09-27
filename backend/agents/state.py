@@ -39,6 +39,9 @@ class AgentState(TypedDict):
     api_contract_validation: Dict[str, Any]
     database_integration_validation: Dict[str, Any]
     docker_runtime_validation: Dict[str, Any]
+    integration_correction_attempts: int
+    max_integration_correction_attempts: int
+    integration_correction_files: List[str]
 
     dependency_specification: Dict[str, Any]
     environment_configuration: Dict[str, Any]
