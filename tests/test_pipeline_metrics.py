@@ -22,4 +22,7 @@ def test_pipeline_metrics():
     assert metrics["nodes"]["demo"]["status"] == "EXECUTED"
     assert metrics["nodes"]["demo"]["seconds"] >= 0
     assert metrics["nodes"]["skipped"]["status"] == "SKIPPED"
+    assert metrics["nodes"]["skipped"]["seconds"] == 0.0
+    assert metrics["completed_at"] is not None
     assert metrics["total_seconds"] is not None
+    assert metrics["total_seconds"] >= 0
