@@ -56,9 +56,11 @@ def test_integration_correction_does_not_change_unaffected_files(monkeypatch):
         "generated_files": {
             "frontend/src/App.jsx": "keep-me",
         },
-        "file_manifest": [
-            {"path": "frontend/src/App.jsx", "kind": "jsx"},
-        ],
+        "file_manifest": {
+            "files": [
+                {"path": "frontend/src/App.jsx", "kind": "jsx"},
+            ]
+        },
         "project_build": {"status": "PASSED", "results": []},
         "api_contract_validation": {"status": "VALID", "issues": []},
         "database_integration_validation": {"status": "VALID", "issues": []},
