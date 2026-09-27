@@ -37,6 +37,7 @@ class AgentState(TypedDict):
     project_export: Dict[str, Any]
     export_status: str
     api_contract_validation: Dict[str, Any]
+    database_integration_validation: Dict[str, Any]
 
     dependency_specification: Dict[str, Any]
     environment_configuration: Dict[str, Any]
