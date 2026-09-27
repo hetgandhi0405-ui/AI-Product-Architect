@@ -42,6 +42,7 @@ class AgentState(TypedDict):
     integration_correction_attempts: int
     max_integration_correction_attempts: int
     integration_correction_files: List[str]
+    release_gate: Dict[str, Any]
 
     dependency_specification: Dict[str, Any]
     environment_configuration: Dict[str, Any]
