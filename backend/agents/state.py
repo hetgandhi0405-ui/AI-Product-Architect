@@ -28,6 +28,15 @@ class AgentState(TypedDict):
     selected_tools: Dict[str, Any]
 
     code_generation_contract: Dict[str, Any]
+    file_manifest: Dict[str, Any]
+    generated_files: Dict[str, str]
+    generated_project_path: str
+    generated_code_validation: Dict[str, Any]
+    generated_code_correction_attempts: int
+    max_generated_code_correction_attempts: int
+    project_export: Dict[str, Any]
+    export_status: str
+
     dependency_specification: Dict[str, Any]
     environment_configuration: Dict[str, Any]
 
