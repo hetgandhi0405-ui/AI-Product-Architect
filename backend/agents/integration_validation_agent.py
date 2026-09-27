@@ -6,7 +6,7 @@ import time
 from google import genai
 from backend.agents.state import AgentState
 from backend.core.llm_cache import cached_generate_content
-from backend.core.prompt_utils import architecture_core
+from backend.core.prompt_utils import architecture_core, compact_json
 
 
 client = genai.Client(
@@ -47,31 +47,31 @@ CUSTOMER REQUIREMENTS:
 {requirements}
 
 PRODUCT PLAN:
-{product_plan}
+{compact_json(product_plan)}
 
 UI/UX SPECIFICATION:
-{ui_specification}
+{compact_json(ui_specification)}
 
 API SPECIFICATION:
-{api_specification}
+{compact_json(api_specification)}
 
 DATABASE SPECIFICATION:
-{database_specification}
+{compact_json(database_specification)}
 
 ARCHITECTURE:
 {architecture_core(architecture)}
 
 INFRASTRUCTURE:
-{infrastructure}
+{compact_json(infrastructure)}
 
 TERRAFORM:
-{terraform}
+{compact_json(terraform)}
 
 CODE QUALITY REPORT:
-{code_quality}
+{compact_json(code_quality)}
 
 TEST SPECIFICATION:
-{test_specification}
+{compact_json(test_specification)}
 
 Validate whether these generated specifications can work
 together as one implementable software product.
