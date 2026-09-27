@@ -10,6 +10,7 @@ class ExecutionConfig:
 
     # QUICK omits all optional enrichment and monitoring nodes.
     optional_nodes: FrozenSet[str] = frozenset({
+        "dynamic_router",
         "architecture_alternatives",
         "architecture_evaluator",
         "architecture_knowledge_graph",
