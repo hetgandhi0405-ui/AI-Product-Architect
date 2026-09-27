@@ -1,7 +1,9 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from backend.agents.graph import build_agent_graph
 from backend.schemas.requirement import RequirementRequest
+from backend.core.execution_config import get_execution_config
+from backend.core.pipeline_metrics import create_metrics
 
 
 router = APIRouter(
@@ -14,14 +16,24 @@ agent_graph = build_agent_graph()
 
 
 @router.post("/")
-def process_requirement(request: RequirementRequest):
+def process_requirement(
+    request: RequirementRequest,
+    execution_mode: str = "FULL",
+):
     """
     Process customer requirements through the
     Gemini-powered LangGraph workflow.
     """
 
+    try:
+        config = get_execution_config(execution_mode)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
     state = {
         "project_id": "api-demo-001",
+        "execution_mode": config.mode,
+        "pipeline_metrics": create_metrics(),
         "project_name": request.project_name,
         "requirements": request.description,
 
@@ -42,6 +54,9 @@ def process_requirement(request: RequirementRequest):
     architecture = result.get("architecture", {})
 
     return {
+        "execution_mode": result.get("execution_mode", config.mode),
+        "pipeline_metrics": result.get("pipeline_metrics", {}),
+
         # Basic project information
         "project_name": result.get(
             "project_name",

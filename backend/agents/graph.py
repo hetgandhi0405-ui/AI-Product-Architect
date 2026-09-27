@@ -43,6 +43,46 @@ from backend.agents.ui_ux_spec_agent import ui_ux_spec_agent
 from backend.agents.validation_agent import validation_agent
 
 from backend.agents.state import AgentState
+from backend.core.execution_config import get_execution_config
+from backend.core.pipeline_metrics import (
+    create_metrics,
+    finish_node,
+    finish_pipeline,
+    skip_node,
+    start_node,
+)
+
+
+def timed_conditional_node(node_name, node_fn):
+    """Time a node or return the unchanged state when its mode skips it."""
+    def wrapped(state: AgentState):
+        execution_mode = state.get("execution_mode", "FULL")
+        metrics = state.get("pipeline_metrics") or create_metrics()
+        state["execution_mode"] = execution_mode
+        state["pipeline_metrics"] = metrics
+
+        config = get_execution_config(execution_mode)
+        if not config.should_run(node_name):
+            skip_node(metrics, node_name)
+            return state
+
+        started = start_node(metrics, node_name)
+        try:
+            output = node_fn(state)
+        except Exception:
+            finish_node(metrics, node_name, started, status="FAILED")
+            raise
+
+        finish_node(metrics, node_name, started)
+        if output is None:
+            output = state
+        output["execution_mode"] = execution_mode
+        output["pipeline_metrics"] = metrics
+        if node_name == "memory_sync":
+            finish_pipeline(metrics)
+        return output
+
+    return wrapped
 
 
 def initialize_node(state: AgentState):
@@ -211,7 +251,7 @@ def build_agent_graph():
 
     graph_builder.add_node(
         "initialize",
-        initialize_node,
+        timed_conditional_node("initialize", initialize_node),
     )
 
     # =========================================================
@@ -220,7 +260,7 @@ def build_agent_graph():
 
     graph_builder.add_node(
         "dynamic_router",
-        dynamic_router_node,
+        timed_conditional_node("dynamic_router", dynamic_router_node),
     )
 
     # =========================================================
@@ -229,12 +269,12 @@ def build_agent_graph():
 
     graph_builder.add_node(
         "requirement",
-        requirement_agent,
+        timed_conditional_node("requirement", requirement_agent),
     )
 
     graph_builder.add_node(
         "suggestion",
-        suggestion_agent,
+        timed_conditional_node("suggestion", suggestion_agent),
     )
 
     # =========================================================
@@ -243,22 +283,22 @@ def build_agent_graph():
 
     graph_builder.add_node(
         "product_planner",
-        product_planner_agent,
+        timed_conditional_node("product_planner", product_planner_agent),
     )
 
     graph_builder.add_node(
         "ui_ux_spec",
-        ui_ux_spec_agent,
+        timed_conditional_node("ui_ux_spec", ui_ux_spec_agent),
     )
 
     graph_builder.add_node(
         "api_spec",
-        api_spec_agent,
+        timed_conditional_node("api_spec", api_spec_agent),
     )
 
     graph_builder.add_node(
         "database_spec",
-        database_spec_agent,
+        timed_conditional_node("database_spec", database_spec_agent),
     )
 
     # =========================================================
@@ -267,62 +307,62 @@ def build_agent_graph():
 
     graph_builder.add_node(
         "architecture",
-        architecture_agent,
+        timed_conditional_node("architecture", architecture_agent),
     )
 
     graph_builder.add_node(
         "architecture_alternatives",
-        architecture_alternatives_agent,
+        timed_conditional_node("architecture_alternatives", architecture_alternatives_agent),
     )
 
     graph_builder.add_node(
         "architecture_evaluator",
-        architecture_evaluator_agent,
+        timed_conditional_node("architecture_evaluator", architecture_evaluator_agent),
     )
 
     graph_builder.add_node(
         "architecture_knowledge_graph",
-        architecture_knowledge_graph_agent,
+        timed_conditional_node("architecture_knowledge_graph", architecture_knowledge_graph_agent),
     )
 
     graph_builder.add_node(
         "digital_twin",
-        digital_twin_agent,
+        timed_conditional_node("digital_twin", digital_twin_agent),
     )
 
     graph_builder.add_node(
         "what_if_engine",
-        what_if_engine_agent,
+        timed_conditional_node("what_if_engine", what_if_engine_agent),
     )
 
     graph_builder.add_node(
         "architecture_simulator",
-        architecture_simulator_agent,
+        timed_conditional_node("architecture_simulator", architecture_simulator_agent),
     )
 
     graph_builder.add_node(
         "security",
-        security_agent,
+        timed_conditional_node("security", security_agent),
     )
 
     graph_builder.add_node(
         "cost_intelligence",
-        cost_intelligence_agent,
+        timed_conditional_node("cost_intelligence", cost_intelligence_agent),
     )
 
     graph_builder.add_node(
         "architecture_recommendation",
-        architecture_recommendation_agent,
+        timed_conditional_node("architecture_recommendation", architecture_recommendation_agent),
     )
 
     graph_builder.add_node(
         "integration",
-        integration_agent,
+        timed_conditional_node("integration", integration_agent),
     )
 
     graph_builder.add_node(
         "plugin_tool",
-        plugin_tool_agent,
+        timed_conditional_node("plugin_tool", plugin_tool_agent),
     )
 
     # =========================================================
@@ -331,17 +371,17 @@ def build_agent_graph():
 
     graph_builder.add_node(
         "code_generation_contract",
-        code_generation_contract_agent,
+        timed_conditional_node("code_generation_contract", code_generation_contract_agent),
     )
 
     graph_builder.add_node(
         "code_quality",
-        code_quality_agent,
+        timed_conditional_node("code_quality", code_quality_agent),
     )
 
     graph_builder.add_node(
         "test",
-        test_agent,
+        timed_conditional_node("test", test_agent),
     )
 
     # =========================================================
@@ -350,22 +390,22 @@ def build_agent_graph():
 
     graph_builder.add_node(
         "dependency",
-        dependency_agent,
+        timed_conditional_node("dependency", dependency_agent),
     )
 
     graph_builder.add_node(
         "requirement_traceability",
-        requirement_traceability_agent,
+        timed_conditional_node("requirement_traceability", requirement_traceability_agent),
     )
 
     graph_builder.add_node(
         "environment_config",
-        environment_config_agent,
+        timed_conditional_node("environment_config", environment_config_agent),
     )
 
     graph_builder.add_node(
         "integration_validation",
-        integration_validation_agent,
+        timed_conditional_node("integration_validation", integration_validation_agent),
     )
 
     # =========================================================
@@ -374,17 +414,17 @@ def build_agent_graph():
 
     graph_builder.add_node(
         "diagram",
-        diagram_agent,
+        timed_conditional_node("diagram", diagram_agent),
     )
 
     graph_builder.add_node(
         "infrastructure",
-        infrastructure_agent,
+        timed_conditional_node("infrastructure", infrastructure_agent),
     )
 
     graph_builder.add_node(
         "terraform",
-        terraform_agent,
+        timed_conditional_node("terraform", terraform_agent),
     )
 
     # =========================================================
@@ -393,12 +433,12 @@ def build_agent_graph():
 
     graph_builder.add_node(
         "validation",
-        validation_agent,
+        timed_conditional_node("validation", validation_agent),
     )
 
     graph_builder.add_node(
         "self_correction",
-        self_correction_agent,
+        timed_conditional_node("self_correction", self_correction_agent),
     )
 
     # =========================================================
@@ -407,7 +447,7 @@ def build_agent_graph():
 
     graph_builder.add_node(
         "memory_sync",
-        memory_sync_node,
+        timed_conditional_node("memory_sync", memory_sync_node),
     )
 
     # =========================================================
@@ -416,12 +456,12 @@ def build_agent_graph():
 
     graph_builder.add_node(
         "monitoring",
-        monitoring_agent,
+        timed_conditional_node("monitoring", monitoring_agent),
     )
 
     graph_builder.add_node(
         "failure_detection",
-        failure_detection_agent,
+        timed_conditional_node("failure_detection", failure_detection_agent),
     )
 
     # =========================================================

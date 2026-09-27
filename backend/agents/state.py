@@ -39,3 +39,5 @@ class AgentState(TypedDict):
 
     correction_attempts: int
     max_correction_attempts: int
+    execution_mode: str
+    pipeline_metrics: Dict[str, Any]
