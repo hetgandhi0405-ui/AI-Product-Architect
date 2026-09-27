@@ -68,3 +68,30 @@ def test_different_prompt_creates_new_cache_entry(tmp_path, monkeypatch):
     )
 
     assert client.models.calls == 2
+
+
+def test_cache_stats_track_hits_and_misses(tmp_path, monkeypatch):
+    monkeypatch.setattr(llm_cache, "CACHE_DIR", Path(tmp_path))
+
+    client = FakeClient()
+
+    llm_cache.cached_generate_content(
+        client=client,
+        agent_name="stats_agent",
+        model="test-model",
+        contents="stats-prompt",
+    )
+
+    llm_cache.cached_generate_content(
+        client=client,
+        agent_name="stats_agent",
+        model="test-model",
+        contents="stats-prompt",
+    )
+
+    stats = llm_cache.cache_stats()
+
+    assert stats["enabled"] is True
+    assert stats["hits"] >= 1
+    assert stats["misses"] >= 1
+    assert stats["entries"] >= 1
