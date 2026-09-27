@@ -17,6 +17,7 @@ from backend.agents.generated_code_self_correction_agent import generated_code_s
 from backend.agents.project_export_agent import project_export_agent
 from backend.agents.project_build_agent import project_build_agent
 from backend.agents.api_contract_testing_agent import api_contract_testing_agent
+from backend.agents.database_integration_testing_agent import database_integration_testing_agent
 from backend.agents.code_quality_agent import code_quality_agent
 from backend.agents.cost_intelligence_agent import cost_intelligence_agent
 from backend.agents.database_spec_agent import database_spec_agent
@@ -425,6 +426,7 @@ def build_agent_graph():
     graph_builder.add_node("project_export", timed_conditional_node("project_export", project_export_agent))
     graph_builder.add_node("project_build", timed_conditional_node("project_build", project_build_agent))
     graph_builder.add_node("api_contract_testing", timed_conditional_node("api_contract_testing", api_contract_testing_agent))
+    graph_builder.add_node("database_integration_testing", timed_conditional_node("database_integration_testing", database_integration_testing_agent))
 
     graph_builder.add_node(
         "code_quality",
@@ -717,7 +719,8 @@ def build_agent_graph():
     )
     graph_builder.add_edge("generated_code_self_correction", "file_assembler")
     graph_builder.add_edge("project_build", "api_contract_testing")
-    graph_builder.add_edge("api_contract_testing", "project_export")
+    graph_builder.add_edge("api_contract_testing", "database_integration_testing")
+    graph_builder.add_edge("database_integration_testing", "project_export")
     graph_builder.add_edge("project_export", "monitoring")
 
     graph_builder.add_edge(
