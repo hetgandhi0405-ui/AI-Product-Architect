@@ -8,6 +8,7 @@ from google import genai
 
 from backend.agents.state import AgentState
 from backend.core.llm_cache import cached_generate_content
+from backend.core.prompt_utils import compact_json
 
 
 MODEL_NAME = get_strong_model()
@@ -215,10 +216,10 @@ REQUIREMENTS:
 {requirements}
 
 PRODUCT PLAN:
-{json.dumps(product_plan, indent=2)}
+{compact_json(product_plan)}
 
 EXISTING ARCHITECTURE:
-{json.dumps(existing_architecture, indent=2)}
+{compact_json(existing_architecture)}
 
 The alternatives should represent genuinely different
 architecture strategies when appropriate.

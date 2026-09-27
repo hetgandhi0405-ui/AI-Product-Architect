@@ -8,6 +8,7 @@ from google import genai
 
 from backend.agents.state import AgentState
 from backend.core.llm_cache import cached_generate_content
+from backend.core.prompt_utils import compact_json
 
 
 MODEL_NAME = get_strong_model()
@@ -162,19 +163,19 @@ PROJECT REQUIREMENTS:
 {requirements}
 
 ARCHITECTURE ALTERNATIVES:
-{json.dumps(alternatives, indent=2)}
+{compact_json(alternatives)}
 
 ARCHITECTURE EVALUATION:
-{json.dumps(evaluation, indent=2)}
+{compact_json(evaluation)}
 
 SECURITY ANALYSIS:
-{json.dumps(security, indent=2)}
+{compact_json(security)}
 
 COST ANALYSIS:
-{json.dumps(cost, indent=2)}
+{compact_json(cost)}
 
 REQUIREMENT TRACEABILITY:
-{json.dumps(traceability, indent=2)}
+{compact_json(traceability)}
 
 IMPORTANT RULES:
 

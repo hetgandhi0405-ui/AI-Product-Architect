@@ -8,6 +8,7 @@ from google import genai
 from backend.agents.state import AgentState
 from backend.agents.tool_registry import get_tool_registry
 from backend.core.llm_cache import cached_generate_content
+from backend.core.prompt_utils import compact_json
 
 
 MODEL_NAME = get_fast_model()
@@ -115,22 +116,22 @@ PROJECT REQUIREMENTS:
 {requirements}
 
 PRODUCT PLAN:
-{json.dumps(product_plan, indent=2)}
+{compact_json(product_plan)}
 
 UI/UX SPECIFICATION:
-{json.dumps(ui_specification, indent=2)}
+{compact_json(ui_specification)}
 
 API SPECIFICATION:
-{json.dumps(api_specification, indent=2)}
+{compact_json(api_specification)}
 
 DATABASE SPECIFICATION:
-{json.dumps(database_specification, indent=2)}
+{compact_json(database_specification)}
 
 ARCHITECTURE:
-{json.dumps(architecture, indent=2)}
+{compact_json(architecture)}
 
 AVAILABLE TOOL REGISTRY:
-{json.dumps(tool_registry, indent=2)}
+{compact_json(tool_registry)}
 
 Return ONLY valid JSON.
 

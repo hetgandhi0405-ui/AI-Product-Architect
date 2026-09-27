@@ -7,6 +7,7 @@ from google import genai
 
 from backend.agents.state import AgentState
 from backend.core.llm_cache import cached_generate_content
+from backend.core.prompt_utils import compact_json
 
 
 MODEL_NAME = get_fast_model()
@@ -68,19 +69,19 @@ PROJECT REQUIREMENTS:
 {requirements}
 
 PRODUCT PLAN:
-{json.dumps(product_plan, indent=2)}
+{compact_json(product_plan)}
 
 API SPECIFICATION:
-{json.dumps(api_specification, indent=2)}
+{compact_json(api_specification)}
 
 DATABASE SPECIFICATION:
-{json.dumps(database_specification, indent=2)}
+{compact_json(database_specification)}
 
 ARCHITECTURE:
-{json.dumps(architecture, indent=2)}
+{compact_json(architecture)}
 
 DEPENDENCY SPECIFICATION:
-{json.dumps(dependency_specification, indent=2)}
+{compact_json(dependency_specification)}
 
 Your task is ONLY to create an environment configuration
 specification.
