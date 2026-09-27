@@ -1,4 +1,7 @@
+from pathlib import Path
+
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 
 from backend.routes import requirements, projects
 
@@ -19,6 +22,11 @@ app.include_router(
     projects.router,
     prefix="/api"
 )
+
+
+@app.get("/generator")
+def generator():
+    return FileResponse(Path("frontend/index.html"))
 
 
 @app.get("/")
