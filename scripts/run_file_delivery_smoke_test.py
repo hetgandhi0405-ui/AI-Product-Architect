@@ -1,5 +1,5 @@
 import os
-import tempfile
+import shutil
 from pathlib import Path
 
 from backend.agents.api_contract_testing_agent import api_contract_testing_agent
@@ -45,11 +45,14 @@ FILES = {
 
 
 def run():
-    with tempfile.TemporaryDirectory(prefix="ai_product_architect_delivery_") as tmp:
-        output_dir = Path(tmp) / "generated_projects"
-        export_dir = Path(tmp) / "exports"
-        os.environ["AI_PRODUCT_ARCHITECT_OUTPUT_DIR"] = str(output_dir)
-        os.environ["AI_PRODUCT_ARCHITECT_EXPORT_DIR"] = str(export_dir)
+    root = Path(os.getenv("AI_PRODUCT_ARCHITECT_SMOKE_ROOT", "generated_projects"))
+    output_dir = root / "delivery-smoke-test"
+    export_dir = root / "exports"
+    if output_dir.exists():
+        shutil.rmtree(output_dir)
+    output_dir.parent.mkdir(parents=True, exist_ok=True)
+    os.environ["AI_PRODUCT_ARCHITECT_OUTPUT_DIR"] = str(root)
+    os.environ["AI_PRODUCT_ARCHITECT_EXPORT_DIR"] = str(export_dir)
         os.environ["AI_PRODUCT_ARCHITECT_RUN_GENERATED_BUILDS"] = "0"
         os.environ["AI_PRODUCT_ARCHITECT_RUN_DOCKER_TESTS"] = "0"
 
@@ -75,42 +78,42 @@ def run():
             "generated_files": FILES,
         }
 
-        state = file_manifest_agent(state)
-        state = file_assembler_agent(state)
-        state = generated_code_validator_agent(state)
-        if state["generated_code_validation"]["status"] != "VALID":
-            raise RuntimeError(state["generated_code_validation"])
+    state = file_manifest_agent(state)
+    state = file_assembler_agent(state)
+    state = generated_code_validator_agent(state)
+    if state["generated_code_validation"]["status"] != "VALID":
+        raise RuntimeError(state["generated_code_validation"])
 
-        state = project_build_agent(state)
-        state = api_contract_testing_agent(state)
-        state = database_integration_testing_agent(state)
-        state = docker_runtime_testing_agent(state)
-        state = release_gate_agent(state)
+    state = project_build_agent(state)
+    state = api_contract_testing_agent(state)
+    state = database_integration_testing_agent(state)
+    state = docker_runtime_testing_agent(state)
+    state = release_gate_agent(state)
 
-        if state["release_gate"]["status"] != "APPROVED":
-            raise RuntimeError(state["release_gate"])
+    if state["release_gate"]["status"] != "APPROVED":
+        raise RuntimeError(state["release_gate"])
 
-        state = project_export_agent(state)
+    state = project_export_agent(state)
 
-        project = Path(state["generated_project_path"])
-        zip_path = Path(state["project_export"]["zip_path"])
+    project = Path(state["generated_project_path"])
+    zip_path = Path(state["project_export"]["zip_path"])
 
-        print("STATUS: PASS")
-        print(f"PROJECT: {project}")
-        print(f"ZIP: {zip_path}")
-        print(f"FILES: {state['file_manifest']['file_count']}")
-        for path in sorted(
+    print("STATUS: PASS")
+    print(f"PROJECT: {project}")
+    print(f"ZIP: {zip_path}")
+    print(f"FILES: {state['file_manifest']['file_count']}")
+    for path in sorted(
             p.relative_to(project).as_posix()
             for p in project.rglob("*") if p.is_file()
         ):
             print(f"DELIVERABLE: {path}")
-        print(f"GENERATED_CODE: {state['generated_code_validation']['status']}")
-        print(f"BUILD: {state['project_build']['status']}")
-        print(f"API: {state['api_contract_validation']['status']}")
-        print(f"DATABASE: {state['database_integration_validation']['status']}")
-        print(f"DOCKER: {state['docker_runtime_validation']['status']}")
-        print(f"RELEASE_GATE: {state['release_gate']['status']}")
-        print(f"EXPORT: {state['project_export']['status']}")
+    print(f"GENERATED_CODE: {state['generated_code_validation']['status']}")
+    print(f"BUILD: {state['project_build']['status']}")
+    print(f"API: {state['api_contract_validation']['status']}")
+    print(f"DATABASE: {state['database_integration_validation']['status']}")
+    print(f"DOCKER: {state['docker_runtime_validation']['status']}")
+    print(f"RELEASE_GATE: {state['release_gate']['status']}")
+    print(f"EXPORT: {state['project_export']['status']}")
 
 
 if __name__ == "__main__":
