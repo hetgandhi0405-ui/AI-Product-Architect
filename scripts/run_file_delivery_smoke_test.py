@@ -53,29 +53,29 @@ def run():
     output_dir.parent.mkdir(parents=True, exist_ok=True)
     os.environ["AI_PRODUCT_ARCHITECT_OUTPUT_DIR"] = str(root)
     os.environ["AI_PRODUCT_ARCHITECT_EXPORT_DIR"] = str(export_dir)
-        os.environ["AI_PRODUCT_ARCHITECT_RUN_GENERATED_BUILDS"] = "0"
-        os.environ["AI_PRODUCT_ARCHITECT_RUN_DOCKER_TESTS"] = "0"
+    os.environ["AI_PRODUCT_ARCHITECT_RUN_GENERATED_BUILDS"] = "0"
+    os.environ["AI_PRODUCT_ARCHITECT_RUN_DOCKER_TESTS"] = "0"
 
-        state = {
-            "project_id": "delivery-smoke-test",
-            "project_name": "Delivery Smoke Test",
-            "requirements": "Create a simple health-check web application with a users database.",
-            "code_generation_contract": {
-                "project": {"name": "Delivery Smoke Test"},
-                "generation_targets": {
-                    "frontend": True, "backend": True, "database": True,
-                    "tests": True, "docker": True, "terraform": True,
-                    "documentation": True,
-                },
+    state = {
+        "project_id": "delivery-smoke-test",
+        "project_name": "Delivery Smoke Test",
+        "requirements": "Create a simple health-check web application with a users database.",
+        "code_generation_contract": {
+            "project": {"name": "Delivery Smoke Test"},
+            "generation_targets": {
+                "frontend": True, "backend": True, "database": True,
+                "tests": True, "docker": True, "terraform": True,
+                "documentation": True,
             },
-            "api_specification": {
-                "base_path": "",
-                "endpoints": [{"method": "GET", "endpoint": "/health"}],
-            },
-            "database_specification": {
-                "tables": [{"name": "users"}],
-            },
-            "generated_files": FILES,
+        },
+        "api_specification": {
+            "base_path": "",
+            "endpoints": [{"method": "GET", "endpoint": "/health"}],
+        },
+        "database_specification": {
+            "tables": [{"name": "users"}],
+        },
+        "generated_files": FILES,
         }
 
     state = file_manifest_agent(state)
