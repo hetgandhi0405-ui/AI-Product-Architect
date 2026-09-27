@@ -1,4 +1,7 @@
+from pathlib import Path
+
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import FileResponse
 
 from backend.agents.graph import build_agent_graph
 from backend.schemas.requirement import RequirementRequest
@@ -31,7 +34,7 @@ def process_requirement(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     state = {
-        "project_id": "api-demo-001",
+        "project_id": str(uuid4()),
         "execution_mode": config.mode,
         "pipeline_metrics": create_metrics(),
         "project_name": request.project_name,
@@ -139,4 +142,21 @@ def process_requirement(
             "code_generation_contract",
             {}
         ),
+        "file_manifest": result.get("file_manifest", {}),
+        "generated_code_validation": result.get("generated_code_validation", {}),
+        "generated_project_path": result.get("generated_project_path", ""),
+        "project_export": result.get("project_export", {}),
     }
+
+
+@router.get("/export/{project_id}")
+def download_project(project_id: str):
+    """Download the generated project ZIP by project ID."""
+    export = Path("generated_projects") / f"{project_id}.zip"
+    if not export.exists():
+        raise HTTPException(status_code=404, detail="Generated project ZIP not found")
+    return FileResponse(
+        path=export,
+        media_type="application/zip",
+        filename=export.name,
+    )
