@@ -20,6 +20,7 @@ from backend.agents.api_contract_testing_agent import api_contract_testing_agent
 from backend.agents.database_integration_testing_agent import database_integration_testing_agent
 from backend.agents.docker_runtime_testing_agent import docker_runtime_testing_agent
 from backend.agents.integration_self_correction_agent import integration_self_correction_agent
+from backend.agents.release_gate_agent import release_gate_agent
 from backend.agents.code_quality_agent import code_quality_agent
 from backend.agents.cost_intelligence_agent import cost_intelligence_agent
 from backend.agents.database_spec_agent import database_spec_agent
@@ -448,6 +449,7 @@ def build_agent_graph():
     graph_builder.add_node("database_integration_testing", timed_conditional_node("database_integration_testing", database_integration_testing_agent))
     graph_builder.add_node("docker_runtime_testing", timed_conditional_node("docker_runtime_testing", docker_runtime_testing_agent))
     graph_builder.add_node("integration_self_correction", timed_conditional_node("integration_self_correction", integration_self_correction_agent))
+    graph_builder.add_node("release_gate", timed_conditional_node("release_gate", release_gate_agent))
 
     graph_builder.add_node(
         "code_quality",
