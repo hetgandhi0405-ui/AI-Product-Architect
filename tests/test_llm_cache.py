@@ -1,4 +1,7 @@
 import importlib
+from pathlib import Path
+
+import pytest
 
 
 class FakeModels:
@@ -51,3 +54,29 @@ def test_llm_cache_hit_and_miss(tmp_path, monkeypatch):
     assert stats["misses"] == 1
     assert stats["hits"] == 1
     assert stats["entries"] == 1
+
+
+def test_different_prompt_creates_new_cache_entry(tmp_path, monkeypatch):
+    cache = importlib.import_module("backend.core.llm_cache")
+
+    monkeypatch.setattr(cache, "CACHE_DIR", Path(tmp_path))
+    monkeypatch.setattr(cache, "CACHE_ENABLED", True)
+    monkeypatch.setattr(cache, "_cache_hits", 0)
+    monkeypatch.setattr(cache, "_cache_misses", 0)
+
+    client = FakeClient()
+
+    cache.cached_generate_content(
+        client=client,
+        agent_name="test-agent",
+        model="test-model",
+        contents="prompt-one",
+    )
+    cache.cached_generate_content(
+        client=client,
+        agent_name="test-agent",
+        model="test-model",
+        contents="prompt-two",
+    )
+
+    assert client.models.calls == 2
