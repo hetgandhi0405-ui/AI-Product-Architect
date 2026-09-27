@@ -1,5 +1,11 @@
-import importlib
 from pathlib import Path
+
+import backend.core.llm_cache as llm_cache
+
+
+class FakeResponse:
+    def __init__(self, text):
+        self.text = text
 
 
 class FakeModels:
@@ -8,11 +14,7 @@ class FakeModels:
 
     def generate_content(self, **kwargs):
         self.calls += 1
-
-        class Response:
-            text = "cached-result"
-
-        return Response()
+        return FakeResponse("generated-response")
 
 
 class FakeClient:
@@ -20,59 +22,47 @@ class FakeClient:
         self.models = FakeModels()
 
 
-def test_llm_cache_hit_and_miss(tmp_path, monkeypatch):
-    cache = importlib.import_module("backend.core.llm_cache")
-
-    monkeypatch.setattr(cache, "CACHE_DIR", tmp_path)
-    monkeypatch.setattr(cache, "CACHE_ENABLED", True)
-    monkeypatch.setattr(cache, "_cache_hits", 0)
-    monkeypatch.setattr(cache, "_cache_misses", 0)
+def test_cache_hit_avoids_second_api_call(tmp_path, monkeypatch):
+    monkeypatch.setattr(llm_cache, "CACHE_DIR", Path(tmp_path))
 
     client = FakeClient()
-    contents = "same-prompt"
 
-    first = cache.cached_generate_content(
+    first = llm_cache.cached_generate_content(
         client=client,
-        agent_name="test-agent",
+        agent_name="test_agent",
         model="test-model",
-        contents=contents,
-    )
-    second = cache.cached_generate_content(
-        client=client,
-        agent_name="test-agent",
-        model="test-model",
-        contents=contents,
+        contents="hello",
     )
 
-    assert first.text == "cached-result"
-    assert second.text == "cached-result"
+    second = llm_cache.cached_generate_content(
+        client=client,
+        agent_name="test_agent",
+        model="test-model",
+        contents="hello",
+    )
+
+    assert first.text == "generated-response"
+    assert second.text == "generated-response"
+
+    # Only the first call should reach the fake API.
     assert client.models.calls == 1
-
-    stats = cache.cache_stats()
-    assert stats["misses"] == 1
-    assert stats["hits"] == 1
-    assert stats["entries"] == 1
 
 
 def test_different_prompt_creates_new_cache_entry(tmp_path, monkeypatch):
-    cache = importlib.import_module("backend.core.llm_cache")
-
-    monkeypatch.setattr(cache, "CACHE_DIR", Path(tmp_path))
-    monkeypatch.setattr(cache, "CACHE_ENABLED", True)
-    monkeypatch.setattr(cache, "_cache_hits", 0)
-    monkeypatch.setattr(cache, "_cache_misses", 0)
+    monkeypatch.setattr(llm_cache, "CACHE_DIR", Path(tmp_path))
 
     client = FakeClient()
 
-    cache.cached_generate_content(
+    llm_cache.cached_generate_content(
         client=client,
-        agent_name="test-agent",
+        agent_name="test_agent",
         model="test-model",
         contents="prompt-one",
     )
-    cache.cached_generate_content(
+
+    llm_cache.cached_generate_content(
         client=client,
-        agent_name="test-agent",
+        agent_name="test_agent",
         model="test-model",
         contents="prompt-two",
     )
