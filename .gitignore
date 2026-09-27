@@ -6,3 +6,6 @@ __pycache__/
 
 # Local LLM cache
 .cache/
+
+# Generated project deliverables
+generated_projects/
