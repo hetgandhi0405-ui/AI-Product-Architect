@@ -34,3 +34,12 @@ def test_dynamic_routing_only_allows_optional_nodes():
     assert "architecture" not in config.dynamically_routable_nodes
     assert "architecture_alternatives" in config.dynamically_routable_nodes
     assert "plugin_tool" in config.dynamically_routable_nodes
+
+
+def test_quick_mode_skips_all_optional_nodes():
+    config = get_execution_config("QUICK")
+
+    assert config.should_run("architecture") is True
+    assert config.should_run("dynamic_router") is False
+    assert config.should_run("plugin_tool") is False
+    assert config.should_run("monitoring") is False
