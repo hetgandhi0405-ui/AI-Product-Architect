@@ -6,6 +6,7 @@ import time
 from google import genai
 from backend.agents.state import AgentState
 from backend.core.llm_cache import cached_generate_content
+from backend.core.prompt_utils import architecture_core
 
 
 client = genai.Client(
@@ -48,7 +49,7 @@ DATABASE SPECIFICATION:
 {database_specification}
 
 ARCHITECTURE:
-{architecture}
+{architecture_core(architecture)}
 
 INTEGRATION REPORT:
 {integration}

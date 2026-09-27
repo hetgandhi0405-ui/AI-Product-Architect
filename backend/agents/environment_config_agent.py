@@ -7,7 +7,7 @@ from google import genai
 
 from backend.agents.state import AgentState
 from backend.core.llm_cache import cached_generate_content
-from backend.core.prompt_utils import compact_json
+from backend.core.prompt_utils import compact_json, architecture_core
 
 
 MODEL_NAME = get_fast_model()
@@ -78,7 +78,7 @@ DATABASE SPECIFICATION:
 {compact_json(database_specification)}
 
 ARCHITECTURE:
-{compact_json(architecture)}
+{compact_json(architecture_core(architecture))}
 
 DEPENDENCY SPECIFICATION:
 {compact_json(dependency_specification)}
