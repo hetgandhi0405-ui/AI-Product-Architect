@@ -36,6 +36,7 @@ class AgentState(TypedDict):
     max_generated_code_correction_attempts: int
     project_export: Dict[str, Any]
     export_status: str
+    api_contract_validation: Dict[str, Any]
 
     dependency_specification: Dict[str, Any]
     environment_configuration: Dict[str, Any]
