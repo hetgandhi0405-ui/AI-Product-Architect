@@ -28,6 +28,21 @@ class ExecutionConfig:
         "architecture_simulator",
     })
 
+    # Dynamic routing is allowed to skip only optional enrichment nodes.
+    # Core pipeline agents are intentionally protected from LLM routing
+    # decisions so downstream state remains valid.
+    dynamically_routable_nodes: FrozenSet[str] = frozenset({
+        "architecture_alternatives",
+        "architecture_evaluator",
+        "architecture_knowledge_graph",
+        "digital_twin",
+        "what_if_engine",
+        "architecture_simulator",
+        "plugin_tool",
+        "monitoring",
+        "failure_detection",
+    })
+
     @property
     def is_quick(self) -> bool:
         return self.mode.upper() == "QUICK"

@@ -20,6 +20,12 @@ VALID_AGENTS = {
     "api_spec",
     "database_spec",
     "architecture",
+    "architecture_alternatives",
+    "architecture_evaluator",
+    "architecture_knowledge_graph",
+    "digital_twin",
+    "what_if_engine",
+    "architecture_simulator",
     "integration",
     "plugin_tool",
     "code_generation_contract",
@@ -33,6 +39,8 @@ VALID_AGENTS = {
     "terraform",
     "validation",
     "self_correction",
+    "monitoring",
+    "failure_detection",
 }
 
 

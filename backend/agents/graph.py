@@ -54,19 +54,39 @@ from backend.core.pipeline_metrics import (
 
 
 def timed_conditional_node(node_name, node_fn):
-    """Time a node or return the unchanged state when its mode skips it."""
+    """Time a node and apply mode + dynamic routing decisions."""
+
     def wrapped(state: AgentState):
         execution_mode = state.get("execution_mode", "FULL")
         metrics = state.get("pipeline_metrics") or create_metrics()
+
         state["execution_mode"] = execution_mode
         state["pipeline_metrics"] = metrics
 
         config = get_execution_config(execution_mode)
+
+        # First apply the existing QUICK / TEST / FULL rules.
         if not config.should_run(node_name):
             skip_node(metrics, node_name)
             return state
 
+        # Then apply dynamic routing only to protected optional nodes.
+        routing = state.get("dynamic_routing") or {}
+        skipped_agents = set(
+            routing.get("skipped_agents", [])
+            if isinstance(routing, dict)
+            else []
+        )
+
+        if (
+            node_name in config.dynamically_routable_nodes
+            and node_name in skipped_agents
+        ):
+            skip_node(metrics, node_name)
+            return state
+
         started = start_node(metrics, node_name)
+
         try:
             output = node_fn(state)
         except Exception:
@@ -74,12 +94,16 @@ def timed_conditional_node(node_name, node_fn):
             raise
 
         finish_node(metrics, node_name, started)
+
         if output is None:
             output = state
+
         output["execution_mode"] = execution_mode
         output["pipeline_metrics"] = metrics
+
         if node_name == "memory_sync":
             finish_pipeline(metrics)
+
         return output
 
     return wrapped
