@@ -199,7 +199,17 @@ def test_fastapi_end_to_end_delivery():
         "description": "Create a task management application where users can register, login, create tasks, update tasks, delete tasks and mark tasks as completed."
     }
 
-    response = client.post("/api/requirements/", json=payload)
+    try:
+        from google.genai.errors import ServerError, APIError
+    except ImportError:
+        ServerError = APIError = Exception
+
+    try:
+        response = client.post("/api/requirements/", json=payload)
+    except (ServerError, APIError, Exception) as exc:
+        if "503" in str(exc) or "UNAVAILABLE" in str(exc) or "experiencing high demand" in str(exc):
+            pytest.skip(f"Google Gemini API temporarily unavailable: {exc}")
+        raise
     assert response.status_code == 200
 
     data = response.json()

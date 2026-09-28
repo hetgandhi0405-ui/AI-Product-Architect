@@ -25,14 +25,25 @@ def test_real_ai_full_generation_pipeline():
     from backend.agents.state import AgentState
 
     test_prompt = "Build a modern task tracking API with user authentication and status filtering."
-    initial_state = AgentState(
-        user_input=test_prompt,
-        project_name="AI Task Tracker",
-        project_id="test-real-ai-001",
-        iteration_count=0
-    )
+    initial_state = {
+        "project_id": "test-real-ai-001",
+        "project_name": "AI Task Tracker",
+        "requirements": test_prompt,
+        "suggestions": [],
+        "architecture": {},
+    }
 
-    final_state = app.invoke(initial_state)
+    try:
+        from google.genai.errors import ServerError, APIError
+    except ImportError:
+        ServerError = APIError = Exception
+
+    try:
+        final_state = app.invoke(initial_state)
+    except (ServerError, APIError, Exception) as exc:
+        if "503" in str(exc) or "UNAVAILABLE" in str(exc) or "experiencing high demand" in str(exc):
+            pytest.skip(f"Google Gemini API temporarily unavailable: {exc}")
+        raise
 
     # 1. Verify specification generation
     assert final_state.get("requirement_analysis") is not None
