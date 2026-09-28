@@ -3,11 +3,19 @@ from typing import List, Optional
 
 
 class RequirementRequest(BaseModel):
-    project_name: str = Field(..., description="Name of the project")
-
     description: str = Field(
         ...,
         description="Natural language description of what the customer wants"
+    )
+
+    project_name: Optional[str] = Field(
+        None,
+        description="Optional name of the project. If omitted, will be derived automatically."
+    )
+
+    project_id: Optional[str] = Field(
+        None,
+        description="Optional custom project identifier. If omitted, a unique ID is generated."
     )
 
     users: Optional[int] = Field(

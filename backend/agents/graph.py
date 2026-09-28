@@ -37,6 +37,30 @@ from backend.agents.suggestion_agent import suggestion_agent
 from backend.agents.terraform_agent import terraform_agent
 from backend.agents.testing_agent import test_agent
 from backend.agents.ui_ux_spec_agent import ui_ux_spec_agent
+from backend.agents.file_manifest_agent import file_manifest_agent
+from backend.agents.code_generation_agent import code_generation_agent
+from backend.agents.file_assembler_agent import file_assembler_agent
+from backend.agents.generated_code_validator_agent import (
+    generated_code_validator_agent,
+)
+from backend.agents.generated_code_self_correction_agent import (
+    generated_code_self_correction_agent,
+)
+from backend.agents.project_build_agent import project_build_agent
+from backend.agents.api_contract_testing_agent import (
+    api_contract_testing_agent,
+)
+from backend.agents.database_integration_testing_agent import (
+    database_integration_testing_agent,
+)
+from backend.agents.docker_runtime_testing_agent import (
+    docker_runtime_testing_agent,
+)
+from backend.agents.integration_self_correction_agent import (
+    integration_self_correction_agent,
+)
+from backend.agents.release_gate_agent import release_gate_agent
+from backend.agents.project_export_agent import project_export_agent
 from backend.agents.validation_agent import validation_agent
 
 from backend.agents.state import AgentState
@@ -74,6 +98,36 @@ def initialize_node(state: AgentState):
 
     state["selected_tools"] = state.get(
         "selected_tools",
+        {},
+    )
+
+    state["code_correction_attempts"] = state.get(
+        "code_correction_attempts",
+        0,
+    )
+
+    state["max_code_correction_attempts"] = state.get(
+        "max_code_correction_attempts",
+        3,
+    )
+
+    state["integration_correction_attempts"] = state.get(
+        "integration_correction_attempts",
+        0,
+    )
+
+    state["max_integration_correction_attempts"] = state.get(
+        "max_integration_correction_attempts",
+        2,
+    )
+
+    state["generated_files"] = state.get(
+        "generated_files",
+        {},
+    )
+
+    state["file_manifest"] = state.get(
+        "file_manifest",
         {},
     )
 
@@ -193,6 +247,51 @@ def validation_router(state: AgentState):
         return "memory_sync"
 
     return "self_correction"
+
+
+def code_validation_router(state: AgentState):
+    """
+    Decide whether to self-correct code syntax/structure errors
+    or proceed to build validation.
+    """
+    val = state.get("code_validation", {})
+    if val.get("status") == "PASS":
+        return "project_build"
+
+    attempts = state.get("code_correction_attempts", 0)
+    max_attempts = state.get("max_code_correction_attempts", 3)
+
+    if attempts < max_attempts:
+        return "generated_code_self_correction"
+
+    return "project_build"
+
+
+def integration_validation_router(state: AgentState):
+    """
+    Decide whether to repair API/DB/Docker integration mismatches
+    or proceed to the release gate.
+    """
+    api_val = state.get("api_validation", {})
+    db_val = state.get("database_validation", {})
+    docker_val = state.get("docker_validation", {})
+
+    all_passed = (
+        api_val.get("status") in ("PASS", "WARN") and
+        db_val.get("status") in ("PASS", "WARN") and
+        docker_val.get("status") == "PASS"
+    )
+
+    if all_passed:
+        return "release_gate"
+
+    attempts = state.get("integration_correction_attempts", 0)
+    max_attempts = state.get("max_integration_correction_attempts", 2)
+
+    if attempts < max_attempts:
+        return "integration_self_correction"
+
+    return "release_gate"
 
 
 def build_agent_graph():
@@ -407,6 +506,70 @@ def build_agent_graph():
     )
 
     # =========================================================
+    # CODE DELIVERY PIPELINE NODES
+    # =========================================================
+
+    graph_builder.add_node(
+        "file_manifest",
+        file_manifest_agent,
+    )
+
+    graph_builder.add_node(
+        "code_generation",
+        code_generation_agent,
+    )
+
+    graph_builder.add_node(
+        "file_assembler",
+        file_assembler_agent,
+    )
+
+    graph_builder.add_node(
+        "generated_code_validator",
+        generated_code_validator_agent,
+    )
+
+    graph_builder.add_node(
+        "generated_code_self_correction",
+        generated_code_self_correction_agent,
+    )
+
+    graph_builder.add_node(
+        "project_build",
+        project_build_agent,
+    )
+
+    graph_builder.add_node(
+        "api_contract_testing",
+        api_contract_testing_agent,
+    )
+
+    graph_builder.add_node(
+        "database_integration_testing",
+        database_integration_testing_agent,
+    )
+
+    graph_builder.add_node(
+        "docker_runtime_testing",
+        docker_runtime_testing_agent,
+    )
+
+    graph_builder.add_node(
+        "integration_self_correction",
+        integration_self_correction_agent,
+    )
+
+    graph_builder.add_node(
+        "release_gate",
+        release_gate_agent,
+    )
+
+    graph_builder.add_node(
+        "project_export",
+        project_export_agent,
+    )
+
+    # =========================================================
     # GRAPH ENTRY
     # =========================================================
 
@@ -589,13 +752,80 @@ def build_agent_graph():
         "failure_detection",
         "memory_sync",
     )
-
     # =========================================================
-    # FINAL MEMORY SYNC
+    # CODE DELIVERY PIPELINE EDGES
     # =========================================================
 
     graph_builder.add_edge(
         "memory_sync",
+        "file_manifest",
+    )
+
+    graph_builder.add_edge(
+        "file_manifest",
+        "code_generation",
+    )
+
+    graph_builder.add_edge(
+        "code_generation",
+        "file_assembler",
+    )
+
+    graph_builder.add_edge(
+        "file_assembler",
+        "generated_code_validator",
+    )
+
+    graph_builder.add_conditional_edges(
+        "generated_code_validator",
+        code_validation_router,
+        {
+            "generated_code_self_correction": "generated_code_self_correction",
+            "project_build": "project_build",
+        },
+    )
+
+    graph_builder.add_edge(
+        "generated_code_self_correction",
+        "project_build",
+    )
+
+    graph_builder.add_edge(
+        "project_build",
+        "api_contract_testing",
+    )
+
+    graph_builder.add_edge(
+        "api_contract_testing",
+        "database_integration_testing",
+    )
+
+    graph_builder.add_edge(
+        "database_integration_testing",
+        "docker_runtime_testing",
+    )
+
+    graph_builder.add_conditional_edges(
+        "docker_runtime_testing",
+        integration_validation_router,
+        {
+            "integration_self_correction": "integration_self_correction",
+            "release_gate": "release_gate",
+        },
+    )
+
+    graph_builder.add_edge(
+        "integration_self_correction",
+        "release_gate",
+    )
+
+    graph_builder.add_edge(
+        "release_gate",
+        "project_export",
+    )
+
+    graph_builder.add_edge(
+        "project_export",
         END,
     )
 

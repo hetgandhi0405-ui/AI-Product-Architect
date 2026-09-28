@@ -6,9 +6,9 @@ from google import genai
 from backend.agents.state import AgentState
 
 
-client = genai.Client(
-    api_key=os.environ.get("GEMINI_API_KEY")
-)
+from backend.agents.llm_client import LazyGenAIClient
+
+client = LazyGenAIClient()
 
 
 def code_quality_agent(state: AgentState) -> AgentState:
