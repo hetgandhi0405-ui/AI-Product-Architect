@@ -19,17 +19,57 @@ def _strip_code_fence(text: str) -> str:
 
 
 def generate_file_content(state: AgentState, path: str, kind: str, feedback: str = "") -> str:
+    customer_requirement = state.get("requirements", "")
+    manifest_paths = [
+        item.get("path")
+        for item in state.get("file_manifest", {}).get("files", [])
+        if item.get("path")
+    ]
+
     prompt = (
         "Generate exactly one complete raw file for an AI Product Architect project.\n"
-        f"Path: {path}\nKind: {kind}\n"
-        f"Customer requirement:\n{state.get('requirements', '')}\n"
-        f"Product plan:\n{compact_json(state.get('product_plan', {}))}\n"
-        f"UI specification:\n{compact_json(state.get('ui_specification', {}))}\n"
-        f"API specification:\n{compact_json(state.get('api_specification', {}))}\n"
-        f"Database specification:\n{compact_json(state.get('database_specification', {}))}\n"
-        f"Code generation contract:\n{compact_json(state.get('code_generation_contract', {}))}\n"
-        f"Architecture:\n{compact_json(state.get('architecture', {}))}\n"
-        "The generated file must be internally consistent with the supplied specifications and other files in the requested project. Return only file contents, with no explanation or Markdown fences."
+        f"Path: {path}\n"
+        f"Kind: {kind}\n"
+        f"Customer requirement:\n{customer_requirement}\n"
+        f"Project files:\n{manifest_paths}\n"
+    )
+
+    if path.startswith("frontend/"):
+        prompt += (
+            f"UI specification:\n{compact_json(state.get('ui_specification', {}))}\n"
+            f"API specification:\n{compact_json(state.get('api_specification', {}))}\n"
+        )
+    elif path.startswith("backend/"):
+        prompt += (
+            f"API specification:\n{compact_json(state.get('api_specification', {}))}\n"
+            f"Database specification:\n{compact_json(state.get('database_specification', {}))}\n"
+            f"Code generation contract:\n{compact_json(state.get('code_generation_contract', {}))}\n"
+        )
+    elif path.startswith("database/"):
+        prompt += (
+            f"Database specification:\n{compact_json(state.get('database_specification', {}))}\n"
+        )
+    elif path.startswith("infrastructure/"):
+        prompt += (
+            f"Architecture:\n{compact_json(state.get('architecture', {}))}\n"
+            f"Code generation contract:\n{compact_json(state.get('code_generation_contract', {}))}\n"
+        )
+    elif path.startswith("tests/"):
+        prompt += (
+            f"API specification:\n{compact_json(state.get('api_specification', {}))}\n"
+            f"Database specification:\n{compact_json(state.get('database_specification', {}))}\n"
+            f"Code generation contract:\n{compact_json(state.get('code_generation_contract', {}))}\n"
+        )
+    else:
+        prompt += (
+            f"Architecture:\n{compact_json(state.get('architecture', {}))}\n"
+            f"Code generation contract:\n{compact_json(state.get('code_generation_contract', {}))}\n"
+        )
+
+    prompt += (
+        "The generated file must be internally consistent with the supplied specifications "
+        "and other files in the requested project. Return only file contents, with no "
+        "explanation or Markdown fences."
     )
     if feedback:
         prompt += f"\nPrevious validation failures:\n{feedback}\nRegenerate the complete corrected file."

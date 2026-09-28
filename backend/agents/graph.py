@@ -1,4 +1,4 @@
-from langgraph.graph import END, StateGraph
+from langgraph.graph import END, START, StateGraph
 
 from backend.agents.api_spec_agent import api_spec_agent
 from backend.agents.architecture_agent import architecture_agent
@@ -201,6 +201,8 @@ def build_agent_graph():
     graph_builder.add_node("memory_sync", timed_conditional_node("memory_sync", memory_sync_node))
     graph_builder.add_node("monitoring", timed_conditional_node("monitoring", monitoring_agent))
     graph_builder.add_node("failure_detection", timed_conditional_node("failure_detection", failure_detection_agent))
+
+    graph_builder.add_edge(START, "initialize")
 
     edges = [
         ("initialize", "dynamic_router"), ("dynamic_router", "requirement"), ("requirement", "suggestion"),
