@@ -23,9 +23,13 @@ def generate_file_content(state: AgentState, path: str, kind: str, feedback: str
         "Generate exactly one complete raw file for an AI Product Architect project.\n"
         f"Path: {path}\nKind: {kind}\n"
         f"Customer requirement:\n{state.get('requirements', '')}\n"
+        f"Product plan:\n{compact_json(state.get('product_plan', {}))}\n"
+        f"UI specification:\n{compact_json(state.get('ui_specification', {}))}\n"
+        f"API specification:\n{compact_json(state.get('api_specification', {}))}\n"
+        f"Database specification:\n{compact_json(state.get('database_specification', {}))}\n"
         f"Code generation contract:\n{compact_json(state.get('code_generation_contract', {}))}\n"
         f"Architecture:\n{compact_json(state.get('architecture', {}))}\n"
-        "Return only file contents, with no explanation or Markdown fences."
+        "The generated file must be internally consistent with the supplied specifications and other files in the requested project. Return only file contents, with no explanation or Markdown fences."
     )
     if feedback:
         prompt += f"\nPrevious validation failures:\n{feedback}\nRegenerate the complete corrected file."
@@ -39,7 +43,10 @@ def generate_file_content(state: AgentState, path: str, kind: str, feedback: str
         model=get_fast_model(),
         contents=prompt,
     )
-    return _strip_code_fence(response.text or "")
+    content = _strip_code_fence(response.text or "")
+    if not content:
+        raise RuntimeError(f"Gemini returned empty content for generated file: {path}")
+    return content
 
 
 def code_generation_agent(state: AgentState) -> AgentState:
