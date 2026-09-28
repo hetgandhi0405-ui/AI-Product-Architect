@@ -28,7 +28,7 @@ def _backend_table_references(root: Path) -> Set[str]:
         text = path.read_text(encoding="utf-8")
         for pattern in (
             r"__tablename__\s*=\s*[\"']([A-Za-z_][A-Za-z0-9_]*)",
-            r"(?:FROM|JOIN|INTO|UPDATE)\s+[\"']?([A-Za-z_][A-Za-z0-9_]*)",
+            r"\b(?:FROM|JOIN|INTO|UPDATE)\s+(?:[\"'])([A-Za-z_][A-Za-z0-9_]*)[\"']",
         ):
             found.update(m.lower() for m in re.findall(pattern, text, re.I))
     return found

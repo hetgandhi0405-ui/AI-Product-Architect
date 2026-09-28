@@ -9,6 +9,8 @@ def _check_file(path: Path, relative: str, kind: str) -> List[str]:
     if not path.exists():
         return ["file does not exist"]
     if path.stat().st_size == 0:
+        if path.name == "__init__.py":
+            return []
         return ["file is empty"]
     text = path.read_text(encoding="utf-8")
     issues: List[str] = []

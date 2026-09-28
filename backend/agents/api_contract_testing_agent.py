@@ -36,7 +36,7 @@ def _backend_routes(root: Path) -> Set[Tuple[str, str]]:
     for path in root.rglob("*.py"):
         text = path.read_text(encoding="utf-8")
         for match in re.finditer(
-            r"@(?:app|router)\.(get|post|put|patch|delete|options|head)\(\s*['"]([^'"]+)",
+            r'@(?:app|router)\.(get|post|put|patch|delete|options|head)\(\s*[\'"]([^\'"]+)',
             text,
             re.IGNORECASE,
         ):
@@ -57,7 +57,7 @@ def _frontend_calls(root: Path) -> List[Tuple[str, str, str]]:
         except UnicodeDecodeError:
             continue
         for match in re.finditer(
-            r"\b(fetch|axios\.(?:get|post|put|patch|delete))\s*\(\s*['"]([^'"]+)",
+            r'\b(fetch|axios\.(?:get|post|put|patch|delete))\s*\(\s*[\'"]([^\'"]+)',
             text,
             re.IGNORECASE,
         ):

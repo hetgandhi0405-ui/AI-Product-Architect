@@ -69,7 +69,7 @@ def project_build_agent(state: AgentState) -> AgentState:
         python_files = list(root.rglob("*.py"))
         for path in python_files:
             result = _run(
-                ["python", "-m", "py_compile", str(path)],
+                ["python", "-m", "py_compile", str(path.resolve())],
                 cwd=root,
                 timeout=10,
             )
