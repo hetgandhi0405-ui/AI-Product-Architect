@@ -22,8 +22,9 @@ def test_full_system_integration():
 
     try:
         response = client.post("/api/requirements/", json=payload)
-    except (ServerError, APIError, Exception) as exc:
-        if "503" in str(exc) or "UNAVAILABLE" in str(exc) or "experiencing high demand" in str(exc):
+    except Exception as exc:
+        err_msg = str(exc)
+        if any(k in err_msg for k in ["503", "UNAVAILABLE", "high demand", "failed after 3 attempts"]):
             pytest.skip(f"Google Gemini API temporarily unavailable: {exc}")
         raise
 

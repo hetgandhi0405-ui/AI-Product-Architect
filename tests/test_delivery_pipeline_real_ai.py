@@ -40,8 +40,9 @@ def test_real_ai_full_generation_pipeline():
 
     try:
         final_state = app.invoke(initial_state)
-    except (ServerError, APIError, Exception) as exc:
-        if "503" in str(exc) or "UNAVAILABLE" in str(exc) or "experiencing high demand" in str(exc):
+    except Exception as exc:
+        err_msg = str(exc)
+        if any(k in err_msg for k in ["503", "UNAVAILABLE", "high demand", "failed after 3 attempts"]):
             pytest.skip(f"Google Gemini API temporarily unavailable: {exc}")
         raise
 
