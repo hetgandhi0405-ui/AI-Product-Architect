@@ -65,6 +65,7 @@ def process_requirement(request: RequirementRequest, execution_mode: str = "FULL
         "project_id": project_id,
         "project_name": result.get("project_name", project_name),
         "prompt": result.get("requirements", request.description),
+        "requirements": result.get("requirements", request.description),
         "execution_mode": result.get("execution_mode", config.mode),
         "status": "DELIVERED" if download_url else "BLOCKED",
         "download_url": download_url,
