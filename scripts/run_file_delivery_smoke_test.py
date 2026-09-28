@@ -17,7 +17,14 @@ FILES = {
     "frontend/package.json": '{"scripts":{"build":"echo smoke-build"},"dependencies":{}}',
     "frontend/index.html": "<!doctype html><html><body><div id='root'></div></body></html>",
     "frontend/src/App.jsx": "export default function App(){return <div>AI Product Architect</div>}\nfetch('/health');\n",
+    "frontend/src/api.js": "export async function health(){return fetch('/health');}\n",
+    "frontend/src/components/Loading.jsx": "export default function Loading(){return <span>Loading...</span>}\n",
     "backend/requirements.txt": "fastapi\nuvicorn\n",
+    "backend/routes/__init__.py": "",
+    "backend/routes/api.py": "# Smoke-test route module.\n",
+    "backend/models.py": "class User:\n    pass\n",
+    "backend/schemas.py": "class UserSchema:\n    pass\n",
+    "backend/services.py": "def list_users():\n    return []\n",
     "backend/main.py": (
         "from fastapi import FastAPI\n"
         "app = FastAPI()\n"
@@ -34,6 +41,7 @@ FILES = {
         ");\n"
     ),
     "tests/test_generated_project.py": "def test_smoke():\n    assert True\n",
+    "tests/test_api.py": "def test_api_contract_placeholder():\n    assert True\n",
     "Dockerfile": "FROM python:3.12-slim\nCOPY backend /app/backend\n",
     "docker-compose.yml": "services:\n  backend:\n    build: .\n",
     ".env.example": "APP_ENV=development\n",
