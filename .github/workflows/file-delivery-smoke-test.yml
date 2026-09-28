@@ -19,6 +19,8 @@ jobs:
           python-version: "3.12"
 
       - name: Run file delivery smoke test
+        env:
+          PYTHONPATH: .
         run: python scripts/run_file_delivery_smoke_test.py
 
       - name: Upload generated deliverables
