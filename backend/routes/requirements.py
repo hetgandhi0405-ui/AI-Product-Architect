@@ -88,6 +88,21 @@ def process_requirement(request: RequirementRequest):
         "release_gate": release_gate,
         "export": export_info,
         "download_url": download_url,
+        "deploy_mode": result.get("deploy_mode", "dry-run"),
+        "docker_status": result.get("docker_status"),
+        "registry_status": result.get("registry_status"),
+        "deployment_status": result.get("deployment_status"),
+        "terraform_status": result.get("terraform_status"),
+        "deployment_validation_status": result.get("deployment_validation_status"),
+        "health_status": result.get("health_status"),
+        "service_url": result.get("service_url"),
+        "telemetry_status": result.get("telemetry_status"),
+        "cost_analysis": result.get("cost_analysis"),
+        "performance_analysis": result.get("performance_analysis"),
+        "reliability_analysis": result.get("reliability_analysis"),
+        "architecture_analysis": result.get("architecture_analysis"),
+        "optimization_candidates": result.get("optimization_candidates"),
+        "optimization_recommendation": result.get("optimization_recommendation"),
     }
 
 

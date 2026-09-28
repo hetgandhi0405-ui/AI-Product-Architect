@@ -5,3 +5,5 @@ __pycache__/
 .pytest_cache/
 generated_projects/
 *.zip
+*.tfstate*
+.terraform/

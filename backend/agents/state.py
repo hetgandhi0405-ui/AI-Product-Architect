@@ -51,3 +51,38 @@ class AgentState(TypedDict, total=False):
     # Release and Export
     release_gate: Dict[str, Any]
     export: Dict[str, Any]
+
+    # Deployment Pipeline (Day 1)
+    deploy_mode: str  # "dry-run" or "real"
+    docker_status: str  # PASSED | FAILED | SKIPPED | UNAVAILABLE
+    image_name: str
+    image_tag: str
+    docker_error: Optional[str]
+
+    registry_status: str  # PASSED | FAILED | SKIPPED | UNAVAILABLE
+    registry_url: Optional[str]
+    image_uri: Optional[str]
+    registry_error: Optional[str]
+
+    terraform_status: str  # PASSED | FAILED | SKIPPED | UNAVAILABLE
+    terraform_path: Optional[str]
+    deployment_status: str  # PASSED | FAILED | SKIPPED | UNAVAILABLE
+    deployment_timestamp: Optional[str]
+    deployment_error: Optional[str]
+    service_url: Optional[str]
+
+    deployment_validation_status: str  # PASSED | FAILED | SKIPPED | UNAVAILABLE
+    health_status: str  # HEALTHY | DEGRADED | UNHEALTHY | INSUFFICIENT_DATA
+    validation_errors: List[str]
+
+    # Telemetry and Monitoring (Day 2)
+    telemetry_status: str  # PASSED | FAILED | SKIPPED | UNAVAILABLE
+    telemetry_data: Dict[str, Any]
+    performance_analysis: Dict[str, Any]
+    cost_analysis: Dict[str, Any]
+    reliability_analysis: Dict[str, Any]
+    architecture_analysis: Dict[str, Any]
+
+    # Optimization Loop (Day 3)
+    optimization_candidates: List[Dict[str, Any]]
+    optimization_recommendation: Dict[str, Any]

@@ -63,6 +63,19 @@ from backend.agents.release_gate_agent import release_gate_agent
 from backend.agents.project_export_agent import project_export_agent
 from backend.agents.validation_agent import validation_agent
 
+from backend.agents.docker_build_agent import docker_build_agent
+from backend.agents.container_registry_agent import container_registry_agent
+from backend.agents.cloud_deployment_agent import cloud_deployment_agent
+from backend.agents.deployment_validation_agent import deployment_validation_agent
+from backend.agents.telemetry_agent import telemetry_agent
+from backend.agents.performance_agent import performance_agent
+from backend.agents.cost_agent import cost_agent
+from backend.agents.reliability_agent import reliability_agent
+from backend.agents.architecture_analysis_agent import architecture_analysis_agent
+from backend.agents.candidate_generation_agent import candidate_generation_agent
+from backend.agents.candidate_evaluation_agent import candidate_evaluation_agent
+from backend.agents.optimization_recommendation_agent import optimization_recommendation_agent
+
 from backend.agents.state import AgentState
 
 
@@ -130,6 +143,16 @@ def initialize_node(state: AgentState):
         "file_manifest",
         {},
     )
+
+    state["deploy_mode"] = state.get("deploy_mode", "dry-run")
+    state["docker_status"] = state.get("docker_status", "SKIPPED")
+    state["registry_status"] = state.get("registry_status", "SKIPPED")
+    state["deployment_status"] = state.get("deployment_status", "SKIPPED")
+    state["terraform_status"] = state.get("terraform_status", "SKIPPED")
+    state["deployment_validation_status"] = state.get("deployment_validation_status", "SKIPPED")
+    state["health_status"] = state.get("health_status", "INSUFFICIENT_DATA")
+    state["telemetry_status"] = state.get("telemetry_status", "SKIPPED")
+    state["service_url"] = state.get("service_url", None)
 
     state["project_memory"] = create_project_memory(
         state
@@ -292,6 +315,54 @@ def integration_validation_router(state: AgentState):
         return "integration_self_correction"
 
     return "release_gate"
+
+
+def release_gate_router(state: AgentState):
+    """
+    If release gate approved, proceed to docker build; otherwise skip to project export.
+    """
+    gate = state.get("release_gate", {})
+    if gate.get("status") == "APPROVED" and gate.get("approved"):
+        return "docker_build"
+    return "project_export"
+
+
+def docker_build_router(state: AgentState):
+    """
+    If docker build failed, abort deployment pipeline and summarize; else proceed to container registry.
+    """
+    if state.get("docker_status") == "FAILED":
+        return "deployment_failed_summary"
+    return "container_registry"
+
+
+def container_registry_router(state: AgentState):
+    """
+    If container registry push failed, abort deployment pipeline and summarize; else proceed to cloud deployment.
+    """
+    if state.get("registry_status") == "FAILED":
+        return "deployment_failed_summary"
+    return "cloud_deployment"
+
+
+def cloud_deployment_router(state: AgentState):
+    """
+    If cloud deployment failed, abort to summary; else proceed to deployment validation.
+    """
+    if state.get("deployment_status") == "FAILED":
+        return "deployment_failed_summary"
+    return "deployment_validation"
+
+
+def deployment_failed_summary_agent(state: AgentState) -> AgentState:
+    """
+    Record deployment failure summary without crashing, ensuring export continues.
+    """
+    state["deployment_status"] = "FAILED"
+    state["service_url"] = None
+    state["deployment_validation_status"] = "FAILED"
+    state["health_status"] = "UNHEALTHY"
+    return state
 
 
 def build_agent_graph():
@@ -570,6 +641,75 @@ def build_agent_graph():
     )
 
     # =========================================================
+    # DEPLOYMENT, TELEMETRY, AND OPTIMIZATION NODES
+    # =========================================================
+
+    graph_builder.add_node(
+        "docker_build",
+        docker_build_agent,
+    )
+
+    graph_builder.add_node(
+        "container_registry",
+        container_registry_agent,
+    )
+
+    graph_builder.add_node(
+        "cloud_deployment",
+        cloud_deployment_agent,
+    )
+
+    graph_builder.add_node(
+        "deployment_validation",
+        deployment_validation_agent,
+    )
+
+    graph_builder.add_node(
+        "telemetry",
+        telemetry_agent,
+    )
+
+    graph_builder.add_node(
+        "performance",
+        performance_agent,
+    )
+
+    graph_builder.add_node(
+        "cost",
+        cost_agent,
+    )
+
+    graph_builder.add_node(
+        "reliability",
+        reliability_agent,
+    )
+
+    graph_builder.add_node(
+        "architecture_analysis",
+        architecture_analysis_agent,
+    )
+
+    graph_builder.add_node(
+        "candidate_generation",
+        candidate_generation_agent,
+    )
+
+    graph_builder.add_node(
+        "candidate_evaluation",
+        candidate_evaluation_agent,
+    )
+
+    graph_builder.add_node(
+        "optimization_recommendation",
+        optimization_recommendation_agent,
+    )
+
+    graph_builder.add_node(
+        "deployment_failed_summary",
+        deployment_failed_summary_agent,
+    )
+
+    # =========================================================
     # GRAPH ENTRY
     # =========================================================
 
@@ -819,8 +959,93 @@ def build_agent_graph():
         "release_gate",
     )
 
-    graph_builder.add_edge(
+    # =========================================================
+    # DEPLOYMENT, MONITORING, AND OPTIMIZATION PIPELINE EDGES
+    # =========================================================
+
+    graph_builder.add_conditional_edges(
         "release_gate",
+        release_gate_router,
+        {
+            "docker_build": "docker_build",
+            "project_export": "project_export",
+        },
+    )
+
+    graph_builder.add_conditional_edges(
+        "docker_build",
+        docker_build_router,
+        {
+            "container_registry": "container_registry",
+            "deployment_failed_summary": "deployment_failed_summary",
+        },
+    )
+
+    graph_builder.add_conditional_edges(
+        "container_registry",
+        container_registry_router,
+        {
+            "cloud_deployment": "cloud_deployment",
+            "deployment_failed_summary": "deployment_failed_summary",
+        },
+    )
+
+    graph_builder.add_conditional_edges(
+        "cloud_deployment",
+        cloud_deployment_router,
+        {
+            "deployment_validation": "deployment_validation",
+            "deployment_failed_summary": "deployment_failed_summary",
+        },
+    )
+
+    graph_builder.add_edge(
+        "deployment_validation",
+        "telemetry",
+    )
+
+    graph_builder.add_edge(
+        "telemetry",
+        "performance",
+    )
+
+    graph_builder.add_edge(
+        "performance",
+        "cost",
+    )
+
+    graph_builder.add_edge(
+        "cost",
+        "reliability",
+    )
+
+    graph_builder.add_edge(
+        "reliability",
+        "architecture_analysis",
+    )
+
+    graph_builder.add_edge(
+        "architecture_analysis",
+        "candidate_generation",
+    )
+
+    graph_builder.add_edge(
+        "candidate_generation",
+        "candidate_evaluation",
+    )
+
+    graph_builder.add_edge(
+        "candidate_evaluation",
+        "optimization_recommendation",
+    )
+
+    graph_builder.add_edge(
+        "optimization_recommendation",
+        "project_export",
+    )
+
+    graph_builder.add_edge(
+        "deployment_failed_summary",
         "project_export",
     )
 
@@ -830,3 +1055,7 @@ def build_agent_graph():
     )
 
     return graph_builder.compile()
+
+
+# Compiled LangGraph application instance
+app = build_agent_graph()

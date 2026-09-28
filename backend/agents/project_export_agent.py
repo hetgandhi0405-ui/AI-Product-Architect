@@ -45,13 +45,29 @@ def project_export_agent(state: AgentState) -> AgentState:
     export_base.mkdir(parents=True, exist_ok=True)
     zip_path = export_base / f"{project_id}.zip"
 
+    EXCLUDED_PATTERNS = [
+        ".env",
+        ".terraform",
+        "terraform.tfstate",
+        ".tfstate",
+        "__pycache__",
+        ".git",
+        ".DS_Store",
+    ]
+
     file_count = 0
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
         for file in project_dir.rglob("*"):
             if file.is_file():
                 rel_path = file.relative_to(project_dir)
-                zipf.write(file, arcname=str(rel_path))
-                file_count += 1
+                rel_parts = rel_path.parts
+                # Check exclusions
+                should_exclude = any(
+                    exc in part for part in rel_parts for exc in EXCLUDED_PATTERNS
+                ) or file.name == ".env" or file.name.endswith(".tfstate") or file.name.endswith(".tfstate.backup")
+                if not should_exclude:
+                    zipf.write(file, arcname=str(rel_path))
+                    file_count += 1
 
     export_result = {
         "status": "SUCCESS",
