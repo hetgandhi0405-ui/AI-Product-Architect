@@ -4,6 +4,7 @@ import json
 import time
 
 from google import genai
+from google.genai import types
 from backend.agents.state import AgentState
 from backend.core.llm_cache import cached_generate_content
 from backend.core.prompt_utils import architecture_core
@@ -133,7 +134,10 @@ Priority must be one of:
                 client,
                 "testing",
                 model=get_fast_model(),
-                contents=prompt
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json"
+                )
             )
 
             test_text = response.text.strip()

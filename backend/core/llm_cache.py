@@ -178,11 +178,30 @@ def cached_generate_content(
             text=cached_text
         )
 
-    response = client.models.generate_content(
-        model=model,
-        contents=contents,
-        **kwargs,
-    )
+    import time
+
+    last_error = None
+    for attempt in range(3):
+        try:
+            response = client.models.generate_content(
+                model=model,
+                contents=contents,
+                **kwargs,
+            )
+            break
+        except Exception as exc:
+            last_error = exc
+            message = str(exc).lower()
+
+            if "429" not in message and "resource_exhausted" not in message:
+                raise
+
+            if attempt == 2:
+                raise
+
+            time.sleep(25 * (attempt + 1))
+    else:
+        raise last_error
 
     response_text = getattr(
         response,

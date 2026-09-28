@@ -4,6 +4,7 @@ import os
 import time
 
 from google import genai
+from google.genai import types
 
 from backend.agents.state import AgentState
 from backend.core.llm_cache import cached_generate_content
@@ -187,7 +188,10 @@ Rules:
                 client,
                 "security",
                 model=MODEL_NAME,
-                contents=prompt
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json"
+                )
             )
 
             security_report = _extract_json(

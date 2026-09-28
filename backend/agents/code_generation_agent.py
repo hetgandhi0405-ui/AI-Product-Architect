@@ -19,19 +19,14 @@ def _strip_code_fence(text: str) -> str:
 
 
 def generate_file_content(state: AgentState, path: str, kind: str, feedback: str = "") -> str:
-    customer_requirement = state.get("requirements", "")
-    manifest_paths = [
-        item.get("path")
-        for item in state.get("file_manifest", {}).get("files", [])
-        if item.get("path")
-    ]
-
+    customer_requirement = str(state.get("requirements", "")).strip()
+    if len(customer_requirement) > 5000:
+        customer_requirement = customer_requirement[:5000] + "\n[Requirement context truncated]"
     prompt = (
         "Generate exactly one complete raw file for an AI Product Architect project.\n"
         f"Path: {path}\n"
         f"Kind: {kind}\n"
         f"Customer requirement:\n{customer_requirement}\n"
-        f"Project files:\n{manifest_paths}\n"
     )
 
     if path.startswith("frontend/"):
