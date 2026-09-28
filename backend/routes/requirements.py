@@ -1,4 +1,5 @@
 import os
+import re
 from uuid import uuid4
 from pathlib import Path
 
@@ -15,6 +16,13 @@ router = APIRouter(prefix="/requirements", tags=["Requirements"])
 agent_graph = build_agent_graph()
 
 
+def _derive_project_name(prompt: str) -> str:
+    text = re.sub(r"[^A-Za-z0-9\\s-]", " ", prompt)
+    stop = {"create", "build", "make", "develop", "design", "application", "app", "website", "web", "system", "platform", "where", "that", "with", "for", "the", "and", "users", "user"}
+    words = [word for word in text.split() if word and word.lower() not in stop][:5]
+    return " ".join(words).title() if words else "Generated Product"
+
+
 @router.post("/")
 def process_requirement(request: RequirementRequest, execution_mode: str = "FULL"):
     """Accept one customer prompt and return the generated project deliverables."""
@@ -24,7 +32,7 @@ def process_requirement(request: RequirementRequest, execution_mode: str = "FULL
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     project_id = str(uuid4())
-    project_name = request.project_name or "Generated Product"
+    project_name = request.project_name.strip() if request.project_name else _derive_project_name(request.description)
     state = {
         "project_id": project_id,
         "execution_mode": config.mode,
