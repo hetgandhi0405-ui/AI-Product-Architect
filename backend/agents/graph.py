@@ -365,6 +365,45 @@ def deployment_failed_summary_agent(state: AgentState) -> AgentState:
     return state
 
 
+from backend.core.execution_config import get_execution_config
+from backend.core.pipeline_metrics import (
+    create_metrics,
+    finish_node,
+    skip_node,
+    start_node,
+)
+
+
+def timed_conditional_node(node_name, node_fn):
+    def wrapped(state: AgentState):
+        execution_mode = state.get("execution_mode", "FULL")
+        metrics = state.get("pipeline_metrics") or create_metrics()
+        state["execution_mode"] = execution_mode
+        state["pipeline_metrics"] = metrics
+        config = get_execution_config(execution_mode)
+        if not config.should_run(node_name):
+            skip_node(metrics, node_name)
+            return state
+        routing = state.get("dynamic_routing") or {}
+        skipped_agents = set(routing.get("skipped_agents", []) if isinstance(routing, dict) else [])
+        if node_name in config.dynamically_routable_nodes and node_name in skipped_agents:
+            skip_node(metrics, node_name)
+            return state
+        started = start_node(metrics, node_name)
+        try:
+            output = node_fn(state)
+        except Exception:
+            finish_node(metrics, node_name, started, status="FAILED")
+            raise
+        finish_node(metrics, node_name, started)
+        if output is None:
+            output = state
+        output["execution_mode"] = execution_mode
+        output["pipeline_metrics"] = metrics
+        return output
+    return wrapped
+
+
 def build_agent_graph():
     """
     Build the complete AI Product Architect agent graph.
