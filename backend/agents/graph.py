@@ -82,6 +82,12 @@ from backend.agents.cloud_architecture_agent import cloud_architecture_agent
 from backend.agents.infrastructure_state_agent import infrastructure_state_agent
 from backend.agents.architecture_diagram_agent import architecture_diagram_agent
 
+# Phase 2 — Validation agents
+from backend.agents.dependency_validation_agent import dependency_validation_agent
+from backend.agents.frontend_validation_agent import frontend_validation_agent
+from backend.agents.security_validation_agent import security_validation_agent
+from backend.agents.validation_report_agent import validation_report_agent
+
 from backend.agents.state import AgentState
 
 
@@ -779,6 +785,30 @@ def build_agent_graph():
     )
 
     # =========================================================
+    # PHASE 2 — Extended Validation nodes
+    # =========================================================
+
+    graph_builder.add_node(
+        "dependency_validation",
+        dependency_validation_agent,
+    )
+
+    graph_builder.add_node(
+        "frontend_validation",
+        frontend_validation_agent,
+    )
+
+    graph_builder.add_node(
+        "security_validation",
+        security_validation_agent,
+    )
+
+    graph_builder.add_node(
+        "validation_report",
+        validation_report_agent,
+    )
+
+    # =========================================================
     # GRAPH ENTRY
     # =========================================================
 
@@ -1039,15 +1069,34 @@ def build_agent_graph():
         integration_validation_router,
         {
             "integration_self_correction": "integration_self_correction",
-            "release_gate": "release_gate",
+            "release_gate": "dependency_validation",  # "release_gate" key → now routes to Phase 2 first
         },
     )
 
     graph_builder.add_edge(
         "integration_self_correction",
-        "release_gate",
+        "dependency_validation",
     )
 
+    graph_builder.add_edge(
+        "dependency_validation",
+        "frontend_validation",
+    )
+
+    graph_builder.add_edge(
+        "frontend_validation",
+        "security_validation",
+    )
+
+    graph_builder.add_edge(
+        "security_validation",
+        "validation_report",
+    )
+
+    graph_builder.add_edge(
+        "validation_report",
+        "release_gate",
+    )
     # =========================================================
     # DEPLOYMENT, MONITORING, AND OPTIMIZATION PIPELINE EDGES
     # =========================================================

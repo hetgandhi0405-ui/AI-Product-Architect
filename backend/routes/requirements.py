@@ -110,6 +110,11 @@ def process_requirement(request: RequirementRequest, execution_mode: str = "QUIC
         "optimization_recommendation": result.get("optimization_recommendation"),
         # Phase 1 — Product Metadata
         "product_metadata": result.get("product_metadata", {}),
+        # Phase 2 — Extended Validation
+        "dependency_validation": result.get("dependency_validation", {}),
+        "frontend_validation": result.get("frontend_validation", {}),
+        "security_validation": result.get("security_validation", {}),
+        "validation_report": result.get("validation_report", {}),
         # Phase 3 — Cloud Architecture
         "cloud_architecture_spec": result.get("cloud_architecture_spec", {}),
         # Phase 4 — Infrastructure State

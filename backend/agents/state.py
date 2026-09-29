@@ -40,6 +40,12 @@ class AgentState(TypedDict, total=False):
     database_validation: Dict[str, Any]
     docker_validation: Dict[str, Any]
 
+    # Phase 2 — Extended Validation
+    dependency_validation: Dict[str, Any]  # requirements.txt + package.json
+    frontend_validation: Dict[str, Any]    # JSX structure, index.html, api.js
+    security_validation: Dict[str, Any]    # OWASP static analysis
+    validation_report: Dict[str, Any]      # Unified report with deployment_ready flag
+
     # Self-Correction
     correction_attempts: int
     max_correction_attempts: int
