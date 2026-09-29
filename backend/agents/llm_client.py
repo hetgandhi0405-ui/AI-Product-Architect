@@ -362,11 +362,33 @@ class MockModels:
         }))
 
 
+class ResilientModels:
+    """
+    Proxy wrapper around real GenAI models that gracefully falls back
+    to deterministic MockModels if API rate limits (429), quota limits,
+    or service unavailable errors (503/404) occur.
+    """
+    def __init__(self, real_models, mock_models):
+        self._real_models = real_models
+        self._mock_models = mock_models
+
+    def generate_content(self, model: str, contents: str, **kwargs):
+        try:
+            return self._real_models.generate_content(model=model, contents=contents, **kwargs)
+        except Exception as e:
+            err_msg = str(e)
+            if any(k in err_msg for k in ["429", "503", "404", "RESOURCE_EXHAUSTED", "UNAVAILABLE", "NOT_FOUND", "Quota", "quota", "high demand"]):
+                print(f"[LazyGenAIClient] API rate limit/unavailable ({err_msg[:60]}...). Using deterministic fallback.")
+                return self._mock_models.generate_content(model=model, contents=contents, **kwargs)
+            raise
+
+
 class LazyGenAIClient:
     """
     Unified GenAI Client:
     - Uses real Google GenAI when GEMINI_API_KEY is present.
-    - Uses high-fidelity deterministic MockModels when offline or testing without API key.
+    - Gracefully falls back to high-fidelity MockModels if rate-limited (429/503).
+    - Uses MockModels when offline or testing without API key.
     """
 
     def __init__(self):
@@ -385,7 +407,7 @@ class LazyGenAIClient:
     def models(self):
         client = self._get_client()
         if client is not None:
-            return client.models
+            return ResilientModels(client.models, self._mock_models)
         return self._mock_models
 
     def __getattr__(self, name):
