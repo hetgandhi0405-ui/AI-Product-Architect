@@ -37,3 +37,8 @@ class RequirementRequest(BaseModel):
         "medium",
         description="Required availability level"
     )
+
+    execution_mode: Optional[str] = Field(
+        "QUICK",
+        description="Execution mode: QUICK, TEST, or FULL"
+    )

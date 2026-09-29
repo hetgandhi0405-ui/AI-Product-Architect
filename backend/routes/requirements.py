@@ -43,12 +43,13 @@ def process_requirement(request: RequirementRequest, execution_mode: str = "QUIC
     """
     project_id = request.project_id or f"proj-{uuid.uuid4().hex[:8]}"
     project_name = request.project_name or _derive_project_name(request.description)
+    mode = request.execution_mode or execution_mode or "QUICK"
 
     initial_state = {
         "project_id": project_id,
         "project_name": project_name,
         "requirements": request.description,
-        "execution_mode": execution_mode,
+        "execution_mode": mode,
         "suggestions": [],
         "architecture": {},
         "correction_attempts": 0,
