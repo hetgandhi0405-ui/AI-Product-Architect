@@ -58,7 +58,10 @@ def process_requirement(request: RequirementRequest):
         "max_integration_correction_attempts": 2,
     }
 
-    result = agent_graph.invoke(initial_state)
+    try:
+        result = agent_graph.invoke(initial_state)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Pipeline execution failed: {str(e)}")
 
     architecture = result.get("architecture", {})
     manifest = result.get("file_manifest", {})
