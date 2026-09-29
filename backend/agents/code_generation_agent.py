@@ -118,6 +118,33 @@ def _generate_file_deterministic(
             {"method": "POST", "endpoint": "/auth/login", "purpose": "Login user"},
         ]
 
+    extra_models_list = []
+    extra_ddl_list = []
+    for t in tables:
+        t_name = t if isinstance(t, str) else (t.get("name") if isinstance(t, dict) else "")
+        if not t_name:
+            continue
+        clean_name = t_name.lower().strip()
+        if clean_name not in ["users", "tasks"]:
+            class_name = "".join(part.capitalize() for part in re.split(r'[^a-zA-Z0-9]+', clean_name)) or "CustomModel"
+            extra_models_list.append(f"""
+class {class_name}(Base):
+    __tablename__ = "{clean_name}"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)""")
+
+            extra_ddl_list.append(f"""
+CREATE TABLE IF NOT EXISTS {clean_name} (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);""")
+
+    extra_models_str = "\n".join(extra_models_list)
+    extra_ddl_str = "\n".join(extra_ddl_list)
+
     # Deterministic templates per file path
     if file_path == "frontend/package.json":
         return json.dumps({
@@ -264,7 +291,7 @@ httpx>=0.27.0
 """
 
     elif file_path == "backend/models.py":
-        return """from sqlalchemy import Column, Integer, String, Boolean, DateTime
+        return f"""from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from sqlalchemy.orm import declarative_base
 import datetime
 
@@ -286,6 +313,7 @@ class User(Base):
     username = Column(String(100), unique=True, nullable=False)
     email = Column(String(255), unique=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
+{extra_models_str}
 """
 
     elif file_path == "backend/schemas.py":
@@ -500,6 +528,7 @@ CREATE TABLE IF NOT EXISTS tasks (
 );
 
 CREATE INDEX IF NOT EXISTS idx_tasks_user_id ON tasks(user_id);
+{extra_ddl_str}
 """
 
     elif file_path == "tests/test_generated_project.py":
