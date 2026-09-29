@@ -86,3 +86,65 @@ class AgentState(TypedDict, total=False):
     # Optimization Loop (Day 3)
     optimization_candidates: List[Dict[str, Any]]
     optimization_recommendation: Dict[str, Any]
+
+    # ─────────────────────────────────────────────────────────
+    # PHASE 1 — Product Generation
+    # ─────────────────────────────────────────────────────────
+    execution_mode: str  # QUICK | FULL | TEST
+    product_metadata: Dict[str, Any]  # Extracted from generated product (tech, ports, deps)
+
+    # ─────────────────────────────────────────────────────────
+    # PHASE 3 — Cloud Architecture Generation
+    # ─────────────────────────────────────────────────────────
+    cloud_architecture_spec: Dict[str, Any]  # Structured cloud infra spec from actual product
+
+    # ─────────────────────────────────────────────────────────
+    # PHASE 4 — Infrastructure State
+    # ─────────────────────────────────────────────────────────
+    infrastructure_state: Dict[str, Any]  # Canonical machine-readable infrastructure state
+    infrastructure_state_path: Optional[str]  # Path to written infrastructure_state.json
+
+    # ─────────────────────────────────────────────────────────
+    # PHASE 5 — Architecture Diagram
+    # ─────────────────────────────────────────────────────────
+    architecture_diagram: str  # Mermaid diagram generated from infrastructure_state
+
+    # ─────────────────────────────────────────────────────────
+    # PHASE 6 — Terraform Generation
+    # ─────────────────────────────────────────────────────────
+    terraform_generation: Dict[str, Any]  # Per-file Terraform content map
+    terraform_validation: Dict[str, Any]  # fmt / validate / plan results
+    terraform_correction_attempts: int
+    max_terraform_correction_attempts: int
+
+    # ─────────────────────────────────────────────────────────
+    # PHASE 8 — Deployment (Approval + Rollback)
+    # ─────────────────────────────────────────────────────────
+    deployment_approval: Dict[str, Any]      # {approved, approver, timestamp, mode}
+    rollback_state: Dict[str, Any]           # Previous known-good infra snapshot
+    deployment_history: List[Dict[str, Any]] # Ordered list of past deployments
+
+    # ─────────────────────────────────────────────────────────
+    # PHASE 9 — Deployment Verification
+    # ─────────────────────────────────────────────────────────
+    smoke_test_results: Dict[str, Any]  # Endpoint smoke test results post-deployment
+    live_frontend_url: Optional[str]
+    live_backend_url: Optional[str]
+
+    # ─────────────────────────────────────────────────────────
+    # PHASE 11 — Agentic Optimization
+    # ─────────────────────────────────────────────────────────
+    security_recommendations: Dict[str, Any]  # From security optimization agent
+
+    # ─────────────────────────────────────────────────────────
+    # PHASE 12 — RL Environment
+    # ─────────────────────────────────────────────────────────
+    rl_state: Dict[str, Any]       # Current RL environment state
+    rl_action: Dict[str, Any]      # Last RL action taken
+    rl_evaluation: Dict[str, Any]  # RL evaluation result with reward
+    rl_policy_validated: bool      # Whether the proposed policy passed safety checks
+
+    # ─────────────────────────────────────────────────────────
+    # PHASE 15 — Fine-tuning Readiness
+    # ─────────────────────────────────────────────────────────
+    finetuning_dataset_record: Dict[str, Any]  # Schema record for future model fine-tuning

@@ -49,6 +49,12 @@ def file_manifest_agent(state: AgentState) -> AgentState:
         },
         # Backend
         {
+            "path": "backend/__init__.py",
+            "language": "python",
+            "purpose": "Backend package initializer",
+            "required": True,
+        },
+        {
             "path": "backend/requirements.txt",
             "language": "text",
             "purpose": "Python package dependencies for FastAPI backend and database ORM",

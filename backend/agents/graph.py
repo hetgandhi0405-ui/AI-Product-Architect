@@ -76,6 +76,12 @@ from backend.agents.candidate_generation_agent import candidate_generation_agent
 from backend.agents.candidate_evaluation_agent import candidate_evaluation_agent
 from backend.agents.optimization_recommendation_agent import optimization_recommendation_agent
 
+# Phase 1 / 3 / 4 / 5 — New agents
+from backend.agents.product_metadata_agent import product_metadata_agent
+from backend.agents.cloud_architecture_agent import cloud_architecture_agent
+from backend.agents.infrastructure_state_agent import infrastructure_state_agent
+from backend.agents.architecture_diagram_agent import architecture_diagram_agent
+
 from backend.agents.state import AgentState
 
 
@@ -749,6 +755,30 @@ def build_agent_graph():
     )
 
     # =========================================================
+    # PHASE 1 / 3 / 4 / 5 — New nodes
+    # =========================================================
+
+    graph_builder.add_node(
+        "product_metadata",
+        product_metadata_agent,
+    )
+
+    graph_builder.add_node(
+        "cloud_architecture",
+        cloud_architecture_agent,
+    )
+
+    graph_builder.add_node(
+        "infrastructure_state",
+        infrastructure_state_agent,
+    )
+
+    graph_builder.add_node(
+        "architecture_diagram",
+        architecture_diagram_agent,
+    )
+
+    # =========================================================
     # GRAPH ENTRY
     # =========================================================
 
@@ -952,6 +982,26 @@ def build_agent_graph():
 
     graph_builder.add_edge(
         "file_assembler",
+        "product_metadata",
+    )
+
+    graph_builder.add_edge(
+        "product_metadata",
+        "cloud_architecture",
+    )
+
+    graph_builder.add_edge(
+        "cloud_architecture",
+        "infrastructure_state",
+    )
+
+    graph_builder.add_edge(
+        "infrastructure_state",
+        "architecture_diagram",
+    )
+
+    graph_builder.add_edge(
+        "architecture_diagram",
         "generated_code_validator",
     )
 

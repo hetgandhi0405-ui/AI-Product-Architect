@@ -108,6 +108,15 @@ def process_requirement(request: RequirementRequest, execution_mode: str = "QUIC
         "architecture_analysis": result.get("architecture_analysis"),
         "optimization_candidates": result.get("optimization_candidates"),
         "optimization_recommendation": result.get("optimization_recommendation"),
+        # Phase 1 — Product Metadata
+        "product_metadata": result.get("product_metadata", {}),
+        # Phase 3 — Cloud Architecture
+        "cloud_architecture_spec": result.get("cloud_architecture_spec", {}),
+        # Phase 4 — Infrastructure State
+        "infrastructure_state": result.get("infrastructure_state", {}),
+        "infrastructure_state_path": result.get("infrastructure_state_path"),
+        # Phase 5 — Architecture Diagram
+        "architecture_diagram": result.get("architecture_diagram", ""),
     }
 
 

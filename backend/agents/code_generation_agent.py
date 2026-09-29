@@ -281,6 +281,10 @@ export default function App() {{
 }}
 """
 
+    elif file_path == "backend/__init__.py":
+        return """# Generated Backend Package
+"""
+
     elif file_path == "backend/requirements.txt":
         return """fastapi>=0.110.0
 uvicorn>=0.28.0
@@ -532,7 +536,11 @@ CREATE INDEX IF NOT EXISTS idx_tasks_user_id ON tasks(user_id);
 """
 
     elif file_path == "tests/test_generated_project.py":
-        return """import pytest
+        return """import sys, os
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+import pytest
 from backend import services, schemas
 
 def test_task_crud_lifecycle():
@@ -555,7 +563,11 @@ def test_task_crud_lifecycle():
 """
 
     elif file_path == "tests/test_api.py":
-        return """from fastapi.testclient import TestClient
+        return """import sys, os
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from fastapi.testclient import TestClient
 from backend.main import app
 
 client = TestClient(app)
