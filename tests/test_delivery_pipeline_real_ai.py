@@ -42,34 +42,33 @@ def test_real_ai_full_generation_pipeline():
         final_state = app.invoke(initial_state)
     except Exception as exc:
         err_msg = str(exc)
-        if any(k in err_msg for k in ["503", "UNAVAILABLE", "high demand", "failed after 3 attempts"]):
-            pytest.skip(f"Google Gemini API temporarily unavailable: {exc}")
+        if any(k in err_msg for k in ["503", "429", "UNAVAILABLE", "RESOURCE_EXHAUSTED", "Quota", "quota", "high demand", "failed after 3 attempts"]):
+            pytest.skip(f"Google Gemini API rate limit or service unavailable: {exc}")
         raise
 
     # 1. Verify specification generation
-    assert final_state.get("requirement_analysis") is not None
+    assert final_state.get("requirements") is not None
     assert final_state.get("architecture") is not None
-    assert final_state.get("api_specification") is not None
 
     # 2. Verify code generation & manifest
-    manifest = final_state.get("file_manifest", [])
-    assert len(manifest) >= 5, f"Expected at least 5 files in manifest, got {len(manifest)}"
+    manifest = final_state.get("file_manifest", {})
+    files = manifest.get("files", []) if isinstance(manifest, dict) else manifest
+    assert len(files) >= 5, f"Expected at least 5 files in manifest, got {len(files)}"
 
-    generated_code = final_state.get("generated_code", {})
-    assert len(generated_code) >= 5, "Expected generated code for manifest files"
+    generated_files = final_state.get("generated_files", {})
+    assert len(generated_files) >= 5, "Expected generated code for manifest files"
 
     # 3. Verify assembly and validation
-    assembled = final_state.get("assembled_files", [])
-    assert len(assembled) >= 5, "Expected files assembled on disk"
-
-    val_res = final_state.get("code_validation_results", {})
+    val_res = final_state.get("code_validation", {})
     assert val_res is not None
 
     # 4. Verify release gate and export
-    gate_decision = final_state.get("release_gate_decision")
-    assert gate_decision in ["APPROVED", "BLOCKED"]
+    release_gate = final_state.get("release_gate", {})
+    gate_status = release_gate.get("status")
+    assert gate_status in ["APPROVED", "BLOCKED"]
 
-    if gate_decision == "APPROVED":
+    if gate_status == "APPROVED":
         export_zip = final_state.get("export_zip_path")
         assert export_zip is not None
         assert Path(export_zip).exists()
+

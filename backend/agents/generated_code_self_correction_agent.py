@@ -62,7 +62,7 @@ RULES:
 3. Ensure no syntax errors and all imports/syntax are 100% valid.
 """
                 response = client.models.generate_content(
-                    model="gemini-2.5-flash",
+                    model="gemini-3.5-flash-lite",
                     contents=prompt
                 )
                 corrected_code = _clean_markdown_fences(response.text or "")
