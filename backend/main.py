@@ -131,19 +131,26 @@ def generator_ui():
       };
 
       try {
-        const res = await fetch('/api/requirements/', {
+        const res = await fetch('/api/requirements/?execution_mode=QUICK', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
 
-        if (!res.ok) {
-          const err = await res.json();
-          alert('Error: ' + (err.detail || 'Generation request failed'));
+        const resText = await res.text();
+        let data = {};
+        try {
+          data = JSON.parse(resText);
+        } catch (e) {
+          alert('Server Error (' + res.status + '): ' + resText.substring(0, 200));
           return;
         }
 
-        const data = await res.json();
+        if (!res.ok) {
+          alert('Error: ' + (data.detail || 'Generation request failed'));
+          return;
+        }
+
         statusCard.style.display = 'block';
 
         document.getElementById('res-id').textContent = data.project_id || '-';
