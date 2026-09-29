@@ -1055,7 +1055,8 @@ def code_generation_agent(state: AgentState) -> AgentState:
     """
     manifest = state.get("file_manifest", {})
     files = manifest.get("files", [])
-    has_api_key = bool(os.environ.get("GEMINI_API_KEY"))
+    execution_mode = str(state.get("execution_mode", "FULL")).upper()
+    has_api_key = bool(os.environ.get("GEMINI_API_KEY")) and execution_mode not in ["QUICK", "FAST", "TEST"]
 
     generated_files: Dict[str, str] = {}
     generation_errors = []
@@ -1063,7 +1064,7 @@ def code_generation_agent(state: AgentState) -> AgentState:
     for item in files:
         file_path = item["path"]
         content = ""
-        # Try LLM generation if API key is present
+        # Try LLM generation if API key is present and not in QUICK mode
         if has_api_key:
             try:
                 content = _generate_file_with_llm(file_path, item, state)

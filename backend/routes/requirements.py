@@ -33,7 +33,7 @@ def _derive_project_name(description: str) -> str:
 
 
 @router.post("/")
-def process_requirement(request: RequirementRequest):
+def process_requirement(request: RequirementRequest, execution_mode: str = "QUICK"):
     """
     Process customer natural-language requirement prompt through the
     complete AI Product Architect graph pipeline:
@@ -48,6 +48,7 @@ def process_requirement(request: RequirementRequest):
         "project_id": project_id,
         "project_name": project_name,
         "requirements": request.description,
+        "execution_mode": execution_mode,
         "suggestions": [],
         "architecture": {},
         "correction_attempts": 0,
