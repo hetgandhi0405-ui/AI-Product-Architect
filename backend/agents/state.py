@@ -118,8 +118,8 @@ class AgentState(TypedDict, total=False):
     # ─────────────────────────────────────────────────────────
     # PHASE 6 — Terraform Generation
     # ─────────────────────────────────────────────────────────
-    terraform_generation: Dict[str, Any]  # Per-file Terraform content map
-    terraform_validation: Dict[str, Any]  # fmt / validate / plan results
+    terraform_generation: Dict[str, Any]  # Per-file HCL content map + metadata
+    terraform_validation: Dict[str, Any]  # Static HCL checks + optional CLI validate
     terraform_correction_attempts: int
     max_terraform_correction_attempts: int
 

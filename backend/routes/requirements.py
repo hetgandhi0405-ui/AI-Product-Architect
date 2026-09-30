@@ -115,6 +115,12 @@ def process_requirement(request: RequirementRequest, execution_mode: str = "QUIC
         "frontend_validation": result.get("frontend_validation", {}),
         "security_validation": result.get("security_validation", {}),
         "validation_report": result.get("validation_report", {}),
+        # Phase 6 — Terraform
+        "terraform_generation": {
+            k: v for k, v in result.get("terraform_generation", {}).items()
+            if k != "file_contents"  # exclude raw HCL content from main response (too large)
+        },
+        "terraform_validation": result.get("terraform_validation", {}),
         # Phase 3 — Cloud Architecture
         "cloud_architecture_spec": result.get("cloud_architecture_spec", {}),
         # Phase 4 — Infrastructure State
@@ -148,4 +154,40 @@ def export_project(project_id: str):
         path=str(zip_path),
         filename=f"{project_id}.zip",
         media_type="application/zip"
+    )
+
+
+@router.get("/terraform/{project_id}")
+def get_terraform(project_id: str):
+    """
+    Download the generated Terraform files for a project as a ZIP archive.
+    """
+    export_dir_env = os.environ.get("AI_PRODUCT_ARCHITECT_EXPORT_DIR")
+    if export_dir_env:
+        export_base = Path(export_dir_env).resolve()
+    else:
+        export_base = (Path(__file__).resolve().parents[2] / "generated_projects").resolve()
+
+    project_dir = export_base / project_id
+    tf_dir = project_dir / "infrastructure" / "terraform"
+
+    if not tf_dir.exists() or not tf_dir.is_dir():
+        raise HTTPException(
+            status_code=404,
+            detail=f"Terraform files for project '{project_id}' not found. Run the generation pipeline first."
+        )
+
+    import zipfile
+    import io
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        for tf_file in sorted(tf_dir.glob("*.tf")):
+            zf.write(tf_file, arcname=f"terraform/{tf_file.name}")
+    buf.seek(0)
+
+    from fastapi.responses import StreamingResponse
+    return StreamingResponse(
+        buf,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{project_id}-terraform.zip"'},
     )

@@ -88,6 +88,10 @@ from backend.agents.frontend_validation_agent import frontend_validation_agent
 from backend.agents.security_validation_agent import security_validation_agent
 from backend.agents.validation_report_agent import validation_report_agent
 
+# Phase 6 — Terraform generation + validation
+from backend.agents.terraform_generation_agent import terraform_generation_agent
+from backend.agents.terraform_validation_agent import terraform_validation_agent
+
 from backend.agents.state import AgentState
 
 
@@ -809,6 +813,20 @@ def build_agent_graph():
     )
 
     # =========================================================
+    # PHASE 6 — Terraform Generation + Validation
+    # =========================================================
+
+    graph_builder.add_node(
+        "terraform_generation",
+        terraform_generation_agent,
+    )
+
+    graph_builder.add_node(
+        "terraform_validation",
+        terraform_validation_agent,
+    )
+
+    # =========================================================
     # GRAPH ENTRY
     # =========================================================
 
@@ -1027,6 +1045,16 @@ def build_agent_graph():
 
     graph_builder.add_edge(
         "infrastructure_state",
+        "terraform_generation",
+    )
+
+    graph_builder.add_edge(
+        "terraform_generation",
+        "terraform_validation",
+    )
+
+    graph_builder.add_edge(
+        "terraform_validation",
         "architecture_diagram",
     )
 
