@@ -68,7 +68,7 @@ def test_real_ai_full_generation_pipeline():
     assert gate_status in ["APPROVED", "BLOCKED"]
 
     if gate_status == "APPROVED":
-        export_zip = final_state.get("export_zip_path")
+        export_zip = final_state.get("export_zip_path") or final_state.get("export", {}).get("zip_path")
         assert export_zip is not None
         assert Path(export_zip).exists()
 

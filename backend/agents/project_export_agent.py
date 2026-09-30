@@ -78,6 +78,7 @@ def project_export_agent(state: AgentState) -> AgentState:
     }
 
     state["export"] = export_result
+    state["export_zip_path"] = str(zip_path)
 
     architecture = state.get("architecture", {})
     architecture["export"] = export_result
