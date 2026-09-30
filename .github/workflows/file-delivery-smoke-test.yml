@@ -1,0 +1,33 @@
+name: File Delivery Smoke Test
+
+on:
+  push:
+    branches:
+      - member2-requirement-traceability
+  workflow_dispatch:
+
+jobs:
+  delivery-smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install project dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Run file delivery smoke test
+        env:
+          PYTHONPATH: .
+        run: python scripts/run_file_delivery_smoke_test.py
+
+      - name: Upload generated deliverables
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-product-architect-delivery-smoke-test
+          path: generated_projects/

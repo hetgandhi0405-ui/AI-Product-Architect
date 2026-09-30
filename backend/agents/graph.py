@@ -37,7 +37,65 @@ from backend.agents.suggestion_agent import suggestion_agent
 from backend.agents.terraform_agent import terraform_agent
 from backend.agents.testing_agent import test_agent
 from backend.agents.ui_ux_spec_agent import ui_ux_spec_agent
+from backend.agents.file_manifest_agent import file_manifest_agent
+from backend.agents.code_generation_agent import code_generation_agent
+from backend.agents.file_assembler_agent import file_assembler_agent
+from backend.agents.generated_code_validator_agent import (
+    generated_code_validator_agent,
+)
+from backend.agents.generated_code_self_correction_agent import (
+    generated_code_self_correction_agent,
+)
+from backend.agents.project_build_agent import project_build_agent
+from backend.agents.api_contract_testing_agent import (
+    api_contract_testing_agent,
+)
+from backend.agents.database_integration_testing_agent import (
+    database_integration_testing_agent,
+)
+from backend.agents.docker_runtime_testing_agent import (
+    docker_runtime_testing_agent,
+)
+from backend.agents.integration_self_correction_agent import (
+    integration_self_correction_agent,
+)
+from backend.agents.release_gate_agent import release_gate_agent
+from backend.agents.project_export_agent import project_export_agent
 from backend.agents.validation_agent import validation_agent
+
+from backend.agents.docker_build_agent import docker_build_agent
+from backend.agents.container_registry_agent import container_registry_agent
+from backend.agents.cloud_deployment_agent import cloud_deployment_agent
+from backend.agents.deployment_validation_agent import deployment_validation_agent
+from backend.agents.telemetry_agent import telemetry_agent
+from backend.agents.performance_agent import performance_agent
+from backend.agents.cost_agent import cost_agent
+from backend.agents.reliability_agent import reliability_agent
+from backend.agents.architecture_analysis_agent import architecture_analysis_agent
+from backend.agents.candidate_generation_agent import candidate_generation_agent
+from backend.agents.candidate_evaluation_agent import candidate_evaluation_agent
+from backend.agents.optimization_recommendation_agent import optimization_recommendation_agent
+
+# Phase 1 / 3 / 4 / 5 — New agents
+from backend.agents.product_metadata_agent import product_metadata_agent
+from backend.agents.cloud_architecture_agent import cloud_architecture_agent
+from backend.agents.infrastructure_state_agent import infrastructure_state_agent
+from backend.agents.architecture_diagram_agent import architecture_diagram_agent
+
+# Phase 2 — Validation agents
+from backend.agents.dependency_validation_agent import dependency_validation_agent
+from backend.agents.frontend_validation_agent import frontend_validation_agent
+from backend.agents.security_validation_agent import security_validation_agent
+from backend.agents.validation_report_agent import validation_report_agent
+
+# Phase 6 — Terraform generation + validation
+from backend.agents.terraform_generation_agent import terraform_generation_agent
+from backend.agents.terraform_validation_agent import terraform_validation_agent
+
+# Phase 8, 12, 15 — Approval, RL Evaluation, Fine-Tuning Dataset
+from backend.agents.deployment_approval_agent import deployment_approval_agent
+from backend.agents.rl_evaluation_agent import rl_evaluation_agent
+from backend.agents.finetuning_dataset_agent import finetuning_dataset_agent
 
 from backend.agents.state import AgentState
 
@@ -76,6 +134,46 @@ def initialize_node(state: AgentState):
         "selected_tools",
         {},
     )
+
+    state["code_correction_attempts"] = state.get(
+        "code_correction_attempts",
+        0,
+    )
+
+    state["max_code_correction_attempts"] = state.get(
+        "max_code_correction_attempts",
+        3,
+    )
+
+    state["integration_correction_attempts"] = state.get(
+        "integration_correction_attempts",
+        0,
+    )
+
+    state["max_integration_correction_attempts"] = state.get(
+        "max_integration_correction_attempts",
+        2,
+    )
+
+    state["generated_files"] = state.get(
+        "generated_files",
+        {},
+    )
+
+    state["file_manifest"] = state.get(
+        "file_manifest",
+        {},
+    )
+
+    state["deploy_mode"] = state.get("deploy_mode", "dry-run")
+    state["docker_status"] = state.get("docker_status", "SKIPPED")
+    state["registry_status"] = state.get("registry_status", "SKIPPED")
+    state["deployment_status"] = state.get("deployment_status", "SKIPPED")
+    state["terraform_status"] = state.get("terraform_status", "SKIPPED")
+    state["deployment_validation_status"] = state.get("deployment_validation_status", "SKIPPED")
+    state["health_status"] = state.get("health_status", "INSUFFICIENT_DATA")
+    state["telemetry_status"] = state.get("telemetry_status", "SKIPPED")
+    state["service_url"] = state.get("service_url", None)
 
     state["project_memory"] = create_project_memory(
         state
@@ -193,6 +291,138 @@ def validation_router(state: AgentState):
         return "memory_sync"
 
     return "self_correction"
+
+
+def code_validation_router(state: AgentState):
+    """
+    Decide whether to self-correct code syntax/structure errors
+    or proceed to build validation.
+    """
+    val = state.get("code_validation", {})
+    if val.get("status") == "PASS":
+        return "project_build"
+
+    attempts = state.get("code_correction_attempts", 0)
+    max_attempts = state.get("max_code_correction_attempts", 3)
+
+    if attempts < max_attempts:
+        return "generated_code_self_correction"
+
+    return "project_build"
+
+
+def integration_validation_router(state: AgentState):
+    """
+    Decide whether to repair API/DB/Docker integration mismatches
+    or proceed to the release gate.
+    """
+    api_val = state.get("api_validation", {})
+    db_val = state.get("database_validation", {})
+    docker_val = state.get("docker_validation", {})
+
+    all_passed = (
+        api_val.get("status") in ("PASS", "WARN") and
+        db_val.get("status") in ("PASS", "WARN") and
+        docker_val.get("status") == "PASS"
+    )
+
+    if all_passed:
+        return "release_gate"
+
+    attempts = state.get("integration_correction_attempts", 0)
+    max_attempts = state.get("max_integration_correction_attempts", 2)
+
+    if attempts < max_attempts:
+        return "integration_self_correction"
+
+    return "release_gate"
+
+
+def release_gate_router(state: AgentState):
+    """
+    If release gate approved, proceed to docker build; otherwise skip to project export.
+    """
+    gate = state.get("release_gate", {})
+    if gate.get("status") == "APPROVED" and gate.get("approved"):
+        return "docker_build"
+    return "project_export"
+
+
+def docker_build_router(state: AgentState):
+    """
+    If docker build failed, abort deployment pipeline and summarize; else proceed to container registry.
+    """
+    if state.get("docker_status") == "FAILED":
+        return "deployment_failed_summary"
+    return "container_registry"
+
+
+def container_registry_router(state: AgentState):
+    """
+    If container registry push failed, abort deployment pipeline and summarize; else proceed to cloud deployment.
+    """
+    if state.get("registry_status") == "FAILED":
+        return "deployment_failed_summary"
+    return "cloud_deployment"
+
+
+def cloud_deployment_router(state: AgentState):
+    """
+    If cloud deployment failed, abort to summary; else proceed to deployment validation.
+    """
+    if state.get("deployment_status") == "FAILED":
+        return "deployment_failed_summary"
+    return "deployment_validation"
+
+
+def deployment_failed_summary_agent(state: AgentState) -> AgentState:
+    """
+    Record deployment failure summary without crashing, ensuring export continues.
+    """
+    state["deployment_status"] = "FAILED"
+    state["service_url"] = None
+    state["deployment_validation_status"] = "FAILED"
+    state["health_status"] = "UNHEALTHY"
+    return state
+
+
+from backend.core.execution_config import get_execution_config
+from backend.core.pipeline_metrics import (
+    create_metrics,
+    finish_node,
+    skip_node,
+    start_node,
+)
+
+
+def timed_conditional_node(node_name, node_fn):
+    def wrapped(state: AgentState):
+        execution_mode = state.get("execution_mode", "FULL")
+        metrics = state.get("pipeline_metrics") or create_metrics()
+        state["execution_mode"] = execution_mode
+        state["pipeline_metrics"] = metrics
+        config = get_execution_config(execution_mode)
+        if not config.should_run(node_name):
+            skip_node(metrics, node_name)
+            return state
+        routing = state.get("dynamic_routing") or {}
+        skipped_agents = set(routing.get("skipped_agents", []) if isinstance(routing, dict) else [])
+        if node_name in config.dynamically_routable_nodes and node_name in skipped_agents:
+            skip_node(metrics, node_name)
+            return state
+        started = start_node(metrics, node_name)
+        try:
+            output = node_fn(state)
+        except Exception:
+            finish_node(metrics, node_name, started, status="FAILED")
+            raise
+        finish_node(metrics, node_name, started)
+        if output is None:
+            output = state
+        output["execution_mode"] = execution_mode
+        output["pipeline_metrics"] = metrics
+        return output
+    return wrapped
 
 
 def build_agent_graph():
@@ -407,6 +637,220 @@ def build_agent_graph():
     )
 
     # =========================================================
+    # CODE DELIVERY PIPELINE NODES
+    # =========================================================
+
+    graph_builder.add_node(
+        "file_manifest",
+        file_manifest_agent,
+    )
+
+    graph_builder.add_node(
+        "code_generation",
+        code_generation_agent,
+    )
+
+    graph_builder.add_node(
+        "file_assembler",
+        file_assembler_agent,
+    )
+
+    graph_builder.add_node(
+        "generated_code_validator",
+        generated_code_validator_agent,
+    )
+
+    graph_builder.add_node(
+        "generated_code_self_correction",
+        generated_code_self_correction_agent,
+    )
+
+    graph_builder.add_node(
+        "project_build",
+        project_build_agent,
+    )
+
+    graph_builder.add_node(
+        "api_contract_testing",
+        api_contract_testing_agent,
+    )
+
+    graph_builder.add_node(
+        "database_integration_testing",
+        database_integration_testing_agent,
+    )
+
+    graph_builder.add_node(
+        "docker_runtime_testing",
+        docker_runtime_testing_agent,
+    )
+
+    graph_builder.add_node(
+        "integration_self_correction",
+        integration_self_correction_agent,
+    )
+
+    graph_builder.add_node(
+        "release_gate",
+        release_gate_agent,
+    )
+
+    graph_builder.add_node(
+        "project_export",
+        project_export_agent,
+    )
+
+    # =========================================================
+    # DEPLOYMENT, TELEMETRY, AND OPTIMIZATION NODES
+    # =========================================================
+
+    graph_builder.add_node(
+        "docker_build",
+        docker_build_agent,
+    )
+
+    graph_builder.add_node(
+        "container_registry",
+        container_registry_agent,
+    )
+
+    graph_builder.add_node(
+        "cloud_deployment",
+        cloud_deployment_agent,
+    )
+
+    graph_builder.add_node(
+        "deployment_validation",
+        deployment_validation_agent,
+    )
+
+    graph_builder.add_node(
+        "telemetry",
+        telemetry_agent,
+    )
+
+    graph_builder.add_node(
+        "performance",
+        performance_agent,
+    )
+
+    graph_builder.add_node(
+        "cost",
+        cost_agent,
+    )
+
+    graph_builder.add_node(
+        "reliability",
+        reliability_agent,
+    )
+
+    graph_builder.add_node(
+        "architecture_analysis",
+        architecture_analysis_agent,
+    )
+
+    graph_builder.add_node(
+        "candidate_generation",
+        candidate_generation_agent,
+    )
+
+    graph_builder.add_node(
+        "candidate_evaluation",
+        candidate_evaluation_agent,
+    )
+
+    graph_builder.add_node(
+        "optimization_recommendation",
+        optimization_recommendation_agent,
+    )
+
+    graph_builder.add_node(
+        "deployment_failed_summary",
+        deployment_failed_summary_agent,
+    )
+
+    # =========================================================
+    # PHASE 1 / 3 / 4 / 5 — New nodes
+    # =========================================================
+
+    graph_builder.add_node(
+        "product_metadata",
+        product_metadata_agent,
+    )
+
+    graph_builder.add_node(
+        "cloud_architecture",
+        cloud_architecture_agent,
+    )
+
+    graph_builder.add_node(
+        "infrastructure_state",
+        infrastructure_state_agent,
+    )
+
+    graph_builder.add_node(
+        "architecture_diagram",
+        architecture_diagram_agent,
+    )
+
+    # =========================================================
+    # PHASE 2 — Extended Validation nodes
+    # =========================================================
+
+    graph_builder.add_node(
+        "dependency_validation",
+        dependency_validation_agent,
+    )
+
+    graph_builder.add_node(
+        "frontend_validation",
+        frontend_validation_agent,
+    )
+
+    graph_builder.add_node(
+        "security_validation",
+        security_validation_agent,
+    )
+
+    graph_builder.add_node(
+        "validation_report",
+        validation_report_agent,
+    )
+
+    # =========================================================
+    # PHASE 6 — Terraform Generation + Validation
+    # =========================================================
+
+    graph_builder.add_node(
+        "terraform_generation",
+        terraform_generation_agent,
+    )
+
+    graph_builder.add_node(
+        "terraform_validation",
+        terraform_validation_agent,
+    )
+
+    # =========================================================
+    # PHASE 8, 12, 15 — Approval, RL Evaluation, Fine-Tuning Dataset
+    # =========================================================
+
+    graph_builder.add_node(
+        "deployment_approval",
+        deployment_approval_agent,
+    )
+
+    graph_builder.add_node(
+        "rl_evaluation",
+        rl_evaluation_agent,
+    )
+
+    graph_builder.add_node(
+        "finetuning_dataset",
+        finetuning_dataset_agent,
+    )
+
+    # =========================================================
     # GRAPH ENTRY
     # =========================================================
 
@@ -589,14 +1033,234 @@ def build_agent_graph():
         "failure_detection",
         "memory_sync",
     )
-
     # =========================================================
-    # FINAL MEMORY SYNC
+    # CODE DELIVERY PIPELINE EDGES
     # =========================================================
 
     graph_builder.add_edge(
         "memory_sync",
+        "file_manifest",
+    )
+
+    graph_builder.add_edge(
+        "file_manifest",
+        "code_generation",
+    )
+
+    graph_builder.add_edge(
+        "code_generation",
+        "file_assembler",
+    )
+
+    graph_builder.add_edge(
+        "file_assembler",
+        "product_metadata",
+    )
+
+    graph_builder.add_edge(
+        "product_metadata",
+        "cloud_architecture",
+    )
+
+    graph_builder.add_edge(
+        "cloud_architecture",
+        "infrastructure_state",
+    )
+
+    graph_builder.add_edge(
+        "infrastructure_state",
+        "terraform_generation",
+    )
+
+    graph_builder.add_edge(
+        "terraform_generation",
+        "terraform_validation",
+    )
+
+    graph_builder.add_edge(
+        "terraform_validation",
+        "architecture_diagram",
+    )
+
+    graph_builder.add_edge(
+        "architecture_diagram",
+        "generated_code_validator",
+    )
+
+    graph_builder.add_conditional_edges(
+        "generated_code_validator",
+        code_validation_router,
+        {
+            "generated_code_self_correction": "generated_code_self_correction",
+            "project_build": "project_build",
+        },
+    )
+
+    graph_builder.add_edge(
+        "generated_code_self_correction",
+        "project_build",
+    )
+
+    graph_builder.add_edge(
+        "project_build",
+        "api_contract_testing",
+    )
+
+    graph_builder.add_edge(
+        "api_contract_testing",
+        "database_integration_testing",
+    )
+
+    graph_builder.add_edge(
+        "database_integration_testing",
+        "docker_runtime_testing",
+    )
+
+    graph_builder.add_conditional_edges(
+        "docker_runtime_testing",
+        integration_validation_router,
+        {
+            "integration_self_correction": "integration_self_correction",
+            "release_gate": "dependency_validation",  # "release_gate" key → now routes to Phase 2 first
+        },
+    )
+
+    graph_builder.add_edge(
+        "integration_self_correction",
+        "dependency_validation",
+    )
+
+    graph_builder.add_edge(
+        "dependency_validation",
+        "frontend_validation",
+    )
+
+    graph_builder.add_edge(
+        "frontend_validation",
+        "security_validation",
+    )
+
+    graph_builder.add_edge(
+        "security_validation",
+        "validation_report",
+    )
+
+    graph_builder.add_edge(
+        "validation_report",
+        "release_gate",
+    )
+    # =========================================================
+    # DEPLOYMENT, MONITORING, AND OPTIMIZATION PIPELINE EDGES
+    # =========================================================
+
+    graph_builder.add_edge(
+        "release_gate",
+        "deployment_approval",
+    )
+
+    graph_builder.add_conditional_edges(
+        "deployment_approval",
+        release_gate_router,
+        {
+            "docker_build": "docker_build",
+            "project_export": "project_export",
+        },
+    )
+
+    graph_builder.add_conditional_edges(
+        "docker_build",
+        docker_build_router,
+        {
+            "container_registry": "container_registry",
+            "deployment_failed_summary": "deployment_failed_summary",
+        },
+    )
+
+    graph_builder.add_conditional_edges(
+        "container_registry",
+        container_registry_router,
+        {
+            "cloud_deployment": "cloud_deployment",
+            "deployment_failed_summary": "deployment_failed_summary",
+        },
+    )
+
+    graph_builder.add_conditional_edges(
+        "cloud_deployment",
+        cloud_deployment_router,
+        {
+            "deployment_validation": "deployment_validation",
+            "deployment_failed_summary": "deployment_failed_summary",
+        },
+    )
+
+    graph_builder.add_edge(
+        "deployment_validation",
+        "telemetry",
+    )
+
+    graph_builder.add_edge(
+        "telemetry",
+        "performance",
+    )
+
+    graph_builder.add_edge(
+        "performance",
+        "cost",
+    )
+
+    graph_builder.add_edge(
+        "cost",
+        "reliability",
+    )
+
+    graph_builder.add_edge(
+        "reliability",
+        "architecture_analysis",
+    )
+
+    graph_builder.add_edge(
+        "architecture_analysis",
+        "candidate_generation",
+    )
+
+    graph_builder.add_edge(
+        "candidate_generation",
+        "candidate_evaluation",
+    )
+
+    graph_builder.add_edge(
+        "candidate_evaluation",
+        "optimization_recommendation",
+    )
+
+    graph_builder.add_edge(
+        "optimization_recommendation",
+        "rl_evaluation",
+    )
+
+    graph_builder.add_edge(
+        "rl_evaluation",
+        "finetuning_dataset",
+    )
+
+    graph_builder.add_edge(
+        "finetuning_dataset",
+        "project_export",
+    )
+
+    graph_builder.add_edge(
+        "deployment_failed_summary",
+        "project_export",
+    )
+
+    graph_builder.add_edge(
+        "project_export",
         END,
     )
 
     return graph_builder.compile()
+
+
+# Compiled LangGraph application instance
+app = build_agent_graph()

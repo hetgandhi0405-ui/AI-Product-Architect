@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Product Architect</title>
+  <style>
+    body{font-family:Inter,Arial,sans-serif;max-width:1000px;margin:0 auto;padding:40px;background:#0b1020;color:#eef2ff}
+    .card{background:#151c31;border:1px solid #2b3657;border-radius:18px;padding:28px}
+    h1{margin-top:0}.muted{color:#aab4d0}
+    textarea,input{width:100%;box-sizing:border-box;background:#0d1427;color:#fff;border:1px solid #35415f;border-radius:10px;padding:14px;margin:8px 0 18px}
+    textarea{min-height:260px;resize:vertical}
+    button{background:#6d7cff;color:#fff;border:0;border-radius:10px;padding:13px 20px;font-weight:700;cursor:pointer}
+    button:disabled{opacity:.5;cursor:not-allowed}
+    pre{background:#0a0f1e;border-radius:10px;padding:16px;overflow:auto}
+    a.download{display:inline-block;margin-top:18px;background:#16a34a;color:white;text-decoration:none;padding:13px 20px;border-radius:10px;font-weight:700}
+    .hidden{display:none}.status{margin-top:20px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>AI Product Architect</h1>
+    <p class="muted">Describe the product you want. The pipeline will generate, validate and package the actual source-code deliverables.</p>
+    <label>Project name</label>
+    <input id="projectName" placeholder="e.g. Task Management Platform">
+    <label>Customer prompt</label>
+    <textarea id="prompt" placeholder="Build a full-stack application that..."></textarea>
+    <button id="generate">Generate Project</button>
+    <div id="status" class="status hidden"></div>
+    <a id="download" class="download hidden" href="#">Download Code Deliverables (.zip)</a>
+    <pre id="details" class="hidden"></pre>
+  </div>
+<script>
+const button=document.getElementById("generate");
+const status=document.getElementById("status");
+const download=document.getElementById("download");
+const details=document.getElementById("details");
+
+button.addEventListener("click", async () => {
+  const description=document.getElementById("prompt").value.trim();
+  const project_name=document.getElementById("projectName").value.trim() || null;
+  if(description.length < 10){ alert("Please enter a detailed customer prompt."); return; }
+
+  button.disabled=true;
+  download.classList.add("hidden");
+  details.classList.add("hidden");
+  status.classList.remove("hidden");
+  status.textContent="Generating project. This may take a few minutes...";
+
+  try{
+    const response=await fetch("/api/requirements/?execution_mode=QUICK",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({description,project_name})
+    });
+    const text=await response.text();
+    let data={};
+    try { data=JSON.parse(text); } catch(e) { throw new Error("Server response: "+text.substring(0,150)); }
+    if(!response.ok) throw new Error(data.detail || "Pipeline failed");
+
+    details.textContent=JSON.stringify({
+      status:data.status,
+      project_id:data.project_id,
+      files:data.file_manifest?.file_count,
+      generated_code:data.generated_code_validation?.status,
+      build:data.project_build?.status,
+      api:data.api_contract_validation?.status,
+      database:data.database_integration_validation?.status,
+      docker:data.docker_runtime_validation?.status,
+      release_gate:data.release_gate?.status
+    },null,2);
+    details.classList.remove("hidden");
+
+    if(data.download_url){
+      download.href=data.download_url;
+      download.classList.remove("hidden");
+      status.textContent="Project generated and approved for delivery.";
+    }else{
+      status.textContent="Generation completed, but the release gate blocked delivery. See validation details below.";
+    }
+  }catch(error){
+    status.textContent="Error: "+error.message;
+  }finally{
+    button.disabled=false;
+  }
+});
+</script>
+</body>
+</html>
