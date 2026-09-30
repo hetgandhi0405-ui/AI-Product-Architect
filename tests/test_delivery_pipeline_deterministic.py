@@ -24,6 +24,12 @@ from backend.agents.graph import build_agent_graph
 client = TestClient(app)
 
 
+@pytest.fixture(autouse=True)
+def mock_gemini_key(monkeypatch):
+    """Force deterministic mock mode for all unit tests in this module."""
+    monkeypatch.setenv("GEMINI_API_KEY", "mock")
+
+
 def test_file_manifest_agent_generates_standard_structure():
     """Verify that file_manifest_agent produces all mandatory files."""
     state = {
@@ -99,6 +105,7 @@ def test_validation_agents_pass_for_synthesized_project(tmp_path):
         "project_id": project_id,
         "project_name": "Task Manager",
         "requirements": "Create a task management app with user registration and tasks.",
+        "execution_mode": "QUICK",
         "api_specification": {
             "endpoints": [
                 {"method": "GET", "endpoint": "/tasks", "purpose": "List tasks"},
