@@ -92,6 +92,11 @@ from backend.agents.validation_report_agent import validation_report_agent
 from backend.agents.terraform_generation_agent import terraform_generation_agent
 from backend.agents.terraform_validation_agent import terraform_validation_agent
 
+# Phase 8, 12, 15 — Approval, RL Evaluation, Fine-Tuning Dataset
+from backend.agents.deployment_approval_agent import deployment_approval_agent
+from backend.agents.rl_evaluation_agent import rl_evaluation_agent
+from backend.agents.finetuning_dataset_agent import finetuning_dataset_agent
+
 from backend.agents.state import AgentState
 
 
@@ -827,6 +832,25 @@ def build_agent_graph():
     )
 
     # =========================================================
+    # PHASE 8, 12, 15 — Approval, RL Evaluation, Fine-Tuning Dataset
+    # =========================================================
+
+    graph_builder.add_node(
+        "deployment_approval",
+        deployment_approval_agent,
+    )
+
+    graph_builder.add_node(
+        "rl_evaluation",
+        rl_evaluation_agent,
+    )
+
+    graph_builder.add_node(
+        "finetuning_dataset",
+        finetuning_dataset_agent,
+    )
+
+    # =========================================================
     # GRAPH ENTRY
     # =========================================================
 
@@ -1129,8 +1153,13 @@ def build_agent_graph():
     # DEPLOYMENT, MONITORING, AND OPTIMIZATION PIPELINE EDGES
     # =========================================================
 
-    graph_builder.add_conditional_edges(
+    graph_builder.add_edge(
         "release_gate",
+        "deployment_approval",
+    )
+
+    graph_builder.add_conditional_edges(
+        "deployment_approval",
         release_gate_router,
         {
             "docker_build": "docker_build",
@@ -1207,6 +1236,16 @@ def build_agent_graph():
 
     graph_builder.add_edge(
         "optimization_recommendation",
+        "rl_evaluation",
+    )
+
+    graph_builder.add_edge(
+        "rl_evaluation",
+        "finetuning_dataset",
+    )
+
+    graph_builder.add_edge(
+        "finetuning_dataset",
         "project_export",
     )
 

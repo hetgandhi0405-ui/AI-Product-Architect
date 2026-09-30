@@ -99,7 +99,8 @@ def terraform_validation_agent(state: AgentState) -> AgentState:
     vars_content = file_contents.get("variables.tf", "")
     declared_vars = set(re.findall(r'^variable\s+"(\w+)"', vars_content, re.MULTILINE))
     all_content = "\n".join(file_contents.values())
-    used_vars = set(re.findall(r'var\.(\w+)', all_content))
+    uncommented_content = re.sub(r'/(?:\*[\s\S]*?\*/|/[^\n]*)|#[^\n]*', '', all_content)
+    used_vars = set(re.findall(r'var\.(\w+)', uncommented_content))
     undeclared = used_vars - declared_vars
     if undeclared:
         issues.append(f"Undeclared variables referenced: {', '.join(sorted(undeclared))}")

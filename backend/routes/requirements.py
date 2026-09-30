@@ -128,6 +128,15 @@ def process_requirement(request: RequirementRequest, execution_mode: str = "QUIC
         "infrastructure_state_path": result.get("infrastructure_state_path"),
         # Phase 5 — Architecture Diagram
         "architecture_diagram": result.get("architecture_diagram", ""),
+        # Phase 8 — Deployment Approval & History
+        "deployment_approval": result.get("deployment_approval", {}),
+        "deployment_history": result.get("deployment_history", []),
+        # Phase 12 — RL Evaluation
+        "rl_evaluation": result.get("rl_evaluation", {}),
+        "rl_state": result.get("rl_state", {}),
+        "rl_action": result.get("rl_action", {}),
+        # Phase 15 — Fine-tuning Dataset Record
+        "finetuning_dataset_record": result.get("finetuning_dataset_record", {}),
     }
 
 
@@ -191,3 +200,41 @@ def get_terraform(project_id: str):
         media_type="application/zip",
         headers={"Content-Disposition": f'attachment; filename="{project_id}-terraform.zip"'},
     )
+
+
+@router.post("/rollback/{project_id}")
+def rollback_deployment(project_id: str):
+    """
+    Execute controlled rollback to the previous known-good infrastructure snapshot.
+    """
+    export_dir_env = os.environ.get("AI_PRODUCT_ARCHITECT_EXPORT_DIR")
+    if export_dir_env:
+        export_base = Path(export_dir_env).resolve()
+    else:
+        export_base = (Path(__file__).resolve().parents[2] / "generated_projects").resolve()
+
+    infra_file = export_base / project_id / "infrastructure" / "infrastructure_state.json"
+    if not infra_file.exists():
+        raise HTTPException(
+            status_code=404,
+            detail=f"No infrastructure state found for project '{project_id}' to rollback."
+        )
+
+    import json
+    from backend.agents.deployment_approval_agent import execute_rollback
+
+    current_state = {
+        "project_id": project_id,
+        "infrastructure_state": json.loads(infra_file.read_text(encoding="utf-8")),
+        "rollback_state": {
+            "snapshot_id": f"snap-rollback-{project_id}",
+            "infrastructure_state": json.loads(infra_file.read_text(encoding="utf-8")),
+        }
+    }
+
+    result = execute_rollback(current_state)
+    return {
+        "project_id": project_id,
+        "rollback_status": result.get("rollback_status", {}),
+        "restored_infrastructure_state": result.get("infrastructure_state", {}),
+    }

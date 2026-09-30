@@ -239,6 +239,12 @@ variable "container_image" {{
   type        = string
   default     = "your-ecr-repo/{project_name}:latest"
 }}
+
+variable "acm_certificate_arn" {{
+  description = "ACM Certificate ARN for HTTPS listener (optional)"
+  type        = string
+  default     = ""
+}}
 '''
 
 
