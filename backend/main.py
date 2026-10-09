@@ -132,20 +132,46 @@ def generator_ui():
     }
     textarea { height: 100px; resize: vertical; }
     
-    .btn-group { display: flex; gap: 12px; }
-    button {
+    .btn-group { display: flex; gap: 12px; margin-top: 8px; }
+    button, .btn-preset, .btn-primary, .btn-success {
+      cursor: pointer !important;
+      font-family: inherit;
+      user-select: none;
+      transition: all 0.2s ease;
+    }
+    .btn-primary {
       background: var(--primary);
       color: #fff;
       border: none;
       border-radius: 8px;
-      padding: 12px 24px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
+      padding: 14px 28px;
+      font-size: 16px;
+      font-weight: 700;
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
     }
-    button:hover { background: var(--primary-hover); }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+    }
+    .btn-primary:active {
+      transform: translateY(1px);
+    }
+    .btn-preset {
+      background: #0f172a;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .btn-preset:hover {
+      background: #1e293b;
+      color: #fff;
+      border-color: var(--primary);
+    }
+    button:disabled { opacity: 0.5; cursor: not-allowed !important; transform: none !important; }
     
     .btn-success { background: var(--success); text-decoration: none; color: white; padding: 10px 18px; border-radius: 6px; font-weight: 600; font-size: 13px; display: inline-block; }
     
@@ -232,11 +258,20 @@ def generator_ui():
         </div>
       </div>
 
+      <div style="margin-bottom: 12px;">
+        <label>Quick Preset Prompts (Click to Load):</label>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button type="button" class="btn-preset" onclick="loadPreset('task')">📋 Task Management App</button>
+          <button type="button" class="btn-preset" onclick="loadPreset('ecommerce')">🛒 E-Commerce Platform</button>
+          <button type="button" class="btn-preset" onclick="loadPreset('analytics')">📊 Analytics Dashboard</button>
+        </div>
+      </div>
+
       <label for="description">Natural Language Product Requirement Prompt</label>
-      <textarea id="description" required placeholder="Build a task management platform for small businesses. Users should be able to register and login, create teams, projects and tasks, comment on tasks, receive notifications, and view a dashboard. Use PostgreSQL. The system should support 10,000 users and require high availability."></textarea>
+      <textarea id="description" required placeholder="Build a task management platform for small businesses. Users should be able to register and login, create teams, projects and tasks, comment on tasks, receive notifications, and view a dashboard. Use PostgreSQL. The system should support 10,000 users and require high availability.">Build a task management platform for small businesses with PostgreSQL and Redis caching. Support 10,000 users with high availability.</textarea>
 
       <div class="btn-group">
-        <button type="submit" id="submit-btn">🚀 Execute Autonomous Pipeline</button>
+        <button type="submit" id="submit-btn" class="btn-primary">🚀 Execute Autonomous Pipeline</button>
       </div>
     </form>
   </div>
@@ -344,6 +379,21 @@ def generator_ui():
 
   <script>
     mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+
+    function loadPreset(type) {
+      const desc = document.getElementById('description');
+      const name = document.getElementById('project_name');
+      if (type === 'task') {
+        name.value = 'TaskMaster Pro';
+        desc.value = 'Build a task management platform for small businesses with PostgreSQL and Redis caching. Support 10,000 users with high availability.';
+      } else if (type === 'ecommerce') {
+        name.value = 'ShopVault Store';
+        desc.value = 'Build an e-commerce platform with user authentication, product catalog, shopping cart, order processing, and payment status webhook handlers. Use PostgreSQL and Redis.';
+      } else if (type === 'analytics') {
+        name.value = 'PulseMetrics Engine';
+        desc.value = 'Build a real-time event analytics dashboard system with user login, event ingestion API, metric aggregation tables, and export reporting. Require high availability and low latency.';
+      }
+    }
 
     const form = document.getElementById('gen-form');
     const submitBtn = document.getElementById('submit-btn');
