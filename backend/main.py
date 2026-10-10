@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -31,7 +31,10 @@ app.include_router(
 
 
 @app.get("/")
-def root():
+def root(request: Request):
+    accept = request.headers.get("accept", "")
+    if "text/html" in accept:
+        return generator_ui()
     return {
         "project": "AI Product Architect",
         "member": "Member 2",
@@ -48,6 +51,7 @@ def health():
 
 @app.get("/ui", response_class=HTMLResponse)
 @app.get("/generator", response_class=HTMLResponse)
+@app.get("/dashboard", response_class=HTMLResponse)
 def generator_ui():
     """
     Autonomous AI Product-to-Cloud Deployment & Optimization Platform Dashboard.
