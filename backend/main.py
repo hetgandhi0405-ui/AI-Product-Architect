@@ -30,18 +30,6 @@ app.include_router(
 )
 
 
-@app.get("/")
-def root(request: Request):
-    accept = request.headers.get("accept", "")
-    if "text/html" in accept:
-        return generator_ui()
-    return {
-        "project": "AI Product Architect",
-        "member": "Member 2",
-        "status": "running"
-    }
-
-
 @app.get("/health")
 def health():
     return {
@@ -49,6 +37,7 @@ def health():
     }
 
 
+@app.get("/", response_class=HTMLResponse)
 @app.get("/ui", response_class=HTMLResponse)
 @app.get("/generator", response_class=HTMLResponse)
 @app.get("/dashboard", response_class=HTMLResponse)
