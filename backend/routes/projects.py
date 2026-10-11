@@ -72,18 +72,37 @@ def list_projects() -> List[Dict[str, Any]]:
     return list(store.values())
 
 
+from pydantic import BaseModel
+from typing import Optional
+
+
+class CreateProjectRequest(BaseModel):
+    project_name: str
+    project_type: Optional[str] = "Full Stack Web App"
+    requirements: Optional[str] = ""
+    preferred_stack: Optional[str] = "React, FastAPI, PostgreSQL"
+
+
 @router.post("/")
-def create_project(project_name: str):
-    project_id = str(uuid4())
+def create_project(req: CreateProjectRequest):
+    project_id = f"proj-{uuid4().hex[:8]}"
 
-    project = ProjectState(
-        project_id=project_id,
-        project_name=project_name,
-        status="created"
-    )
+    data = {
+        "project_id": project_id,
+        "project_name": req.project_name,
+        "status": "created",
+        "project_type": req.project_type,
+        "requirements": req.requirements,
+        "preferred_stack": req.preferred_stack,
+        "created_at": "Just now",
+        "duration": "-",
+        "coverage": 0,
+        "release_gate": "PENDING"
+    }
 
-    record_project(project.model_dump())
-    return project
+    record_project(data)
+    return {"success": True, "project_id": project_id, "project": data}
+
 
 
 @router.get("/{project_id}")
@@ -111,4 +130,4 @@ def delete_project(project_id: str):
         _save_store(store)
     if project_id in projects:
         del projects[project_id]
-    return {"status": "deleted", "project_id": project_id}
+    return {"status": "deleted", "deleted": True, "project_id": project_id}

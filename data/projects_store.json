@@ -8532,5 +8532,77 @@
         }
       }
     }
+  },
+  "proj-22d7be33": {
+    "project_id": "proj-22d7be33",
+    "project_name": "ZIP Download Test App",
+    "status": "created",
+    "project_type": "Full Stack Web App",
+    "requirements": "Build a task app",
+    "preferred_stack": "React, FastAPI, PostgreSQL",
+    "created_at": "Just now",
+    "duration": "-",
+    "coverage": 0,
+    "release_gate": "PENDING"
+  },
+  "proj-664c5039": {
+    "project_id": "proj-664c5039",
+    "project_name": "File Preview Test App",
+    "status": "created",
+    "project_type": "Full Stack Web App",
+    "requirements": "Build a portal",
+    "preferred_stack": "React, FastAPI, PostgreSQL",
+    "created_at": "Just now",
+    "duration": "-",
+    "coverage": 0,
+    "release_gate": "PENDING"
+  },
+  "proj-c81dcec2": {
+    "project_id": "proj-c81dcec2",
+    "project_name": "ZIP Download Test App",
+    "status": "created",
+    "project_type": "Full Stack Web App",
+    "requirements": "Build a task app",
+    "preferred_stack": "React, FastAPI, PostgreSQL",
+    "created_at": "Just now",
+    "duration": "-",
+    "coverage": 0,
+    "release_gate": "PENDING"
+  },
+  "proj-49fdea89": {
+    "project_id": "proj-49fdea89",
+    "project_name": "File Preview Test App",
+    "status": "created",
+    "project_type": "Full Stack Web App",
+    "requirements": "Build a portal",
+    "preferred_stack": "React, FastAPI, PostgreSQL",
+    "created_at": "Just now",
+    "duration": "-",
+    "coverage": 0,
+    "release_gate": "PENDING"
+  },
+  "proj-e8adebd9": {
+    "project_id": "proj-e8adebd9",
+    "project_name": "ZIP Download Test App",
+    "status": "created",
+    "project_type": "Full Stack Web App",
+    "requirements": "Build a task app",
+    "preferred_stack": "React, FastAPI, PostgreSQL",
+    "created_at": "Just now",
+    "duration": "-",
+    "coverage": 0,
+    "release_gate": "PENDING"
+  },
+  "proj-6c2c8416": {
+    "project_id": "proj-6c2c8416",
+    "project_name": "File Preview Test App",
+    "status": "created",
+    "project_type": "Full Stack Web App",
+    "requirements": "Build a portal",
+    "preferred_stack": "React, FastAPI, PostgreSQL",
+    "created_at": "Just now",
+    "duration": "-",
+    "coverage": 0,
+    "release_gate": "PENDING"
   }
 }
