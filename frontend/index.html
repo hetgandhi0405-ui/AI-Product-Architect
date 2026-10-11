@@ -1949,6 +1949,7 @@ terraform apply -auto-approve</pre>
       const circle = document.getElementById('gauge-circle');
       if (circle) {
         const circ = 2 * Math.PI * 45; // ~283
+        circle.style.transition = 'stroke-dashoffset 0.6s ease-in-out';
         circle.style.strokeDashoffset = String(circ - (cov / 100) * circ);
       }
       if (liveData.coverage_metrics) {
@@ -2387,6 +2388,29 @@ terraform apply -auto-approve</pre>
       if (dlBtn) dlBtn.disabled = false;
       const zipSizeEl = document.getElementById('dash-zip-size');
       if (zipSizeEl) zipSizeEl.textContent = 'Size: ~1.8 MB (Verified ZIP)';
+
+      // 7. Update Cloud Deployment Card
+      const linkBox = document.getElementById('deploy-service-link-box');
+      const liveUrlEl = document.getElementById('deploy-live-url');
+      const openBtn = document.getElementById('deploy-open-btn');
+      const deployBadge = document.getElementById('deploy-status-badge');
+      if (linkBox && liveUrlEl) {
+        const sUrl = data.service_url || `/preview/${activeProjectId}`;
+        const fullServiceUrl = sUrl.startsWith('http') ? sUrl : (window.location.origin + sUrl);
+        liveUrlEl.textContent = fullServiceUrl;
+        liveUrlEl.href = fullServiceUrl;
+        liveUrlEl.target = '_blank';
+        if (openBtn) {
+          openBtn.href = fullServiceUrl;
+          openBtn.target = '_blank';
+        }
+        linkBox.style.display = 'block';
+        if (deployBadge) {
+          deployBadge.textContent = '🟢 LIVE';
+          deployBadge.style.background = 'var(--success-glow)';
+          deployBadge.style.color = 'var(--success)';
+        }
+      }
     }
 
         // Global helpers for Preview, Zoom, Sort, and Retry
@@ -2637,9 +2661,14 @@ terraform apply -auto-approve</pre>
             }
             if (linkBox && liveUrlEl) {
               linkBox.style.display = 'block';
-              liveUrlEl.textContent = data.service_url;
-              liveUrlEl.href = data.service_url;
-              if (openBtn) openBtn.href = data.service_url;
+              const fullServiceUrl = (data.service_url || '').startsWith('http') ? data.service_url : (window.location.origin + (data.service_url || `/preview/${activeProjectId}`));
+              liveUrlEl.textContent = fullServiceUrl;
+              liveUrlEl.href = fullServiceUrl;
+              liveUrlEl.target = '_blank';
+              if (openBtn) {
+                openBtn.href = fullServiceUrl;
+                openBtn.target = '_blank';
+              }
             }
             if (deployBtn) deployBtn.disabled = false;
             showToast('Deployment SUCCESSFUL! Live service URL active.');

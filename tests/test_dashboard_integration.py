@@ -155,3 +155,15 @@ def test_cloud_deployment_and_rollback():
     assert len(rb_data["logs"]) > 0
 
 
+def test_preview_endpoint_serves_interactive_app():
+    """Verify live interactive deployment preview serves HTML with working app and API console."""
+    pid = "proj-preview-test-456"
+    res = client.get(f"/preview/{pid}")
+    assert res.status_code == 200
+    assert "Live Cloud Deployment Preview" in res.text
+    assert "Online (200 OK)" in res.text
+    assert "Interactive Application" in res.text
+    assert "REST API Console" in res.text
+
+
+

@@ -66,3 +66,20 @@ def generator_ui():
         )
     return HTMLResponse(content="<h1>AI Product Architect</h1><p>Frontend file not found at frontend/index.html</p>", status_code=404)
 
+
+@app.get("/preview/{project_id}", response_class=HTMLResponse)
+def project_preview(project_id: str):
+    """
+    Live interactive deployment preview for the generated product.
+    """
+    from backend.routes.preview_html import render_project_preview_html
+    return HTMLResponse(
+        content=render_project_preview_html(project_id),
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0",
+        },
+    )
+
+
