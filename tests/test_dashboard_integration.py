@@ -130,3 +130,28 @@ def test_pipeline_background_start_and_status():
     missing_res = client.get("/api/requirements/status/job-nonexistent-12345")
     assert missing_res.status_code == 404
 
+
+def test_cloud_deployment_and_rollback():
+    """Verify cloud deployment operations and rollback endpoints."""
+    # 1. Deploy project
+    pid = "proj-deploy-test-123"
+    deploy_res = client.post(f"/api/requirements/deploy/{pid}", json={
+        "target": "cloud_run",
+        "environment": "production"
+    })
+    assert deploy_res.status_code == 200
+    deploy_data = deploy_res.json()
+    assert deploy_data["success"] is True
+    assert deploy_data["status"] == "DEPLOYED"
+    assert "service_url" in deploy_data
+    assert len(deploy_data["logs"]) > 0
+
+    # 2. Rollback deployment
+    rb_res = client.post(f"/api/requirements/rollback/{pid}")
+    assert rb_res.status_code == 200
+    rb_data = rb_res.json()
+    assert rb_data["project_id"] == pid
+    assert rb_data["rollback_status"]["status"] == "SUCCESS"
+    assert len(rb_data["logs"]) > 0
+
+
