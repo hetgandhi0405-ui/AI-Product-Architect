@@ -19,6 +19,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+
 app.include_router(
     requirements.router,
     prefix="/api"
@@ -28,6 +31,11 @@ app.include_router(
     projects.router,
     prefix="/api"
 )
+
+_frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
+if _frontend_dir.exists():
+    app.mount("/frontend", StaticFiles(directory=str(_frontend_dir), html=True), name="frontend")
+
 
 
 @app.get("/health")
