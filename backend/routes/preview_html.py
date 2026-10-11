@@ -748,7 +748,7 @@ def render_project_preview_html(project_id: str, metadata: Optional[Dict[str, An
       const latency = Math.floor(Math.random() * 12 + 8);
       term.innerHTML = `
 <span style="color:#60a5fa;">> ${method} ${endpoint} HTTP/1.1</span>
-<span style="color:#94a3b8;">Host: __PROJECT_ID__.preview.ai-architect.cloud</span>
+<span style="color:#94a3b8;">Host: ${window.location.host}</span>
 <span style="color:#94a3b8;">Accept: application/json</span>
 
 <span style="color:#10b981;">HTTP/1.1 ${method === 'POST' ? '201 Created' : '200 OK'}</span>

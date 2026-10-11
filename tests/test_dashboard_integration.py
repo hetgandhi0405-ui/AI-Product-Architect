@@ -166,4 +166,31 @@ def test_preview_endpoint_serves_interactive_app():
     assert "REST API Console" in res.text
 
 
+def test_pipeline_status_survives_server_reload_memory_wipe():
+    """Verify background job status polling survives uvicorn reload or in-memory cache wipe."""
+    from backend.routes import requirements
+    import time
+    start_res = client.post("/api/requirements/start", json={
+        "description": "Test real-time status resilience under reload",
+        "execution_mode": "TEST"
+    })
+    assert start_res.status_code == 200
+    jid = start_res.json()["job_id"]
+    time.sleep(0.2)
+
+    # Simulate server reload wiping in-memory state
+    with requirements._jobs_lock:
+        requirements._jobs.clear()
+
+    # Poll status after memory wipe
+    st = client.get(f"/api/requirements/status/{jid}")
+    assert st.status_code == 200
+    st_data = st.json()
+    assert st_data["job_id"] == jid
+    assert st_data["status"] in ["queued", "running", "done"]
+    assert "stage" in st_data
+    assert "coverage" in st_data
+
+
+
 

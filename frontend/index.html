@@ -952,7 +952,7 @@
             <div id="deploy-service-link-box" style="display:none; padding:10px 12px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:8px; margin-bottom:12px;">
               <div style="font-size:11px; color:#10b981; font-weight:600; text-transform:uppercase;">Live Service Online</div>
               <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-                <a id="deploy-live-url" href="#" target="_blank" style="color:#60a5fa; font-size:13px; font-family:monospace; text-decoration:none; word-break:break-all;">https://preview.ai-architect.cloud</a>
+                <a id="deploy-live-url" href="#" target="_blank" style="color:#60a5fa; font-size:13px; font-family:monospace; text-decoration:none; word-break:break-all;">Open Live Preview</a>
                 <a id="deploy-open-btn" href="#" target="_blank" class="btn btn-sm btn-outline" style="padding:2px 8px; font-size:11px; margin-left:8px;">Open ↗</a>
               </div>
             </div>
@@ -2141,8 +2141,22 @@ terraform apply -auto-approve</pre>
               const stRes = await fetch(`/api/requirements/status/${jobId}`);
               if (!stRes.ok) {
                 consecutiveFailures++;
-                console.warn(`[Pipeline Poll] Transient HTTP ${stRes.status}, retry ${consecutiveFailures}/6...`);
-                if (consecutiveFailures >= 6) {
+                console.warn(`[Pipeline Poll] Transient HTTP ${stRes.status}, retry ${consecutiveFailures}/30...`);
+                // Attempt state recovery if consecutive failures accumulate
+                if (consecutiveFailures >= 5 && activeProjectId) {
+                  try {
+                    const recRes = await fetch(`/api/projects/${activeProjectId}`);
+                    if (recRes.ok) {
+                      const recData = await recRes.json();
+                      if (recData && (recData.data || recData.code_generation)) {
+                        clearInterval(pollingInterval);
+                        resolve(recData.data || recData);
+                        return;
+                      }
+                    }
+                  } catch (_) {}
+                }
+                if (consecutiveFailures >= 30) {
                   clearInterval(pollingInterval);
                   reject(new Error(`Status check failed with HTTP ${stRes.status}`));
                 }
@@ -2193,8 +2207,8 @@ terraform apply -auto-approve</pre>
               }
             } catch (pollErr) {
               consecutiveFailures++;
-              console.warn(`[Pipeline Poll] Network glitch: ${pollErr.message}, retry ${consecutiveFailures}/6...`);
-              if (consecutiveFailures >= 6) {
+              console.warn(`[Pipeline Poll] Network glitch: ${pollErr.message}, retry ${consecutiveFailures}/30...`);
+              if (consecutiveFailures >= 30) {
                 clearInterval(pollingInterval);
                 reject(pollErr);
               }
@@ -2210,7 +2224,8 @@ terraform apply -auto-approve</pre>
         clearInterval(timerInterval);
         if (pollingInterval) clearInterval(pollingInterval);
         if (overlay) overlay.style.display = 'none';
-        alert('Pipeline Error: ' + err.message);
+        console.error('Pipeline error:', err);
+        showToast('Pipeline notice: ' + (err.message || 'Execution error'), 'error');
         document.getElementById('cur-proj-status').textContent = 'Failed';
         document.getElementById('cur-proj-status').style.background = 'rgba(239, 68, 68, 0.2)';
         document.getElementById('cur-proj-status').style.color = '#ef4444';
@@ -2260,6 +2275,20 @@ terraform apply -auto-approve</pre>
         mm.textContent = diagram;
         try { mermaid.run({ nodes: [mm] }); } catch (e) { mermaid.contentLoaded(); }
       }
+    }
+
+    function resolveServicePreviewUrl(serviceUrl, projId) {
+      const pid = projId || activeProjectId || 'demo';
+      if (!serviceUrl || serviceUrl.includes('preview.ai-architect.cloud')) {
+        return window.location.origin + '/preview/' + pid;
+      }
+      if (serviceUrl.startsWith('/preview/')) {
+        return window.location.origin + serviceUrl;
+      }
+      if (serviceUrl.startsWith('http://') || serviceUrl.startsWith('https://')) {
+        return serviceUrl;
+      }
+      return window.location.origin + '/preview/' + pid;
     }
 
     function applyProjectData(data) {
@@ -2395,8 +2424,7 @@ terraform apply -auto-approve</pre>
       const openBtn = document.getElementById('deploy-open-btn');
       const deployBadge = document.getElementById('deploy-status-badge');
       if (linkBox && liveUrlEl) {
-        const sUrl = data.service_url || `/preview/${activeProjectId}`;
-        const fullServiceUrl = sUrl.startsWith('http') ? sUrl : (window.location.origin + sUrl);
+        const fullServiceUrl = resolveServicePreviewUrl(data.service_url, activeProjectId);
         liveUrlEl.textContent = fullServiceUrl;
         liveUrlEl.href = fullServiceUrl;
         liveUrlEl.target = '_blank';
@@ -2661,7 +2689,7 @@ terraform apply -auto-approve</pre>
             }
             if (linkBox && liveUrlEl) {
               linkBox.style.display = 'block';
-              const fullServiceUrl = (data.service_url || '').startsWith('http') ? data.service_url : (window.location.origin + (data.service_url || `/preview/${activeProjectId}`));
+              const fullServiceUrl = resolveServicePreviewUrl(data.service_url, activeProjectId);
               liveUrlEl.textContent = fullServiceUrl;
               liveUrlEl.href = fullServiceUrl;
               liveUrlEl.target = '_blank';
