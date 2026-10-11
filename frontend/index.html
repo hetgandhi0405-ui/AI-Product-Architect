@@ -2132,16 +2132,22 @@ terraform apply -auto-approve</pre>
         activeProjectId = startData.project_id || jobId;
         document.getElementById('cur-proj-id').textContent = activeProjectId;
 
-        // Poll /api/requirements/status/${jobId} with live artifact streaming
+        // Poll /api/requirements/status/${jobId} with live artifact streaming and resilient retries
+        let consecutiveFailures = 0;
         const result = await new Promise((resolve, reject) => {
           pollingInterval = setInterval(async () => {
             try {
               const stRes = await fetch(`/api/requirements/status/${jobId}`);
               if (!stRes.ok) {
-                clearInterval(pollingInterval);
-                reject(new Error('Status check failed'));
+                consecutiveFailures++;
+                console.warn(`[Pipeline Poll] Transient HTTP ${stRes.status}, retry ${consecutiveFailures}/6...`);
+                if (consecutiveFailures >= 6) {
+                  clearInterval(pollingInterval);
+                  reject(new Error(`Status check failed with HTTP ${stRes.status}`));
+                }
                 return;
               }
+              consecutiveFailures = 0;
               const stData = await stRes.json();
 
               // Update stepper nodes live
@@ -2185,10 +2191,14 @@ terraform apply -auto-approve</pre>
                 reject(new Error(stData.error || 'Pipeline execution failed'));
               }
             } catch (pollErr) {
-              clearInterval(pollingInterval);
-              reject(pollErr);
+              consecutiveFailures++;
+              console.warn(`[Pipeline Poll] Network glitch: ${pollErr.message}, retry ${consecutiveFailures}/6...`);
+              if (consecutiveFailures >= 6) {
+                clearInterval(pollingInterval);
+                reject(pollErr);
+              }
             }
-          }, 1200);
+          }, 1500);
         });
 
         clearInterval(timerInterval);
