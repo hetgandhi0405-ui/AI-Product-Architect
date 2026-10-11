@@ -98,3 +98,35 @@ def test_file_content_endpoint_and_security():
     # 2. Path traversal attack must be blocked with 403 Forbidden
     attack_res = client.get(f"/api/requirements/file-content/{pid}?path=../../etc/passwd")
     assert attack_res.status_code == 403
+
+
+def test_pipeline_background_start_and_status():
+    """Verify non-blocking pipeline startup and status polling endpoints."""
+    # 1. Start pipeline in background
+    payload = {
+        "description": "Build a simple weather dashboard with FastAPI and React",
+        "project_name": "Weather Status Dashboard",
+        "execution_mode": "QUICK",
+    }
+    start_res = client.post("/api/requirements/start", json=payload)
+    assert start_res.status_code == 200
+    start_data = start_res.json()
+    assert "job_id" in start_data
+    assert "stages" in start_data
+    assert start_data["status"] == "queued"
+    job_id = start_data["job_id"]
+
+    # 2. Check initial status
+    status_res = client.get(f"/api/requirements/status/{job_id}")
+    assert status_res.status_code == 200
+    st_data = status_res.json()
+    assert st_data["job_id"] == job_id
+    assert st_data["status"] in ["queued", "running", "done"]
+    assert "stage" in st_data
+    assert "stage_index" in st_data
+    assert st_data["total_stages"] == 8
+
+    # 3. Non-existent job returns 404
+    missing_res = client.get("/api/requirements/status/job-nonexistent-12345")
+    assert missing_res.status_code == 404
+
