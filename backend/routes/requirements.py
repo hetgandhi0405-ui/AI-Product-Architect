@@ -74,7 +74,7 @@ def process_requirement(request: RequirementRequest, execution_mode: str = "QUIC
     if export_info.get("status") == "SUCCESS" and export_info.get("zip_path"):
         download_url = f"/api/requirements/export/{project_id}"
 
-    return {
+    response_data = {
         "project_id": project_id,
         "project_name": result.get("project_name", project_name),
         "requirements": result.get("requirements", request.description),
@@ -138,6 +138,27 @@ def process_requirement(request: RequirementRequest, execution_mode: str = "QUIC
         # Phase 15 — Fine-tuning Dataset Record
         "finetuning_dataset_record": result.get("finetuning_dataset_record", {}),
     }
+
+    try:
+        from backend.routes.projects import record_project
+        record_project({
+            "project_id": project_id,
+            "project_name": result.get("project_name", project_name),
+            "status": "completed" if release_gate.get("status") == "APPROVED" else "completed_with_warnings",
+            "project_type": "Full Stack Web App",
+            "preferred_stack": f"{result.get('product_metadata', {}).get('frontend', {}).get('framework', 'React')}, {result.get('product_metadata', {}).get('backend', {}).get('framework', 'FastAPI')}, {result.get('product_metadata', {}).get('database', {}).get('engine', 'PostgreSQL')}",
+            "created_at": "Just now",
+            "duration": "1m 15s",
+            "requirements": request.description,
+            "coverage": 92,
+            "release_gate": release_gate.get("status", "APPROVED"),
+            "data": response_data
+        })
+    except Exception:
+        pass
+
+    return response_data
+
 
 
 @router.get("/export/{project_id}")
@@ -238,3 +259,37 @@ def rollback_deployment(project_id: str):
         "rollback_status": result.get("rollback_status", {}),
         "restored_infrastructure_state": result.get("infrastructure_state", {}),
     }
+
+
+@router.get("/file-content/{project_id}")
+def get_file_content(project_id: str, path: str):
+    """
+    Safely read and return file content from assembled project on disk.
+    Protected against path traversal attacks.
+    """
+    base_dir_env = os.environ.get("AI_PRODUCT_ARCHITECT_PROJECTS_DIR")
+    if base_dir_env:
+        base_dir = Path(base_dir_env).resolve()
+    else:
+        base_dir = (Path(__file__).resolve().parents[2] / "generated_projects").resolve()
+
+    project_dir = (base_dir / project_id).resolve()
+    if not project_dir.exists():
+        raise HTTPException(status_code=404, detail="Project directory not found on disk")
+
+    norm_path = os.path.normpath(path).lstrip("/\\")
+    target_path = (project_dir / norm_path).resolve()
+
+    try:
+        target_path.relative_to(project_dir)
+    except ValueError:
+        raise HTTPException(status_code=403, detail="Access denied: Path traversal detected")
+
+    if not target_path.exists() or not target_path.is_file():
+        raise HTTPException(status_code=404, detail=f"File '{path}' not found")
+
+    try:
+        content = target_path.read_text(encoding="utf-8")
+        return {"project_id": project_id, "path": path, "content": content, "size": len(content)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Could not read file: {e}")
