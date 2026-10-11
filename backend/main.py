@@ -56,5 +56,13 @@ def generator_ui():
     """
     index_file = _frontend_dir / "index.html"
     if index_file.exists():
-        return HTMLResponse(content=index_file.read_text(encoding="utf-8"))
+        return HTMLResponse(
+            content=index_file.read_text(encoding="utf-8"),
+            headers={
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0",
+            },
+        )
     return HTMLResponse(content="<h1>AI Product Architect</h1><p>Frontend file not found at frontend/index.html</p>", status_code=404)
+

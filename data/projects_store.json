@@ -17148,5 +17148,29 @@
     "duration": "-",
     "coverage": 0,
     "release_gate": "PENDING"
+  },
+  "proj-a283b7d1": {
+    "project_id": "proj-a283b7d1",
+    "project_name": "ZIP Download Test App",
+    "status": "created",
+    "project_type": "Full Stack Web App",
+    "requirements": "Build a task app",
+    "preferred_stack": "React, FastAPI, PostgreSQL",
+    "created_at": "Just now",
+    "duration": "-",
+    "coverage": 0,
+    "release_gate": "PENDING"
+  },
+  "proj-0544087b": {
+    "project_id": "proj-0544087b",
+    "project_name": "File Preview Test App",
+    "status": "created",
+    "project_type": "Full Stack Web App",
+    "requirements": "Build a portal",
+    "preferred_stack": "React, FastAPI, PostgreSQL",
+    "created_at": "Just now",
+    "duration": "-",
+    "coverage": 0,
+    "release_gate": "PENDING"
   }
 }
