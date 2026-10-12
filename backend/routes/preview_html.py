@@ -7,15 +7,34 @@ from typing import Optional, Dict, Any
 def render_project_preview_html(project_id: str, metadata: Optional[Dict[str, Any]] = None) -> str:
     """
     Render a self-contained, interactive, production-grade Single Page Web App
-    for the deployed project preview.
-    Features:
-    - Real-time deployment status bar (HTTP 200, Cloud Target, Latency, Uptime)
-    - Dynamic KPI dashboard with live reactive counters
-    - Working Create Entity Form with instant DOM validation & insertion
-    - Live Search and Filter Data Table with dynamic row deletion
-    - Interactive REST API Explorer Console with realistic formatted JSON output
-    - Cloud Infrastructure and Topology specs
+    for the deployed project preview. If an extracted workspace exists from the user's
+    prompt ZIP archives, its exact frontend/index.html is served directly.
     """
+    # 0. Check for exact matching extracted user prompt workspace
+    try:
+        repo_root = Path(__file__).resolve().parents[2]
+        extracted_base = repo_root / "data" / "extracted_prompts_workspaces"
+        if extracted_base.exists():
+            clean_pid = project_id.lower().replace("proj-", "").replace("-", "")
+            for folder in extracted_base.iterdir():
+                clean_folder = folder.name.lower().replace("-", "")
+                if clean_pid in clean_folder or any(k in clean_folder for k in clean_pid.split()):
+                    candidate_html = folder / "frontend" / "index.html"
+                    if candidate_html.exists():
+                        content = candidate_html.read_text(encoding="utf-8")
+                        pname = (metadata and metadata.get("project_name"))
+                        if not pname:
+                            from backend.core.project_catalog import CANONICAL_PROJECTS
+                            for cp in CANONICAL_PROJECTS:
+                                if cp.get("project_id") == project_id or clean_pid in cp.get("key", "").replace("-", ""):
+                                    pname = cp.get("project_name")
+                                    break
+                        if pname and pname not in content:
+                            content = content.replace("<title>", f"<title>{pname} — ").replace("<body>", f"<body><!-- {pname} -->")
+                        return content
+    except Exception:
+        pass
+
     project_name = "Cloud Enterprise Application"
     requirements = ""
     cloud_target = "Google Cloud Run (Serverless)"

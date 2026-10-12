@@ -1107,8 +1107,11 @@ def preview_project_route(project_id: str):
     """
     Render live interactive cloud preview application for the specified project.
     """
+    from backend.routes.projects import _load_store
+    store = _load_store()
+    meta = store.get(project_id)
     return HTMLResponse(
-        content=render_project_preview_html(project_id),
+        content=render_project_preview_html(project_id, metadata=meta),
         headers={
             "Cache-Control": "no-cache, no-store, must-revalidate",
             "Pragma": "no-cache",

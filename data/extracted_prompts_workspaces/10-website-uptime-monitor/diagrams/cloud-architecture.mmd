@@ -1,0 +1,16 @@
+---
+title: Cloud Architecture — Website Uptime Monitoring
+---
+flowchart LR
+  U[Users / Operations Team] --> CDN[Dashboard CDN / Hosting]
+  CDN --> IDP[Identity and Access]
+  IDP --> APP[Monitor Management Service]
+  APP --> DB[(Managed Monitor Configuration DB)]
+  APP --> Q[Scheduled Check Queue]
+  Q --> WORKERS[Distributed Probe Workers]
+  WORKERS --> TARGETS[External Websites]
+  WORKERS --> RESULTS[Result Ingestion Service]
+  RESULTS --> TS[(Time-Series Results Store)]
+  RESULTS --> ALERT[Alerting / Incident Service]
+  ALERT --> MSG[Email / Chat Notifications]
+  APP --> OBS[Logs, Metrics and Traces]

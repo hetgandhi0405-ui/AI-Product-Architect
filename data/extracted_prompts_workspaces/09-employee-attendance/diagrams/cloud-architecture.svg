@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1620" height="380" viewBox="0 0 1620 380">
+<defs><marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker><linearGradient id="hdr" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f0edff"/><stop offset="100%" stop-color="#e7f1ff"/></linearGradient></defs>
+<rect width="100%" height="100%" fill="#f8fafc"/><text x="28" y="30" font-family="Arial,sans-serif" font-size="21" font-weight="700" fill="#172033">Cloud Architecture — Employee Attendance Management</text>
+<path d="M 134.0 184.0 L 234.0 184.0 L 234.0 184.0 L 258.0 184.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 334.0 184.0 L 434.0 184.0 L 434.0 184.0 L 458.0 184.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 534.0 184.0 L 634.0 184.0 L 634.0 184.0 L 658.0 184.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 734.0 184.0 L 834.0 184.0 L 834.0 184.0 L 858.0 184.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 934.0 184.0 L 1044.0 184.0 L 1044.0 184.0 L 1078.0 184.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 934.0 184.0 L 1044.0 184.0 L 1044.0 274.0 L 1078.0 274.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 1154.0 274.0 L 1254.0 274.0 L 1254.0 274.0 L 1278.0 274.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 1354.0 274.0 L 1459.0 274.0 L 1459.0 274.0 L 1488.0 274.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 934.0 184.0 L 934.0 184.0 L 934.0 334.0 L 858.0 334.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 934.0 184.0 L 1144.0 184.0 L 1144.0 104.0 L 1278.0 104.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 1154.0 184.0 L 1359.0 184.0 L 1359.0 184.0 L 1488.0 184.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<rect x="60" y="158" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="134.0" y="188" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Employees / HR</text>
+<rect x="260" y="158" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="334.0" y="188" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Secure Web Hosting</text>
+<rect x="460" y="158" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="534.0" y="188" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">SSO / Identity</text>
+<rect x="660" y="158" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="734.0" y="188" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Load Balancer</text>
+<rect x="860" y="158" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="934.0" y="188" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Attendance Service</text>
+<rect x="1080" y="158" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="1154.0" y="188" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">HR Database</text>
+<rect x="1080" y="248" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="1154.0" y="278" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Event Queue</text>
+<rect x="1280" y="248" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="1354.0" y="270" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d"><tspan x="1354.0" dy="0">Policy / Export</tspan><tspan x="1354.0" dy="15">Worker</tspan></text>
+<rect x="1490" y="248" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="1564.0" y="270" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d"><tspan x="1564.0" dy="0">Payroll / HR</tspan><tspan x="1564.0" dy="15">Systems</tspan></text>
+<rect x="860" y="308" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="934.0" y="330" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d"><tspan x="934.0" dy="0">Private Document</tspan><tspan x="934.0" dy="15">Store</tspan></text>
+<rect x="1280" y="78" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="1354.0" y="108" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Audit Logs</text>
+<rect x="1490" y="158" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="1564.0" y="188" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Backup / Recovery</text>
+<text x="28" y="362" font-family="Arial,sans-serif" font-size="11" fill="#64748b">Conceptual cloud design · Provider-neutral services · Production deployment requires configuration</text></svg>

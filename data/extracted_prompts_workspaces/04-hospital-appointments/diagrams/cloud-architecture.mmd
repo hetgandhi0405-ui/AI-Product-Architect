@@ -1,0 +1,16 @@
+---
+title: Cloud Architecture — Hospital Appointment Management
+---
+flowchart LR
+  P[Patients and Staff] --> CDN[Secure Web Hosting]
+  CDN --> WAF[WAF and Identity / MFA]
+  WAF --> LB[Private Application Load Balancer]
+  LB --> APP[Appointment Scheduling Service]
+  APP --> DB[(Encrypted Managed Database)]
+  APP --> CACHE[Managed Cache]
+  APP --> Q[Scheduling Event Queue]
+  Q --> WORKER[Reminder Worker]
+  WORKER --> MSG[SMS / Email Provider]
+  APP --> VAULT[Secrets Manager / KMS]
+  APP --> AUDIT[Immutable Audit Logs]
+  DB --> BACKUP[Encrypted Backups / Recovery]

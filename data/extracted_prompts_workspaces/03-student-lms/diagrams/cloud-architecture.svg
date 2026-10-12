@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1610" height="410" viewBox="0 0 1610 410">
+<defs><marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker><linearGradient id="hdr" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f0edff"/><stop offset="100%" stop-color="#e7f1ff"/></linearGradient></defs>
+<rect width="100%" height="100%" fill="#f8fafc"/><text x="28" y="30" font-family="Arial,sans-serif" font-size="21" font-weight="700" fill="#172033">Cloud Architecture — Student Learning Management System</text>
+<path d="M 144.0 184.0 L 244.0 184.0 L 244.0 184.0 L 268.0 184.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 344.0 184.0 L 444.0 184.0 L 444.0 184.0 L 468.0 184.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 544.0 184.0 L 644.0 184.0 L 644.0 184.0 L 668.0 184.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 744.0 184.0 L 844.0 184.0 L 844.0 184.0 L 868.0 184.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 944.0 184.0 L 1049.0 184.0 L 1049.0 184.0 L 1078.0 184.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 944.0 184.0 L 1049.0 184.0 L 1049.0 94.0 L 1078.0 94.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 1154.0 94.0 L 749.0 94.0 L 749.0 184.0 L 268.0 184.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 944.0 184.0 L 1049.0 184.0 L 1049.0 274.0 L 1078.0 274.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 1154.0 274.0 L 1254.0 274.0 L 1254.0 274.0 L 1278.0 274.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 1354.0 274.0 L 1454.0 274.0 L 1454.0 274.0 L 1478.0 274.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 944.0 184.0 L 1149.0 184.0 L 1149.0 104.0 L 1278.0 104.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 944.0 184.0 L 1249.0 184.0 L 1249.0 184.0 L 1478.0 184.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 1154.0 184.0 L 1254.0 184.0 L 1254.0 364.0 L 1278.0 364.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<rect x="70" y="158" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="144.0" y="180" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d"><tspan x="144.0" dy="0">Students /</tspan><tspan x="144.0" dy="15">Instructors</tspan></text>
+<rect x="270" y="158" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="344.0" y="188" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">CDN / Web Hosting</text>
+<rect x="470" y="158" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="544.0" y="188" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Identity / Access</text>
+<rect x="670" y="158" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="744.0" y="188" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Load Balancer</text>
+<rect x="870" y="158" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="944.0" y="188" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">LMS Services</text>
+<rect x="1080" y="158" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="1154.0" y="180" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d"><tspan x="1154.0" dy="0">Course / Enrollment</tspan><tspan x="1154.0" dy="15">DB</tspan></text>
+<rect x="1080" y="68" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="1154.0" y="90" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d"><tspan x="1154.0" dy="0">Learning Media</tspan><tspan x="1154.0" dy="15">Storage</tspan></text>
+<rect x="1080" y="248" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="1154.0" y="278" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Processing Queue</text>
+<rect x="1280" y="248" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="1354.0" y="278" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Worker Services</text>
+<rect x="1480" y="248" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="1554.0" y="278" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Notifications</text>
+<rect x="1280" y="78" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="1354.0" y="108" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Cache</text>
+<rect x="1480" y="158" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="1554.0" y="188" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Monitoring / Audit</text>
+<rect x="1280" y="338" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="1354.0" y="368" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Backup / Recovery</text>
+<text x="28" y="392" font-family="Arial,sans-serif" font-size="11" fill="#64748b">Conceptual cloud design · Provider-neutral services · Production deployment requires configuration</text></svg>

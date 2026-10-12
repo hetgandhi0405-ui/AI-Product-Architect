@@ -1,0 +1,17 @@
+---
+title: Cloud Architecture — Task Management Platform
+---
+flowchart LR
+  U[Users / Team Members] --> CDN[Cloud CDN]
+  CDN --> WEB[Static Web App Hosting]
+  WEB --> WAF[WAF and Identity Provider]
+  WAF --> LB[Application Load Balancer]
+  LB --> APP[Containerized Task Service]
+  APP --> CACHE[Managed Cache]
+  APP --> DB[(Managed Relational Database)]
+  APP --> Q[Managed Queue]
+  Q --> WORKER[Background Notification Worker]
+  WORKER --> MAIL[Email / Notification Service]
+  APP --> OBJ[Object Storage for Attachments]
+  APP --> OBS[Logs, Metrics and Traces]
+  DB --> BACKUP[Automated Backups]

@@ -1,0 +1,6 @@
+flowchart TD
+ Browser --> Routes[FastAPI routes]
+ Routes --> Validation[Pydantic validation]
+ Validation --> Domain[Domain operations]
+ Domain --> Store[In-memory store]
+ Routes --> Health[Health endpoint]

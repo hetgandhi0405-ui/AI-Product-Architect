@@ -1,0 +1,17 @@
+---
+title: Cloud Architecture — Student Learning Management System
+---
+flowchart LR
+  S[Students and Instructors] --> CDN[CDN / Web Hosting]
+  CDN --> IDP[Identity and Access Management]
+  IDP --> LB[Application Load Balancer]
+  LB --> APP[LMS Application Services]
+  APP --> DB[(Managed Course / Enrollment DB)]
+  APP --> MEDIA[Object Storage for Learning Media]
+  MEDIA --> CDN
+  APP --> Q[Assignment Processing Queue]
+  Q --> WORKER[Grading / Notification Workers]
+  WORKER --> MSG[Email / Learning Notifications]
+  APP --> CACHE[Managed Cache]
+  APP --> OBS[Monitoring and Audit Logs]
+  DB --> BACKUP[Backups and Recovery]

@@ -1,0 +1,35 @@
+openapi: 3.1.0
+info:
+  title: Customer Support Ticketing System API
+  version: 0.1.0
+servers:
+  - url: http://127.0.0.1:8000
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: Service available
+  /tickets:
+    get:
+      summary: List ticket records
+      responses:
+        "200":
+          description: Records returned
+    post:
+      summary: Create ticket record
+      responses:
+        "201":
+          description: Record created
+  /comments:
+    get:
+      summary: List comment records
+      responses:
+        "200":
+          description: Records returned
+    post:
+      summary: Create comment record
+      responses:
+        "201":
+          description: Record created

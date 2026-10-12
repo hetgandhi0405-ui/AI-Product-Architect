@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="375" viewBox="0 0 1500 375">
+<defs><marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker><linearGradient id="hdr" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f0edff"/><stop offset="100%" stop-color="#e7f1ff"/></linearGradient></defs>
+<rect width="100%" height="100%" fill="#f8fafc"/><text x="28" y="30" font-family="Arial,sans-serif" font-size="21" font-weight="700" fill="#172033">Cloud Architecture — Task Management Platform</text>
+<path d="M 134.0 184.0 L 224.0 184.0 L 224.0 184.0 L 238.0 184.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 314.0 184.0 L 404.0 184.0 L 404.0 184.0 L 418.0 184.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 494.0 184.0 L 584.0 184.0 L 584.0 184.0 L 598.0 184.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 674.0 184.0 L 764.0 184.0 L 764.0 184.0 L 778.0 184.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 854.0 184.0 L 944.0 184.0 L 944.0 184.0 L 958.0 184.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 1034.0 184.0 L 1134.0 184.0 L 1134.0 109.0 L 1158.0 109.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 1034.0 184.0 L 1134.0 184.0 L 1134.0 184.0 L 1158.0 184.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 1034.0 184.0 L 1134.0 184.0 L 1134.0 259.0 L 1158.0 259.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 1234.0 259.0 L 1339.0 259.0 L 1339.0 259.0 L 1368.0 259.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 1034.0 184.0 L 1034.0 184.0 L 1034.0 329.0 L 958.0 329.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 1034.0 184.0 L 1239.0 184.0 L 1239.0 184.0 L 1368.0 184.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<path d="M 1234.0 184.0 L 1339.0 184.0 L 1339.0 109.0 L 1368.0 109.0" fill="none" stroke="#94a3b8" stroke-width="1.7" marker-end="url(#arrow)" opacity=".9"/>
+<rect x="60" y="158" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="134.0" y="180" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d"><tspan x="134.0" dy="0">Users / Team</tspan><tspan x="134.0" dy="15">Members</tspan></text>
+<rect x="240" y="158" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="314.0" y="188" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Cloud CDN</text>
+<rect x="420" y="158" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="494.0" y="188" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Static Web Hosting</text>
+<rect x="600" y="158" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="674.0" y="188" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">WAF + Identity</text>
+<rect x="780" y="158" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="854.0" y="188" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Load Balancer</text>
+<rect x="960" y="158" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="1034.0" y="188" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Task Service</text>
+<rect x="1160" y="83" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="1234.0" y="113" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Managed Cache</text>
+<rect x="1160" y="158" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="1234.0" y="188" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Relational DB</text>
+<rect x="1160" y="233" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="1234.0" y="263" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Queue + Worker</text>
+<rect x="1370" y="233" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="1444.0" y="263" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Notifications</text>
+<rect x="960" y="303" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="1034.0" y="333" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Object Storage</text>
+<rect x="1370" y="158" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="1444.0" y="188" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Logs / Metrics</text>
+<rect x="1370" y="83" width="148" height="52" rx="10" fill="url(#hdr)" stroke="#b9c7df" stroke-width="1.2"/>
+<text x="1444.0" y="113" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#24334d">Backups</text>
+<text x="28" y="357" font-family="Arial,sans-serif" font-size="11" fill="#64748b">Conceptual cloud design · Provider-neutral services · Production deployment requires configuration</text></svg>

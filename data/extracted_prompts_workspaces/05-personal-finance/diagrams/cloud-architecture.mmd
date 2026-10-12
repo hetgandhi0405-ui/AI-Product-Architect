@@ -1,0 +1,16 @@
+---
+title: Cloud Architecture — Personal Finance Tracker
+---
+flowchart LR
+  U[Users] --> CDN[CDN / Frontend Hosting]
+  CDN --> WAF[WAF and Identity / MFA]
+  WAF --> LB[Application Load Balancer]
+  LB --> APP[Finance Application Service]
+  APP --> DB[(Encrypted Transaction Database)]
+  APP --> CACHE[Managed Cache]
+  APP --> Q[Import / Report Queue]
+  Q --> WORKER[Statement and Budget Worker]
+  WORKER --> OBJ[Private Document Storage]
+  APP --> KMS[Key Management Service]
+  APP --> AUDIT[Security Audit Logs]
+  DB --> BACKUP[Encrypted Backups]

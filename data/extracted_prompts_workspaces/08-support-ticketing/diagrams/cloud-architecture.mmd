@@ -1,0 +1,15 @@
+---
+title: Cloud Architecture — Customer Support Ticketing
+---
+flowchart LR
+  C[Customers and Agents] --> CDN[Web App Hosting / CDN]
+  CDN --> WAF[WAF and Identity Provider]
+  WAF --> LB[Application Load Balancer]
+  LB --> APP[Ticketing Application]
+  APP --> DB[(Managed Ticket Database)]
+  APP --> SEARCH[Managed Search Index]
+  APP --> Q[Ticket Event Queue]
+  Q --> WORKER[Assignment / SLA Worker]
+  WORKER --> MSG[Email / In-App Notifications]
+  APP --> OBJ[Private Attachment Storage]
+  APP --> OBS[Audit Logs and Monitoring]
