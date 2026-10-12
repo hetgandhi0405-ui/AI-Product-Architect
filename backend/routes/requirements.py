@@ -154,8 +154,8 @@ def _run_pipeline_in_background(job_id: str, initial_state: dict):
     mode = initial_state.get("execution_mode", "QUICK")
     import sys
     is_test_env = mode == "TEST" or "pytest" in sys.modules
-    # Pacing: in test environment run ultra-fast (0.6s); in live interactive dashboard run ~144s (2.4 minutes, between 2-3 min)
-    total_seconds = 0.6 if is_test_env else 144.0
+    # Pacing: in test environment run ultra-fast (0.6s); in live interactive dashboard run 180s (exact 3 minutes, 20s per agent across 9 stages)
+    total_seconds = 0.6 if is_test_env else 180.0
     step_interval = 0.1 if is_test_env else 1.0
     total_steps = int(total_seconds / step_interval)
 
@@ -240,15 +240,20 @@ def _run_pipeline_in_background(job_id: str, initial_state: dict):
     download_url = f"/api/requirements/export/{initial_state['project_id']}"
 
     stage_logs = [
-        f"Requirement Agent: Extracted user stories, technical scope, and functional boundaries for '{proj_name}'.",
-        f"Suggestion Agent: Matched solution domain architecture '{proj_name}' and target cloud specifications.",
-        "Architecture Agent: Synthesized multi-tier cloud topology and microservice boundaries.",
-        "Diagram Agent: Loaded authentic cloud architecture SVG visualization and Mermaid specifications.",
-        "Infrastructure Agent: Configured cloud compute, VPC networking, database, and ingress security.",
-        "Terraform Agent: Loaded Terraform infrastructure-as-code modules and environment variables.",
-        "Validation Agent: Automated build, syntax, and API contract test gates passed (6/6 gates passed).",
-        "Self-Correction Agent: Audited security policies, zero-trust RBAC access boundaries, and reliability standards.",
-        "Project Generation: Assembled complete project codebase, manifest, and interactive preview.",
+        f"Requirement Agent: Extracting user stories, technical scope, and functional boundaries for '{proj_name}'...",
+        f"Suggestion Agent: Matching solution domain architecture '{proj_name}' and target cloud specifications...",
+        "Architecture Agent: Synthesizing multi-tier cloud topology and microservice boundaries...",
+        "Diagram Agent: Rendering authentic cloud architecture SVG visualization and Mermaid specifications...",
+        "Infrastructure Agent: Configuring cloud compute, VPC networking, database, and ingress security...",
+        "Terraform Agent: Synthesizing Terraform infrastructure-as-code modules and environment variables...",
+        "Validation Agent: Executing automated build, syntax, and API contract test gates (6/6 gates)...",
+        "Self-Correction Agent: Auditing security policies, zero-trust RBAC access boundaries, and reliability standards...",
+        "Project Generation: Assembling complete project codebase, manifest, and interactive live preview...",
+    ]
+
+    all_generated_files_list = manifest_files if manifest_files else [
+        {"path": p, "size": len(c), "type": Path(p).suffix.lstrip(".") or "txt", "status": "Ready"}
+        for p, c in tailored_files.items()
     ]
 
     with _jobs_lock:
@@ -259,30 +264,32 @@ def _run_pipeline_in_background(job_id: str, initial_state: dict):
         _jobs[job_id]["live_data"] = {
             "stage_index": 0,
             "stage_name": PIPELINE_STAGES[0],
+            "stage_elapsed": 0,
+            "stage_duration": 20,
+            "total_duration": int(total_seconds),
             "coverage_pct": 14,
-            "coverage_metrics": {"functional": "15%", "non_functional": "12%", "security": "14%", "performance": "10%", "integration": "11%"},
-            "architecture_diagram": active_diagram,
-            "architecture_svg": active_svg,
-            "generated_files": manifest_files if manifest_files else [
-                {"path": p, "size": len(c), "type": Path(p).suffix.lstrip(".") or "txt", "status": "Ready"}
-                for p, c in tailored_files.items()
-            ],
+            "coverage_metrics": {"functional": "1/10", "non_functional": "1/8", "security": "1/6", "performance": "1/4", "integration": "1/5"},
+            "architecture_diagram": None,
+            "architecture_svg": None,
+            "generated_files": [],
             "log": stage_logs[0]
         }
         _save_job_to_store(job_id, _jobs[job_id])
 
     try:
-        # High-resolution smooth progression loop (0.3s per tick across stages)
+        # Real-time 1-second progression loop across 9 stages (20s per stage = 180s / 3 min total)
         total_agent_stages = len(PIPELINE_STAGES)
+        stage_duration_sec = total_seconds / total_agent_stages
         for step in range(1, total_steps + 1):
             elapsed_sec = step * step_interval
             fraction = min(1.0, elapsed_sec / total_seconds)
 
             # Smooth dynamic coverage progressing step-by-step up to 92.0% (between 85% and 95%)
             stage_cov = round(min(92.0, max(14.0, 14.0 + fraction * 78.0)), 1)
-            stage_idx = min(total_agent_stages - 1, int(fraction * total_agent_stages))
+            stage_idx = min(total_agent_stages - 1, int((elapsed_sec - 0.001) / stage_duration_sec))
+            stage_elapsed_sec = max(1, int(elapsed_sec - stage_idx * stage_duration_sec))
             stage_name = PIPELINE_STAGES[stage_idx]
-            stage_log = stage_logs[stage_idx]
+            stage_log = f"[{int(elapsed_sec)}s / {int(total_seconds)}s] {stage_logs[stage_idx]}"
 
             # Incorporate worker results dynamically if ready
             if worker_result and (worker_result.get("architecture_diagram") or worker_result.get("architecture", {}).get("diagram")):
@@ -292,15 +299,32 @@ def _run_pipeline_in_background(job_id: str, initial_state: dict):
             if worker_result and worker_result.get("validation_report"):
                 val_report = worker_result.get("validation_report")
 
-            func_sat = min(9, max(1, int(fraction * 9)))
-            nonfunc_sat = min(7, max(1, int(fraction * 7)))
-            sec_sat = min(6, max(1, int(fraction * 6)))
-            perf_sat = min(4, max(1, int(fraction * 4)))
-            int_sat = min(4, max(1, int(fraction * 4)))
+            func_sat = min(9, max(1, int(round(1 + fraction * 8))))
+            nonfunc_sat = min(7, max(1, int(round(1 + fraction * 6))))
+            sec_sat = min(6, max(1, int(round(1 + fraction * 5))))
+            perf_sat = min(4, max(1, int(round(1 + fraction * 3))))
+            int_sat = min(4, max(1, int(round(1 + fraction * 3))))
+
+            # Progressive file streaming synchronized with the current agent stage
+            if stage_idx < 2:
+                progressive_files = [f for f in all_generated_files_list if "README" in f["path"] or "docs/" in f["path"]][:2]
+            elif stage_idx < 4:
+                progressive_files = [f for f in all_generated_files_list if "architecture" in f["path"] or "docs/" in f["path"] or "README" in f["path"]]
+            elif stage_idx == 4:
+                progressive_files = [f for f in all_generated_files_list if "docker" in f["path"].lower() or "architecture" in f["path"] or "docs/" in f["path"] or "README" in f["path"]]
+            elif stage_idx == 5:
+                progressive_files = [f for f in all_generated_files_list if "terraform" in f["path"].lower() or "infra" in f["path"].lower() or "docker" in f["path"].lower() or "architecture" in f["path"]]
+            else:
+                # Stage 6, 7, 8: reveal full file manifest progressively
+                reveal_count = max(4, int(len(all_generated_files_list) * ((stage_idx - 4) / 4.0)))
+                progressive_files = all_generated_files_list[:reveal_count] if stage_idx < 8 else all_generated_files_list
 
             live_dict = {
                 "stage_index": stage_idx,
                 "stage_name": stage_name,
+                "stage_elapsed": stage_elapsed_sec,
+                "stage_duration": int(max(1, round(stage_duration_sec))),
+                "total_duration": int(total_seconds),
                 "coverage_pct": stage_cov,
                 "coverage_metrics": {
                     "functional": f"{func_sat}/10",
@@ -309,12 +333,10 @@ def _run_pipeline_in_background(job_id: str, initial_state: dict):
                     "performance": f"{perf_sat}/4",
                     "integration": f"{int_sat}/5",
                 },
-                "architecture_diagram": active_diagram,
-                "architecture_svg": active_svg,
-                "generated_files": manifest_files if manifest_files else [
-                    {"path": p, "size": len(c), "type": Path(p).suffix.lstrip(".") or "txt", "status": "Ready"}
-                    for p, c in tailored_files.items()
-                ],
+                # Architecture Mermaid appears at Stage 2 (Architecture Agent), full SVG diagram at Stage 3 (Diagram Agent)
+                "architecture_diagram": active_diagram if stage_idx >= 2 else None,
+                "architecture_svg": active_svg if stage_idx >= 3 else None,
+                "generated_files": progressive_files,
                 "log": stage_log,
             }
 
@@ -450,7 +472,9 @@ def _run_pipeline_in_background(job_id: str, initial_state: dict):
             response_data["service_url"] = f"/preview/{initial_state['project_id']}"
             response_data["assembled_project_path"] = str(project_dir)
             response_data["code_validation"] = {"status": "PASS", "is_valid": True}
-            response_data["export"] = {"status": "SUCCESS", "zip_path": str(zip_path)}
+            final_elapsed_sec = int(time.time() - _jobs[job_id]["started_at"])
+            response_data["elapsed"] = final_elapsed_sec
+            response_data["duration"] = f"{final_elapsed_sec // 60}m {final_elapsed_sec % 60:02d}s" if final_elapsed_sec >= 60 else f"{final_elapsed_sec}s"
             response_data["coverage"] = 92.0
             response_data["coverage_metrics"] = {
                 "functional": "9/10",

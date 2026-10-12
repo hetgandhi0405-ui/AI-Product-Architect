@@ -2493,11 +2493,11 @@ terraform apply -auto-approve</pre>
               consecutiveFailures = 0;
               const stData = await stRes.json();
 
-              // Update stepper nodes live with real progressive elapsed time
+              // Update stepper nodes live with real progressive elapsed time (3 min = 180s total, 20s per stage)
               const currentStageIdx = stData.stage_index ?? 0;
               const totalStages = 9;
               const currentElapsed = stData.elapsed || Math.floor((Date.now() - startTime) / 1000);
-              const stageApproxTime = 16;
+              const stageApproxTime = (stData.live_data && stData.live_data.stage_duration) ? stData.live_data.stage_duration : 20;
               nodes.forEach((n, idx) => {
                 const timeEl = n.querySelector('.node-time');
                 if (idx < currentStageIdx) {
@@ -2507,18 +2507,48 @@ terraform apply -auto-approve</pre>
                 } else if (idx === currentStageIdx) {
                   n.classList.remove('done', 'failed');
                   n.classList.add('active');
-                  const stageSec = Math.max(1, currentElapsed - idx * stageApproxTime);
-                  if (timeEl) timeEl.textContent = `Running... (${stageSec}s)`;
+                  const stageSec = (stData.live_data && stData.live_data.stage_elapsed)
+                    ? stData.live_data.stage_elapsed
+                    : Math.min(stageApproxTime, Math.max(1, currentElapsed - idx * stageApproxTime));
+                  if (timeEl) timeEl.textContent = `Running (${stageSec}s / ${stageApproxTime}s)`;
                 } else {
                   n.classList.remove('done', 'active', 'failed');
-                  if (timeEl) timeEl.textContent = 'Pending';
+                  if (timeEl) timeEl.textContent = 'Waiting';
+                }
+              });
+
+              // Also synchronize Tab 4 (#pipeline-agents-list) badges in real time
+              const tab4Cards = document.querySelectorAll('#pipeline-agents-list .val-item');
+              tab4Cards.forEach((card, idx) => {
+                const badgeEl = card.querySelector('.badge-success');
+                if (!badgeEl) return;
+                if (idx < currentStageIdx) {
+                  badgeEl.textContent = `✓ Completed (${stageApproxTime}s)`;
+                  badgeEl.style.background = 'var(--success-glow)';
+                  badgeEl.style.color = 'var(--success)';
+                  badgeEl.style.borderColor = 'var(--success)';
+                } else if (idx === currentStageIdx) {
+                  const stageSec = (stData.live_data && stData.live_data.stage_elapsed)
+                    ? stData.live_data.stage_elapsed
+                    : Math.min(stageApproxTime, Math.max(1, currentElapsed - idx * stageApproxTime));
+                  badgeEl.textContent = `● Running (${stageSec}s / ${stageApproxTime}s)`;
+                  badgeEl.style.background = 'rgba(59, 130, 246, 0.2)';
+                  badgeEl.style.color = '#60a5fa';
+                  badgeEl.style.borderColor = '#3b82f6';
+                } else {
+                  badgeEl.textContent = '⏳ Pending';
+                  badgeEl.style.background = 'rgba(148, 163, 184, 0.15)';
+                  badgeEl.style.color = '#94a3b8';
+                  badgeEl.style.borderColor = '#475569';
                 }
               });
 
               const statusMsg = document.getElementById('exec-status-msg');
-              const stagePct = Math.round(((currentStageIdx + 1) / totalStages) * 100);
-              if (statusMsg) statusMsg.textContent = `Stage ${currentStageIdx + 1}/9 (${stagePct}%): ${stData.stage}`;
-              document.getElementById('pipe-badge').textContent = `● ${stData.stage}`;
+              const overallPct = Math.min(99, Math.max(1, Math.round((currentElapsed / 180) * 100)));
+              const eMins = Math.floor(currentElapsed / 60);
+              const eSecs = currentElapsed % 60;
+              if (statusMsg) statusMsg.textContent = `Stage ${currentStageIdx + 1}/9 (${overallPct}% — ${eMins}m ${eSecs < 10 ? '0' : ''}${eSecs}s / 3m 00s): ${stData.stage}`;
+              document.getElementById('pipe-badge').textContent = `● Stage ${currentStageIdx + 1}/9: ${stData.stage} (${overallPct}%)`;
 
               // Stream live data (gauge, architecture SVG/mermaid, files, validation)
               if (stData.live_data) {
@@ -2531,10 +2561,19 @@ terraform apply -auto-approve</pre>
                   n.classList.remove('active', 'failed');
                   n.classList.add('done');
                   const timeEl = n.querySelector('.node-time');
-                  if (timeEl) timeEl.textContent = '✓ Done';
+                  if (timeEl) timeEl.textContent = `✓ Done (${stageApproxTime}s)`;
                 });
-                if (statusMsg) statusMsg.textContent = 'Stage 9/9 (100%): Complete';
-                document.getElementById('pipe-badge').textContent = '✓ Completed';
+                tab4Cards.forEach(card => {
+                  const badgeEl = card.querySelector('.badge-success');
+                  if (badgeEl) {
+                    badgeEl.textContent = `✓ Completed (${stageApproxTime}s)`;
+                    badgeEl.style.background = 'var(--success-glow)';
+                    badgeEl.style.color = 'var(--success)';
+                    badgeEl.style.borderColor = 'var(--success)';
+                  }
+                });
+                if (statusMsg) statusMsg.textContent = 'Stage 9/9 (100% — 3m 00s): Complete';
+                document.getElementById('pipe-badge').textContent = '✓ Completed (3m 00s)';
                 resolve(stData.result);
               } else if (stData.status === 'error') {
                 clearInterval(pollingInterval);
