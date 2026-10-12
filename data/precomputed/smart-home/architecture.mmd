@@ -1,0 +1,28 @@
+flowchart TD
+  subgraph IoT Hardware & Edge
+    DEV1["Smart Thermostats"]
+    DEV2["Environmental Air Sensors"]
+    DEV3["Smart Energy Plugs"]
+  end
+
+  subgraph Edge Protocols & Gateway
+    MQTT["MQTT Broker / IoT Core Gateway"]
+    HTTPS["Ingress API Gateway (HTTPS)"]
+  end
+
+  subgraph Ingestion & Processing
+    API["Smart Home Dashboard Ingestion Engine"]
+    RULE_ENG["Threshold Alert Rule Evaluator"]
+  end
+
+  subgraph Storage Tier
+    TS_DB[("PostgreSQL Time-Series Tables")]
+    ALERTS[("Alert Notification Queue")]
+  end
+
+  DEV1 --> MQTT --> API
+  DEV2 --> HTTPS --> API
+  DEV3 --> MQTT --> API
+  API --> RULE_ENG
+  API --> TS_DB
+  RULE_ENG --> ALERTS

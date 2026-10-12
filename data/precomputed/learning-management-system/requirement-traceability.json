@@ -1,0 +1,149 @@
+{
+  "coverage_percent": 100.0,
+  "metrics": {
+    "functional": "4/4",
+    "non_functional": "1/1",
+    "security": "1/1",
+    "performance": "1/1",
+    "integration": "1/1"
+  },
+  "total_requirements": 5,
+  "satisfied": 5,
+  "matrix": [
+    {
+      "req_id": "REQ-001",
+      "title": "Course Curriculum Management",
+      "description": "Instructors can create courses and students can browse course syllabi",
+      "type": "functional",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Courses list with codes and credits",
+        "Instructors can author new courses"
+      ],
+      "implemented_files": [
+        "backend/routes/courses.py",
+        "backend/models/course.py",
+        "frontend/src/App.jsx"
+      ],
+      "related_apis": [
+        "/api/courses"
+      ],
+      "related_models": [
+        "Course"
+      ],
+      "tests": [
+        "test_list_courses",
+        "test_create_course"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-002",
+      "title": "Student Course Enrollment",
+      "description": "Students can enroll in available courses and view active enrollments",
+      "type": "functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Enrollment records student and course IDs",
+        "Prevents duplicate active enrollments"
+      ],
+      "implemented_files": [
+        "backend/routes/courses.py",
+        "backend/models/course.py"
+      ],
+      "related_apis": [
+        "/api/courses/{course_id}/enroll"
+      ],
+      "related_models": [
+        "Enrollment"
+      ],
+      "tests": [
+        "test_enroll_course"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-003",
+      "title": "Assignment Submission & Grading",
+      "description": "Students upload homework submissions and instructors assign numerical grades",
+      "type": "functional",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Submission records timestamp",
+        "Grading route updates grade and status"
+      ],
+      "implemented_files": [
+        "backend/routes/submissions.py",
+        "backend/models/course.py"
+      ],
+      "related_apis": [
+        "/api/assignments",
+        "/api/submissions",
+        "/api/submissions/{submission_id}/grade"
+      ],
+      "related_models": [
+        "Assignment",
+        "Submission"
+      ],
+      "tests": [
+        "test_grade_submission"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-004",
+      "title": "Student Learning Dashboard",
+      "description": "Interactive React dashboard showcasing enrolled classes, upcoming deadlines, and GPA/grades",
+      "type": "functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Card-based course catalog",
+        "Assignment submission modal",
+        "Live grade calculation"
+      ],
+      "implemented_files": [
+        "frontend/src/App.jsx"
+      ],
+      "related_apis": [
+        "/api/courses",
+        "/api/assignments"
+      ],
+      "related_models": [
+        "Course",
+        "Submission"
+      ],
+      "tests": [
+        "test_health"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-005",
+      "title": "Relational Data Integrity",
+      "description": "PostgreSQL relational schemas with foreign key relationships linking students to assignments",
+      "type": "non_functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Cascade on delete for course enrollments",
+        "Composite indexing on enrollments"
+      ],
+      "implemented_files": [
+        "database/schema.sql",
+        "backend/models/course.py"
+      ],
+      "related_apis": [
+        "/api/courses"
+      ],
+      "related_models": [
+        "Course",
+        "Enrollment",
+        "Assignment",
+        "Submission"
+      ],
+      "tests": [
+        "test_list_courses"
+      ],
+      "status": "SATISFIED"
+    }
+  ]
+}

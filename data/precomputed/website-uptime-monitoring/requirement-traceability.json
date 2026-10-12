@@ -1,0 +1,145 @@
+{
+  "coverage_percent": 100.0,
+  "metrics": {
+    "functional": "4/4",
+    "non_functional": "1/1",
+    "security": "1/1",
+    "performance": "1/1",
+    "integration": "1/1"
+  },
+  "total_requirements": 5,
+  "satisfied": 5,
+  "matrix": [
+    {
+      "req_id": "REQ-001",
+      "title": "Endpoint Target Configuration",
+      "description": "Configure URLs to monitor with check interval, timeout limit, and expected HTTP status",
+      "type": "functional",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Monitor registers URL and interval",
+        "Active flag toggles scheduler checks"
+      ],
+      "implemented_files": [
+        "backend/routes/monitors.py",
+        "backend/models/monitor.py",
+        "frontend/src/App.jsx"
+      ],
+      "related_apis": [
+        "/api/monitors"
+      ],
+      "related_models": [
+        "MonitoredUrl"
+      ],
+      "tests": [
+        "test_list_monitors",
+        "test_create_monitor"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-002",
+      "title": "Synthetic Probe Execution & Latency Tracking",
+      "description": "Perform periodic HTTP probes measuring response time in milliseconds and availability",
+      "type": "functional",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Probe records response_time_ms",
+        "Marks is_up=False when status code does not match"
+      ],
+      "implemented_files": [
+        "backend/routes/monitors.py",
+        "backend/models/monitor.py"
+      ],
+      "related_apis": [
+        "/api/monitors/{monitor_id}/check"
+      ],
+      "related_models": [
+        "UptimeCheck"
+      ],
+      "tests": [
+        "test_trigger_probe"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-003",
+      "title": "Incident Detection & Outage Logging",
+      "description": "Automatically open incident records upon probe failures and log root cause analysis",
+      "type": "functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Outages recorded with started_at timestamp",
+        "Resolved timestamp logged on recovery"
+      ],
+      "implemented_files": [
+        "backend/routes/monitors.py",
+        "backend/models/monitor.py"
+      ],
+      "related_apis": [
+        "/api/incidents"
+      ],
+      "related_models": [
+        "Incident"
+      ],
+      "tests": [
+        "test_list_incidents"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-004",
+      "title": "Public Status Page & KPI UI",
+      "description": "Interactive React dashboard showcasing 99.99% uptime badges, latency charts, and ping buttons",
+      "type": "functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Status pills (Operational / Degraded / Down)",
+        "Instant probe trigger action",
+        "Uptime calculation"
+      ],
+      "implemented_files": [
+        "frontend/src/App.jsx"
+      ],
+      "related_apis": [
+        "/api/monitors",
+        "/api/uptime/metrics"
+      ],
+      "related_models": [
+        "MonitoredUrl",
+        "UptimeCheck"
+      ],
+      "tests": [
+        "test_health"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-005",
+      "title": "Time-Series Health Check Indexes",
+      "description": "PostgreSQL indexing on checked_at and url_id to deliver fast historical SLA queries",
+      "type": "performance",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Composite index on (url_id, checked_at)",
+        "Cascade delete removes child checks"
+      ],
+      "implemented_files": [
+        "database/schema.sql",
+        "backend/models/monitor.py"
+      ],
+      "related_apis": [
+        "/api/monitors"
+      ],
+      "related_models": [
+        "MonitoredUrl",
+        "UptimeCheck",
+        "Incident"
+      ],
+      "tests": [
+        "test_list_monitors"
+      ],
+      "status": "SATISFIED"
+    }
+  ]
+}

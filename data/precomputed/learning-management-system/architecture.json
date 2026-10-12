@@ -1,0 +1,9 @@
+{
+  "diagram": "flowchart TD\n  subgraph User Access\n    STUDENT[\"Student Web Portal\"]\n    FACULTY[\"Instructor Dashboard\"]\n  end\n\n  subgraph API & Routing Tier\n    ALB[\"Cloud Load Balancer\"]\n    AUTH[\"RBAC Guard (Student / Instructor)\"]\n    API[\"Student Learning Management System FastAPI Service\"]\n  end\n\n  subgraph Academic Engines\n    COURSE_MGR[\"Course & Enrollment Manager\"]\n    ASSIGN_MGR[\"Assignment & Deadline Tracker\"]\n    GRADE_ENGINE[\"Grading & Assessment Evaluator\"]\n  end\n\n  subgraph Storage\n    PG[(\"PostgreSQL (Courses, Enrollments, Submissions)\")]\n    DOCS[(\"S3 Course Material & Files\")]\n  end\n\n  STUDENT --> ALB --> AUTH --> API\n  FACULTY --> ALB --> AUTH --> API\n  API --> COURSE_MGR\n  API --> ASSIGN_MGR\n  API --> GRADE_ENGINE\n  COURSE_MGR --> PG\n  ASSIGN_MGR --> PG\n  GRADE_ENGINE --> PG\n  COURSE_MGR --> DOCS",
+  "mermaid_diagram": "flowchart TD\n  subgraph User Access\n    STUDENT[\"Student Web Portal\"]\n    FACULTY[\"Instructor Dashboard\"]\n  end\n\n  subgraph API & Routing Tier\n    ALB[\"Cloud Load Balancer\"]\n    AUTH[\"RBAC Guard (Student / Instructor)\"]\n    API[\"Student Learning Management System FastAPI Service\"]\n  end\n\n  subgraph Academic Engines\n    COURSE_MGR[\"Course & Enrollment Manager\"]\n    ASSIGN_MGR[\"Assignment & Deadline Tracker\"]\n    GRADE_ENGINE[\"Grading & Assessment Evaluator\"]\n  end\n\n  subgraph Storage\n    PG[(\"PostgreSQL (Courses, Enrollments, Submissions)\")]\n    DOCS[(\"S3 Course Material & Files\")]\n  end\n\n  STUDENT --> ALB --> AUTH --> API\n  FACULTY --> ALB --> AUTH --> API\n  API --> COURSE_MGR\n  API --> ASSIGN_MGR\n  API --> GRADE_ENGINE\n  COURSE_MGR --> PG\n  ASSIGN_MGR --> PG\n  GRADE_ENGINE --> PG\n  COURSE_MGR --> DOCS",
+  "compute": "AWS ECS Fargate",
+  "database": "PostgreSQL 15 RDS",
+  "cache": "None",
+  "storage": "Amazon S3 (Assignment File Attachments)",
+  "networking": "AWS VPC (Multi-AZ)"
+}

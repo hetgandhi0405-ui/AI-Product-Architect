@@ -1,0 +1,9 @@
+{
+  "diagram": "flowchart TD\n  subgraph IoT Hardware & Edge\n    DEV1[\"Smart Thermostats\"]\n    DEV2[\"Environmental Air Sensors\"]\n    DEV3[\"Smart Energy Plugs\"]\n  end\n\n  subgraph Edge Protocols & Gateway\n    MQTT[\"MQTT Broker / IoT Core Gateway\"]\n    HTTPS[\"Ingress API Gateway (HTTPS)\"]\n  end\n\n  subgraph Ingestion & Processing\n    API[\"Smart Home Dashboard Ingestion Engine\"]\n    RULE_ENG[\"Threshold Alert Rule Evaluator\"]\n  end\n\n  subgraph Storage Tier\n    TS_DB[(\"PostgreSQL Time-Series Tables\")]\n    ALERTS[(\"Alert Notification Queue\")]\n  end\n\n  DEV1 --> MQTT --> API\n  DEV2 --> HTTPS --> API\n  DEV3 --> MQTT --> API\n  API --> RULE_ENG\n  API --> TS_DB\n  RULE_ENG --> ALERTS",
+  "mermaid_diagram": "flowchart TD\n  subgraph IoT Hardware & Edge\n    DEV1[\"Smart Thermostats\"]\n    DEV2[\"Environmental Air Sensors\"]\n    DEV3[\"Smart Energy Plugs\"]\n  end\n\n  subgraph Edge Protocols & Gateway\n    MQTT[\"MQTT Broker / IoT Core Gateway\"]\n    HTTPS[\"Ingress API Gateway (HTTPS)\"]\n  end\n\n  subgraph Ingestion & Processing\n    API[\"Smart Home Dashboard Ingestion Engine\"]\n    RULE_ENG[\"Threshold Alert Rule Evaluator\"]\n  end\n\n  subgraph Storage Tier\n    TS_DB[(\"PostgreSQL Time-Series Tables\")]\n    ALERTS[(\"Alert Notification Queue\")]\n  end\n\n  DEV1 --> MQTT --> API\n  DEV2 --> HTTPS --> API\n  DEV3 --> MQTT --> API\n  API --> RULE_ENG\n  API --> TS_DB\n  RULE_ENG --> ALERTS",
+  "compute": "AWS ECS Fargate Ingestion Workers",
+  "database": "PostgreSQL 15 with Time-Series B-tree Indexes",
+  "cache": "None (direct indexing with time buckets)",
+  "storage": "S3",
+  "networking": "AWS VPC (Multi-AZ)"
+}

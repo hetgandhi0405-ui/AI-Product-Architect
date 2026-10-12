@@ -1,0 +1,30 @@
+flowchart TD
+  subgraph DevOps Engineers
+    DASH["Uptime Status Page (React 18)"]
+    ALERTS["Slack / PagerDuty Webhooks"]
+  end
+
+  subgraph Ingress & SRE Services
+    ALB["Load Balancer"]
+    API["Website Uptime Monitoring Uptime Controller"]
+    SCHEDULER["Cron Probe Scheduler"]
+    PROBER["Asynchronous HTTP/TLS Prober Engine"]
+  end
+
+  subgraph Monitored Target Endpoints
+    SITE1["https://api.payments.com"]
+    SITE2["https://auth.enterprise.io"]
+  end
+
+  subgraph Telemetry Storage
+    PG[("PostgreSQL (Monitors, Checks, Incidents)")]
+  end
+
+  DASH --> ALB --> API
+  API --> SCHEDULER
+  SCHEDULER --> PROBER
+  PROBER --> SITE1
+  PROBER --> SITE2
+  PROBER --> PG
+  PROBER --> ALERTS
+  API --> PG

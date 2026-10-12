@@ -1,0 +1,9 @@
+{
+  "diagram": "flowchart TD\n  subgraph Ticket Channels\n    USER[\"Customer Help Center\"]\n    AGENT[\"Support Agent Workspace\"]\n  end\n\n  subgraph Ingress & Identity\n    ALB[\"Cloud Load Balancer\"]\n    AUTH[\"RBAC (Customer / Agent / Admin)\"]\n  end\n\n  subgraph Microservice Core\n    API[\"Customer Support Ticket System Ticket Core API\"]\n    SLA[\"SLA Breached Deadline Monitor\"]\n    NOTIF[\"Email / Webhook Notification Worker\"]\n  end\n\n  subgraph Relational Database\n    PG[(\"PostgreSQL (Tickets, Comments, Departments)\")]\n  end\n\n  USER --> ALB --> AUTH --> API\n  AGENT --> ALB --> AUTH --> API\n  API --> SLA\n  API --> NOTIF\n  SLA --> PG\n  API --> PG",
+  "mermaid_diagram": "flowchart TD\n  subgraph Ticket Channels\n    USER[\"Customer Help Center\"]\n    AGENT[\"Support Agent Workspace\"]\n  end\n\n  subgraph Ingress & Identity\n    ALB[\"Cloud Load Balancer\"]\n    AUTH[\"RBAC (Customer / Agent / Admin)\"]\n  end\n\n  subgraph Microservice Core\n    API[\"Customer Support Ticket System Ticket Core API\"]\n    SLA[\"SLA Breached Deadline Monitor\"]\n    NOTIF[\"Email / Webhook Notification Worker\"]\n  end\n\n  subgraph Relational Database\n    PG[(\"PostgreSQL (Tickets, Comments, Departments)\")]\n  end\n\n  USER --> ALB --> AUTH --> API\n  AGENT --> ALB --> AUTH --> API\n  API --> SLA\n  API --> NOTIF\n  SLA --> PG\n  API --> PG",
+  "compute": "AWS ECS Fargate",
+  "database": "PostgreSQL 15 RDS",
+  "cache": "None",
+  "storage": "S3 (Ticket File Attachments)",
+  "networking": "AWS VPC (Multi-AZ)"
+}

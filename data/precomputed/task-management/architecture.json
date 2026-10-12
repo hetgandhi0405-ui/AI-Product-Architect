@@ -1,0 +1,9 @@
+{
+  "diagram": "flowchart TD\n  subgraph Client Tier\n    WEB[\"React Task Kanban SPA\"]\n    MOB[\"Mobile Web Client\"]\n  end\n\n  subgraph Ingress & Security\n    ALB[\"Cloud Load Balancer (HTTPS)\"]\n    AUTH[\"JWT Auth & Session Guard\"]\n  end\n\n  subgraph Application Microservice\n    API[\"Task Management System FastAPI Service\"]\n    TASK_SVC[\"Task Lifecycle Manager\"]\n    FILTER_SVC[\"Priority & Status Filter Engine\"]\n  end\n\n  subgraph Persistence Tier\n    PG[(\"PostgreSQL 15 (Tasks, Users, Categories)\")]\n  end\n\n  WEB --> ALB\n  MOB --> ALB\n  ALB --> AUTH\n  AUTH --> API\n  API --> TASK_SVC\n  API --> FILTER_SVC\n  TASK_SVC --> PG\n  FILTER_SVC --> PG",
+  "mermaid_diagram": "flowchart TD\n  subgraph Client Tier\n    WEB[\"React Task Kanban SPA\"]\n    MOB[\"Mobile Web Client\"]\n  end\n\n  subgraph Ingress & Security\n    ALB[\"Cloud Load Balancer (HTTPS)\"]\n    AUTH[\"JWT Auth & Session Guard\"]\n  end\n\n  subgraph Application Microservice\n    API[\"Task Management System FastAPI Service\"]\n    TASK_SVC[\"Task Lifecycle Manager\"]\n    FILTER_SVC[\"Priority & Status Filter Engine\"]\n  end\n\n  subgraph Persistence Tier\n    PG[(\"PostgreSQL 15 (Tasks, Users, Categories)\")]\n  end\n\n  WEB --> ALB\n  MOB --> ALB\n  ALB --> AUTH\n  AUTH --> API\n  API --> TASK_SVC\n  API --> FILTER_SVC\n  TASK_SVC --> PG\n  FILTER_SVC --> PG",
+  "compute": "AWS ECS Fargate / Cloud Run",
+  "database": "PostgreSQL 15 (RDS)",
+  "cache": "None (unnecessary for standard task CRUD)",
+  "storage": "S3 (attachment assets)",
+  "networking": "AWS VPC (Multi-AZ)"
+}

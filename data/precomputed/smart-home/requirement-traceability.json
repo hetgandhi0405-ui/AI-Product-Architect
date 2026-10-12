@@ -1,0 +1,142 @@
+{
+  "coverage_percent": 100.0,
+  "metrics": {
+    "functional": "4/4",
+    "non_functional": "1/1",
+    "security": "1/1",
+    "performance": "1/1",
+    "integration": "1/1"
+  },
+  "total_requirements": 5,
+  "satisfied": 5,
+  "matrix": [
+    {
+      "req_id": "REQ-001",
+      "title": "Device Provisioning & Registration",
+      "description": "Register IoT devices with name, device_type, room location, and IP address",
+      "type": "functional",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Device saved with online status",
+        "Unique ID assigned for telemetry streaming"
+      ],
+      "implemented_files": [
+        "backend/routes/devices.py",
+        "backend/models/device.py",
+        "frontend/src/App.jsx"
+      ],
+      "related_apis": [
+        "/api/devices"
+      ],
+      "related_models": [
+        "Device"
+      ],
+      "tests": [
+        "test_list_devices",
+        "test_create_device"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-002",
+      "title": "High-Frequency Telemetry Ingestion",
+      "description": "Ingest temperature, humidity, energy, and motion sensor readings with timestamps",
+      "type": "functional",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Payload stores metric, value, unit",
+        "Timestamp indexed for time-series queries"
+      ],
+      "implemented_files": [
+        "backend/routes/devices.py",
+        "backend/models/device.py"
+      ],
+      "related_apis": [
+        "/api/devices/{device_id}/telemetry"
+      ],
+      "related_models": [
+        "SensorReading"
+      ],
+      "tests": [
+        "test_ingest_telemetry"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-003",
+      "title": "Automated Threshold Alerts",
+      "description": "Define threshold alert rules that trigger notifications when readings exceed limits",
+      "type": "functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Rule evaluation detects conditions",
+        "Active rule flag toggle"
+      ],
+      "implemented_files": [
+        "backend/routes/devices.py"
+      ],
+      "related_apis": [
+        "/api/alerts"
+      ],
+      "related_models": [
+        "AlertRule"
+      ],
+      "tests": [
+        "test_create_alert_rule"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-004",
+      "title": "Real-Time Sensor Dashboard UI",
+      "description": "Interactive IoT monitoring dashboard displaying live metric cards and online status pills",
+      "type": "functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Live temperature/power gauges",
+        "One-click device provisioning form",
+        "Status indicators"
+      ],
+      "implemented_files": [
+        "frontend/src/App.jsx"
+      ],
+      "related_apis": [
+        "/api/devices"
+      ],
+      "related_models": [
+        "Device",
+        "SensorReading"
+      ],
+      "tests": [
+        "test_health"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-005",
+      "title": "Time-Series Query Performance",
+      "description": "PostgreSQL time-series indexes on device_id and timestamp to support low-latency chart rendering",
+      "type": "performance",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Composite index on (device_id, timestamp)",
+        "Foreign key on delete cascade"
+      ],
+      "implemented_files": [
+        "database/schema.sql",
+        "backend/models/device.py"
+      ],
+      "related_apis": [
+        "/api/devices/{device_id}/telemetry"
+      ],
+      "related_models": [
+        "Device",
+        "SensorReading"
+      ],
+      "tests": [
+        "test_list_devices"
+      ],
+      "status": "SATISFIED"
+    }
+  ]
+}
