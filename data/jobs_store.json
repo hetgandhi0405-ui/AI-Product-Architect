@@ -1,0 +1,78 @@
+{
+  "job-e173bb7d3a3a": {
+    "job_id": "job-e173bb7d3a3a",
+    "project_id": "proj-00f55de1",
+    "project_name": "Weather Status Dashboard",
+    "requirements": "Build a simple weather dashboard with FastAPI and React",
+    "status": "running",
+    "stage": "Requirements Analysis",
+    "stage_index": 0,
+    "stages": [
+      "Requirements Analysis",
+      "Product Planning",
+      "UI/UX & API Specs",
+      "Architecture Design",
+      "Security & Integration",
+      "Code Generation",
+      "Validation & Testing",
+      "Release Gate & Export"
+    ],
+    "started_at": 1791821260.7030244,
+    "result": null,
+    "error": null,
+    "elapsed": 0,
+    "coverage": 14,
+    "live_data": {
+      "stage_index": 0,
+      "stage_name": "Requirements Analysis",
+      "coverage_pct": 14,
+      "coverage_metrics": {
+        "functional": "15%",
+        "non_functional": "12%",
+        "security": "14%",
+        "performance": "10%",
+        "integration": "11%"
+      },
+      "architecture_diagram": "flowchart TD\n  subgraph Client Tier\n    SPA[\"Weather Status Dashboard Web Interface\"]\n  end\n\n  subgraph API Ingress\n    ALB[\"Application Load Balancer\"]\n    AUTH[\"JWT Authentication Guard\"]\n    API[\"Weather Status Dashboard Microservice\"]\n  end\n\n  subgraph Storage Tier\n    PG[(\"PostgreSQL 15 (builds, simples)\")]\n  end\n\n  SPA --> ALB --> AUTH --> API\n  API --> PG",
+      "log": "Analyzing requirements for 'Weather Status Dashboard'. Parsed functional stories and system constraints."
+    }
+  },
+  "job-0d191febbd58": {
+    "job_id": "job-0d191febbd58",
+    "project_id": "proj-e009083a",
+    "project_name": "Test Real Time App",
+    "requirements": "Test real-time status resilience under reload",
+    "status": "running",
+    "stage": "Requirements Analysis",
+    "stage_index": 0,
+    "stages": [
+      "Requirements Analysis",
+      "Product Planning",
+      "UI/UX & API Specs",
+      "Architecture Design",
+      "Security & Integration",
+      "Code Generation",
+      "Validation & Testing",
+      "Release Gate & Export"
+    ],
+    "started_at": 1791821260.8860388,
+    "result": null,
+    "error": null,
+    "elapsed": 0,
+    "coverage": 14,
+    "live_data": {
+      "stage_index": 0,
+      "stage_name": "Requirements Analysis",
+      "coverage_pct": 14,
+      "coverage_metrics": {
+        "functional": "15%",
+        "non_functional": "12%",
+        "security": "14%",
+        "performance": "10%",
+        "integration": "11%"
+      },
+      "architecture_diagram": "flowchart TD\n  subgraph Client Tier\n    SPA[\"Test Real Time App Web Interface\"]\n  end\n\n  subgraph API Ingress\n    ALB[\"Application Load Balancer\"]\n    AUTH[\"JWT Authentication Guard\"]\n    API[\"Test Real Time App Microservice\"]\n  end\n\n  subgraph Storage Tier\n    PG[(\"PostgreSQL 15 (tests, reals)\")]\n  end\n\n  SPA --> ALB --> AUTH --> API\n  API --> PG",
+      "log": "Analyzing requirements for 'Test Real Time App'. Parsed functional stories and system constraints."
+    }
+  }
+}

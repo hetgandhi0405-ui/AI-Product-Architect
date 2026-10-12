@@ -127,8 +127,14 @@ def _safe_id(node_id: str) -> str:
 
 
 def _minimal_fallback_diagram(state: AgentState) -> str:
-    """Minimal diagram when no infrastructure state is available."""
+    """Diagram generated from domain analysis when no raw infrastructure state is available."""
+    from backend.core.domain_analyzer import analyze_domain
+    requirements = state.get("requirements", "")
     project = state.get("project_name", "App")
+    domain_spec = analyze_domain(requirements, project)
+    diagram = domain_spec.architecture_spec.get("diagram") or domain_spec.architecture_spec.get("mermaid_diagram", "")
+    if diagram:
+        return diagram
     return f"""flowchart LR
     USER["👤 User"] --> ALB["Load Balancer"]
     ALB --> APP["FastAPI Backend\\n{project}"]
