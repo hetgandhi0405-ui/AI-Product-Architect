@@ -2,6 +2,7 @@ import os
 import json
 import re
 from google import genai
+from backend.core.domain_analyzer import analyze_domain
 
 
 class MockResponse:
@@ -40,114 +41,92 @@ class MockModels:
 
         # 2. Product Planner Agent
         if "senior product manager" in prompt_lower:
+            spec = analyze_domain(contents)
             return MockResponse(json.dumps({
-                "product_name": "Task Management App",
-                "user_roles": ["Standard User", "Administrator"],
-                "features": [
-                    "User registration and login",
-                    "Task creation and tracking",
-                    "Task status update and completion",
-                    "Task deletion",
-                    "Task filtering and search"
-                ],
-                "user_stories": [
-                    "As a user, I want to create tasks so that I can manage my work.",
-                    "As a user, I want to mark tasks as completed.",
-                    "As a user, I want to delete tasks I no longer need."
-                ],
-                "pages": [
-                    "Login / Registration Page",
-                    "Task Dashboard Page",
-                    "Task Detail View"
-                ],
-                "scope": [
-                    "Frontend React SPA",
-                    "FastAPI REST API",
-                    "PostgreSQL Relational Database"
-                ]
+                "product_name": spec.title,
+                "user_roles": spec.roles,
+                "features": [r["title"] for r in spec.traceability_matrix],
+                "user_stories": [r["description"] for r in spec.traceability_matrix],
+                "pages": [f"{p} View" for p in spec.ui_spec.get("actions", ["Dashboard"])],
+                "scope": [spec.architecture_spec.get("compute", "FastAPI"), "PostgreSQL", spec.title]
             }))
 
         # 3. UI/UX Specification Agent
         if "ui/ux architect" in prompt_lower:
+            spec = analyze_domain(contents)
+            pages = [{"name": "Dashboard", "path": "/dashboard", "purpose": f"Overview of {spec.primary_entity}"}]
+            for act in spec.ui_spec.get("actions", []):
+                slug = act.lower().replace(" ", "-")
+                pages.append({"name": act, "path": f"/{slug}", "purpose": f"{act} interface"})
+            components = [
+                {"name": f"{spec.primary_entity}Grid", "type": "Grid"},
+                {"name": f"{spec.primary_entity}Form", "type": "Form"},
+                {"name": "StatusPill", "type": "Badge"},
+                {"name": "Loading", "type": "Spinner"}
+            ]
             return MockResponse(json.dumps({
-                "pages": [
-                    {"name": "Dashboard", "path": "/dashboard", "purpose": "Overview of tasks"},
-                    {"name": "Tasks", "path": "/tasks", "purpose": "Task management list and filters"},
-                    {"name": "Login", "path": "/login", "purpose": "User authentication"}
-                ],
-                "navigation": {
-                    "links": [{"label": "Tasks", "path": "/tasks"}]
-                },
-                "components": [
-                    {"name": "TaskList", "type": "List"},
-                    {"name": "TaskCard", "type": "Card"},
-                    {"name": "TaskForm", "type": "Form"},
-                    {"name": "Loading", "type": "Spinner"}
-                ],
-                "forms": [
-                    {"name": "TaskForm", "fields": ["title", "description"]}
-                ],
-                "user_flows": [
-                    "User logs in -> views tasks -> creates task -> marks complete"
-                ]
+                "pages": pages,
+                "navigation": {"links": [{"label": p["name"], "path": p["path"]} for p in pages]},
+                "components": components,
+                "forms": [{"name": f"{spec.primary_entity}Form", "fields": ["title", "description", "status"]}],
+                "user_flows": [f"User accesses dashboard -> manages {spec.primary_entity.lower()}s -> views updates"]
             }))
 
         # 4. API Specification Agent
         if "api designer" in prompt_lower or "backend architect and api designer" in prompt_lower:
+            spec = analyze_domain(contents)
+            endpoints = []
+            for a in spec.apis:
+                endpoints.append({
+                    "method": a["method"],
+                    "endpoint": a["path"].replace("/api", ""),
+                    "purpose": a["summary"],
+                    "authentication": a.get("auth", False),
+                    "request": {},
+                    "response": {}
+                })
+            endpoints.extend([
+                {"method": "POST", "endpoint": "/auth/register", "purpose": "Register user", "authentication": False, "request": {}, "response": {}},
+                {"method": "POST", "endpoint": "/auth/login", "purpose": "Login user", "authentication": False, "request": {}, "response": {}}
+            ])
             return MockResponse(json.dumps({
                 "api_style": "REST",
                 "base_path": "/api",
-                "endpoints": [
-                    {"method": "GET", "endpoint": "/tasks", "purpose": "List tasks", "authentication": False, "request": {}, "response": {}},
-                    {"method": "POST", "endpoint": "/tasks", "purpose": "Create task", "authentication": False, "request": {}, "response": {}},
-                    {"method": "GET", "endpoint": "/tasks/{id}", "purpose": "Get task details", "authentication": False, "request": {}, "response": {}},
-                    {"method": "PUT", "endpoint": "/tasks/{id}", "purpose": "Update task", "authentication": False, "request": {}, "response": {}},
-                    {"method": "DELETE", "endpoint": "/tasks/{id}", "purpose": "Delete task", "authentication": False, "request": {}, "response": {}},
-                    {"method": "POST", "endpoint": "/auth/register", "purpose": "Register user", "authentication": False, "request": {}, "response": {}},
-                    {"method": "POST", "endpoint": "/auth/login", "purpose": "Login user", "authentication": False, "request": {}, "response": {}}
-                ]
+                "endpoints": endpoints
             }))
 
         # 5. Database Specification Agent
         if "database architect" in prompt_lower:
+            spec = analyze_domain(contents)
+            tables = []
+            for ent in spec.entities:
+                cols = []
+                for fld in ent.fields:
+                    cols.append({"name": fld.name, "type": fld.sql_type})
+                tables.append({"name": ent.table_name, "columns": cols})
             return MockResponse(json.dumps({
                 "database_type": "PostgreSQL",
-                "tables": [
-                    {
-                        "name": "users",
-                        "columns": [
-                            {"name": "id", "type": "SERIAL PRIMARY KEY"},
-                            {"name": "username", "type": "VARCHAR(100)"},
-                            {"name": "email", "type": "VARCHAR(255)"},
-                            {"name": "password_hash", "type": "VARCHAR(255)"}
-                        ]
-                    },
-                    {
-                        "name": "tasks",
-                        "columns": [
-                            {"name": "id", "type": "SERIAL PRIMARY KEY"},
-                            {"name": "title", "type": "VARCHAR(255)"},
-                            {"name": "description", "type": "TEXT"},
-                            {"name": "completed", "type": "BOOLEAN DEFAULT FALSE"},
-                            {"name": "user_id", "type": "INTEGER REFERENCES users(id)"}
-                        ]
-                    }
-                ]
+                "tables": tables
             }))
 
         # 6. Architecture Agent (AWS Cloud Architecture)
         if "aws cloud solution architect" in prompt_lower:
+            spec = analyze_domain(contents)
+            has_redis = "redis" in spec.architecture_spec.get("cache", "").lower() or spec.domain_id == "analytics"
+            cache_val = "Redis 7 Cluster for High-Throughput Stream Ingestion Buffer" if has_redis else "None (Low latency direct PostgreSQL queries)"
             return MockResponse(json.dumps({
                 "frontend": "Amazon S3 static website hosting distributed through Amazon CloudFront CDN",
-                "backend": "FastAPI application running on Amazon ECS with AWS Fargate",
+                "backend": f"FastAPI {spec.primary_entity} service running on Amazon ECS with AWS Fargate",
                 "database": "Amazon RDS for PostgreSQL with automated backups and encryption",
                 "storage": "Amazon S3 for secure document and static asset storage",
+                "cache": cache_val,
                 "authentication": "Amazon Cognito user pools with OAuth 2.0 and JWT token support",
                 "networking": "Amazon VPC with public and private subnets across multiple AZs with NAT Gateway",
                 "compute": "Serverless containers on AWS Fargate",
                 "monitoring": "Amazon CloudWatch logs, metrics, and AWS X-Ray distributed tracing",
                 "security": "AWS WAF for perimeter protection and AWS Secrets Manager for credentials",
-                "scalability": "Target tracking Application Auto Scaling based on CPU utilization"
+                "scalability": "Target tracking Application Auto Scaling based on CPU utilization",
+                "diagram": spec.architecture_spec.get("mermaid_diagram", "")
             }))
 
         # 7. Architecture Alternatives Agent
@@ -335,15 +314,18 @@ class MockModels:
 
         # 16. Requirement Agent (freeform text)
         if "analyze the following customer requirement" in prompt_lower:
+            spec = analyze_domain(contents)
+            entities_str = ", ".join(e.name for e in spec.entities)
+            reqs_str = "; ".join(r["description"] for r in spec.traceability_matrix)
             return MockResponse(
-                "AI Requirement Analysis:\n"
-                "1. Functional Requirements: User authentication, task management (create, read, update, delete, complete).\n"
-                "2. Application Components: React SPA frontend, FastAPI REST backend, PostgreSQL relational database.\n"
-                "3. User & Traffic Requirements: Scalable architecture supporting standard web workloads.\n"
-                "4. Data Requirements: Relational schema for users and tasks with foreign key relationships.\n"
-                "5. Security Requirements: Password hashing, JWT token authentication, CORS security headers.\n"
-                "6. Availability & Scalability: Containerized deployment using Docker and cloud VPC infrastructure.\n"
-                "7. Important Technical Considerations: RESTful endpoints with consistent error status codes."
+                f"AI Requirement Analysis for {spec.title}:\n"
+                f"1. Main Functional Requirements: {reqs_str}.\n"
+                f"2. Application Components: React SPA frontend, FastAPI REST backend, PostgreSQL database ({entities_str}).\n"
+                f"3. User & Traffic Requirements: Scalable architecture supporting {', '.join(spec.roles)}.\n"
+                f"4. Data Requirements: Relational schema for {entities_str} with foreign key constraints.\n"
+                f"5. Security Requirements: Password hashing, JWT token authentication, CORS security headers.\n"
+                f"6. Availability & Scalability: Containerized deployment ({spec.architecture_spec.get('compute', 'ECS Fargate')}).\n"
+                f"7. Important Technical Considerations: RESTful endpoints with consistent error status codes."
             )
 
         # 17. Suggestion Agent

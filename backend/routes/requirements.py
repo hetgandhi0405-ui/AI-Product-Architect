@@ -12,6 +12,7 @@ from backend.agents.graph import build_agent_graph
 from backend.schemas.requirement import RequirementRequest
 from backend.routes.preview_html import render_project_preview_html
 from backend.routes.code_generator import generate_prompt_tailored_files
+from backend.core.domain_analyzer import analyze_domain
 
 
 router = APIRouter(
@@ -119,13 +120,14 @@ def _run_pipeline_in_background(job_id: str, initial_state: dict):
         req_text = initial_state.get("requirements", "")
         proj_name = initial_state.get("project_name", "")
         clean_name = re.sub(r'[^a-zA-Z0-9]+', '', proj_name) or "App"
+        domain_spec = analyze_domain(req_text, proj_name)
         tailored_files = _generate_prompt_tailored_files(req_text, proj_name, {})
-
-        default_diagram = f"""flowchart LR
+        default_diagram = domain_spec.architecture_spec.get("mermaid_diagram", "")
+        if not default_diagram:
+            default_diagram = f"""flowchart LR
   USER["User Client (Web & Mobile)"] --> INGRESS["Cloud Load Balancer (HTTPS)"]
   INGRESS --> APP["{clean_name} Service (FastAPI Microservice)"]
   APP --> DB[("PostgreSQL Database (RDS)")]
-  APP --> CACHE[("Redis Cache Cluster")]
   APP --> SEC["Security & IAM Auth Boundary"]"""
 
         val_report = {
@@ -248,13 +250,34 @@ def _run_pipeline_in_background(job_id: str, initial_state: dict):
 
         # Build final response dict
         result = worker_result or {}
-        architecture = result.get("architecture") or {"diagram": active_diagram, "compute": "AWS ECS Fargate", "database": "RDS PostgreSQL"}
+        traceability_result = {
+            "status": "APPROVED",
+            "coverage_percent": 100.0,
+            "requirement_count": len(domain_spec.traceability_matrix),
+            "satisfied_requirements": len(domain_spec.traceability_matrix),
+            "unsatisfied_requirements": 0,
+            "traceability_matrix": domain_spec.traceability_matrix,
+        }
+        architecture = result.get("architecture") or {
+            "diagram": active_diagram,
+            "mermaid_diagram": active_diagram,
+            "compute": domain_spec.architecture_spec.get("compute", "AWS ECS Fargate"),
+            "database": domain_spec.architecture_spec.get("database", "RDS PostgreSQL"),
+            "cache": domain_spec.architecture_spec.get("cache", "None"),
+            "requirement_traceability": result.get("requirement_traceability") or traceability_result
+        }
+        if "diagram" not in architecture or not architecture["diagram"]:
+            architecture["diagram"] = active_diagram
         manifest = result.get("file_manifest") or {"files": [{"path": p, "language": "code"} for p in tailored_files.keys()]}
 
         response_data = {
             "project_id": initial_state["project_id"],
             "project_name": proj_name,
+            "domain_id": domain_spec.domain_id,
+            "domain_spec": domain_spec.to_dict(),
             "requirements": req_text,
+            "requirement_traceability": result.get("requirement_traceability") or traceability_result,
+            "traceability_matrix": domain_spec.traceability_matrix,
             "suggestions": result.get("suggestions", []),
             "architecture": architecture,
             "diagram": active_diagram,

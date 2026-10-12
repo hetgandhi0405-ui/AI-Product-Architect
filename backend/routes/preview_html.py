@@ -44,67 +44,33 @@ def render_project_preview_html(project_id: str, metadata: Optional[Dict[str, An
         except Exception:
             pass
 
-    # Entity detection
-    req_lower = (requirements + " " + project_name).lower()
-    if any(k in req_lower for k in ["event", "analytic", "metric", "stream", "sensor", "telemetry", "tracking"]):
-        entity = "Event"
-        entity_lower = "event"
-        entity_plural = "events"
-        category_options = ["Security Ingress", "User Activity", "System Metric", "Network Telemetry"]
-        sample_rows = [
-            {"id": 101, "title": "User Authentication Succeeded", "category": "Security Ingress", "priority": "Low", "status": "active", "time": "2 mins ago"},
-            {"id": 102, "title": "High Traffic Ingress /api/v1/stream", "category": "Network Telemetry", "priority": "High", "status": "active", "time": "5 mins ago"},
-            {"id": 103, "title": "Nightly Snapshot Backup Completed", "category": "System Metric", "priority": "Medium", "status": "completed", "time": "12 mins ago"},
-        ]
-    elif any(k in req_lower for k in ["e-commerce", "ecommerce", "store", "shop", "product", "cart", "order", "book"]):
-        entity = "Product"
-        entity_lower = "product"
-        entity_plural = "products"
-        category_options = ["Electronics", "Books & Media", "Apparel", "Home Office"]
-        sample_rows = [
-            {"id": 201, "title": "Wireless Active Noise-Canceling Headphones", "category": "Electronics", "priority": "High", "status": "active", "time": "Just now"},
-            {"id": 202, "title": "Enterprise Cloud Architecture Handbook", "category": "Books & Media", "priority": "Medium", "status": "active", "time": "8 mins ago"},
-            {"id": 203, "title": "Custom Mechanical Gaming Keyboard", "category": "Electronics", "priority": "Low", "status": "completed", "time": "22 mins ago"},
-        ]
-    elif any(k in req_lower for k in ["patient", "health", "hospital", "clinic", "medical", "doctor"]):
-        entity = "Patient"
-        entity_lower = "patient"
-        entity_plural = "patients"
-        category_options = ["Cardiology", "Primary Care", "Diagnostics", "Pediatrics"]
-        sample_rows = [
-            {"id": 301, "title": "Urgent Triage Intake #MED-940", "category": "Primary Care", "priority": "High", "status": "active", "time": "1 min ago"},
-            {"id": 302, "title": "Cardiovascular Stress Test Review", "category": "Cardiology", "priority": "Medium", "status": "active", "time": "10 mins ago"},
-            {"id": 303, "title": "Comprehensive Metabolic Lab Panel", "category": "Diagnostics", "priority": "Low", "status": "completed", "time": "24 mins ago"},
-        ]
-    elif any(k in req_lower for k in ["ticket", "booking", "reservation", "flight", "concert"]):
-        entity = "Reservation"
-        entity_lower = "reservation"
-        entity_plural = "reservations"
-        category_options = ["Flight", "Luxury Hotel", "Conference", "Dining"]
-        sample_rows = [
-            {"id": 401, "title": "Transatlantic Flight Booking #BA-819", "category": "Flight", "priority": "High", "status": "active", "time": "3 mins ago"},
-            {"id": 402, "title": "Executive Suite Downtown Reservation", "category": "Luxury Hotel", "priority": "Medium", "status": "active", "time": "15 mins ago"},
-            {"id": 403, "title": "AI Summit Full Access VIP Pass", "category": "Conference", "priority": "Low", "status": "completed", "time": "35 mins ago"},
-        ]
-    elif any(k in req_lower for k in ["task", "todo", "project", "kanban", "issue"]):
-        entity = "Task"
-        entity_lower = "task"
-        entity_plural = "tasks"
-        category_options = ["Sprint Backlog", "API Services", "Frontend UI", "DevOps & Cloud"]
-        sample_rows = [
-            {"id": 501, "title": "Provision Zero-Trust VPC & Ingress", "category": "DevOps & Cloud", "priority": "Critical", "status": "active", "time": "4 mins ago"},
-            {"id": 502, "title": "Implement FastAPI JWT Middleware", "category": "API Services", "priority": "High", "status": "active", "time": "12 mins ago"},
-            {"id": 503, "title": "Refactor React Responsive Header", "category": "Frontend UI", "priority": "Medium", "status": "completed", "time": "28 mins ago"},
-        ]
+    # Dynamic Domain Spec extraction
+    from backend.core.domain_analyzer import analyze_domain
+    spec = analyze_domain(requirements, project_name)
+    entity = spec.primary_entity
+    entity_lower = entity.lower()
+    if entity_lower.endswith("y") and not entity_lower.endswith(("ay", "ey", "oy", "uy")):
+        entity_plural = entity_lower[:-1] + "ies"
+    elif entity_lower.endswith(("s", "x", "z", "ch", "sh")):
+        entity_plural = entity_lower + "es"
     else:
-        entity = "Item"
-        entity_lower = "item"
-        entity_plural = "items"
-        category_options = ["Operations", "Finance", "Infrastructure", "Analytics"]
+        entity_plural = entity_lower + "s"
+
+    category_options = spec.ui_spec.get("badges", ["General", "Operations", "Critical", "Active"])
+    sample_rows = []
+    for idx, rec in enumerate(spec.ui_spec.get("sample_records", []), start=1):
+        sample_rows.append({
+            "id": idx * 100 + 1,
+            "title": rec.get("title") or rec.get("name") or rec.get("description") or f"{entity} #{idx}",
+            "category": rec.get("category") or rec.get("specialty") or rec.get("dept") or category_options[0],
+            "priority": str(rec.get("priority") or rec.get("status") or "High").capitalize(),
+            "status": str(rec.get("status") or "active").lower(),
+            "time": f"{idx * 3} mins ago"
+        })
+    if not sample_rows:
         sample_rows = [
-            {"id": 601, "title": "Primary Microservice Cluster Node #1", "category": "Infrastructure", "priority": "High", "status": "active", "time": "2 mins ago"},
-            {"id": 602, "title": "Automated ETL Telemetry Pipeline", "category": "Analytics", "priority": "Medium", "status": "active", "time": "9 mins ago"},
-            {"id": 603, "title": "Secrets & IAM Boundary Rotation", "category": "Operations", "priority": "Low", "status": "completed", "time": "20 mins ago"},
+            {"id": 101, "title": f"Sample {entity} Alpha", "category": category_options[0], "priority": "High", "status": "active", "time": "2 mins ago"},
+            {"id": 102, "title": f"Sample {entity} Beta", "category": category_options[-1], "priority": "Medium", "status": "active", "time": "8 mins ago"}
         ]
 
     category_options_html = "".join(f'<option value="{c}">{c}</option>' for c in category_options)
