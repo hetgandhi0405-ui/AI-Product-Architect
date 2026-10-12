@@ -216,3 +216,18 @@ def test_custom_domain_dynamic_fallback():
     for path, code in files.items():
         if path.endswith(".py"):
             ast.parse(code)
+
+
+def test_all_ten_prompts_produce_distinct_diagrams():
+    """Verify that every single benchmark prompt produces a completely distinct, non-generic Mermaid architecture diagram."""
+    unique_diagrams = set()
+    for domain, title, prompt, primary, entities, api, redis_j in BENCHMARK_PROMPTS:
+        spec = analyze_domain(prompt, title)
+        diagram = spec.architecture_spec.get("mermaid_diagram", "")
+        assert "flowchart" in diagram
+        assert len(diagram) > 100
+        unique_diagrams.add(diagram)
+
+    assert len(unique_diagrams) == len(BENCHMARK_PROMPTS), (
+        f"Expected {len(BENCHMARK_PROMPTS)} distinct diagrams, but only got {len(unique_diagrams)} unique diagrams!"
+    )
