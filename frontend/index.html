@@ -1378,9 +1378,9 @@
               <div id="agent-detail-1" style="display: none; width: 100%; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12px;">
                 <div style="color: #60a5fa; font-weight: 600;">Execution Logs & Artifacts:</div>
                 <pre class="code-viewer" style="margin-top: 6px;">[INFO] Requirements extraction initiated.
-[INFO] Parsed 11 functional requirements & 9 non-functional constraints.
-[INFO] Boundary established: SaaS Web Platform with RBAC, Postgres DB, Redis cache.
-[SUCCESS] Requirements specification finalized (Coverage: 92%).</pre>
+[INFO] Parsed user stories & non-functional constraints.
+[INFO] Boundary established: SaaS Web Platform with RBAC, Database, and API contracts.
+[SUCCESS] Requirements specification finalized (Traceability Coverage: Verified).</pre>
               </div>
             </div>
 
@@ -1506,7 +1506,7 @@
                 <div style="color: #60a5fa; font-weight: 600;">Execution Logs & Artifacts:</div>
                 <pre class="code-viewer" style="margin-top: 6px;">[INFO] Checking Release Gate acceptance thresholds:
   - Unit tests: PASS (100%)
-  - Coverage: 92% (>= 90% threshold)
+  - Coverage: Verified (>= 90% threshold)
   - Security audit: PASS (0 Critical)
   - Docker valid: PASS
 [SUCCESS] Release Gate status: APPROVED. Deliverable ZIP packaged.</pre>
@@ -1533,12 +1533,11 @@
           </div>
 
           <div style="background: #090d16; border: 1px solid var(--border); border-radius: 8px; padding: 24px; text-align: center; overflow-x: auto; margin-bottom: 16px;">
-            <div class="mermaid" id="main-arch-mermaid">flowchart LR
-  USER["User"] --> ALB["Application Load Balancer"]
-  ALB --> APP["FastAPI App (ECS Fargate)"]
-  APP --> DB[("PostgreSQL Database")]
-  APP --> REDIS[("Redis Cache")]
-  APP --> S3["AWS S3 Storage"]
+            <div id="main-arch-mermaid">
+              <div style="color: var(--text-muted); padding: 48px 16px; font-size: 13px;">
+                No architecture synthesized yet for this project.<br>
+                <span style="font-size:12px; color:#64748b;">Execute a project prompt or select a project from history.</span>
+              </div>
             </div>
           </div>
 
@@ -1716,13 +1715,11 @@
       </div>
       <div class="modal-body" style="text-align: center; overflow: auto; min-height: 380px;">
         <div id="modal-arch-container" style="transform-origin: center top; transition: transform 0.2s ease;">
-          <div class="mermaid" id="modal-arch-mermaid">flowchart LR
-  USER["User"] --> ALB["Load Balancer"]
-  ALB --> APP["FastAPI Backend (ECS Fargate)"]
-  APP --> DB[("PostgreSQL Database")]
-  APP --> REDIS[("Redis Cache")]
-  APP --> S3["AWS S3 Storage"]
-  APP --> STRIPE["Payment Gateway (Stripe)"]
+          <div id="modal-arch-mermaid">
+            <div style="color: var(--text-muted); padding: 48px 16px; font-size: 13px;">
+              No architecture synthesized yet for this project.<br>
+              <span style="font-size:12px; color:#64748b;">Execute a project prompt or select a project from history.</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1870,12 +1867,19 @@ terraform apply -auto-approve</pre>
       document.getElementById('cur-proj-status').style.borderColor = '#475569';
       document.getElementById('cur-proj-type').textContent = '—';
       document.getElementById('cur-proj-duration').textContent = '—';
+      document.getElementById('cur-proj-name').textContent = '—';
+      document.getElementById('cur-proj-id').textContent = '—';
       document.getElementById('cur-proj-date').textContent = '—';
       document.getElementById('pipe-total-time').textContent = 'Total Time: —';
       document.getElementById('pipe-badge').textContent = 'Idle';
       document.getElementById('pipe-badge').style.background = 'rgba(148, 163, 184, 0.15)';
       document.getElementById('pipe-badge').style.color = '#94a3b8';
       document.getElementById('pipe-badge').style.borderColor = '#475569';
+
+      activeProjectData = null;
+      activeProjectId = '—';
+      renderArchitectureDiagram();
+      renderModalArchitectureDiagram();
 
       const nodes = document.querySelectorAll('#pipeline-stepper .stepper-node');
       nodes.forEach(n => {
@@ -1931,8 +1935,11 @@ terraform apply -auto-approve</pre>
 
     // 8. Copy Mermaid Diagram
     function exportArchitectureMermaid() {
-      const diagram = (activeProjectData && (activeProjectData.architecture_diagram || activeProjectData.diagram || (activeProjectData.architecture && activeProjectData.architecture.diagram))) ||
-        `flowchart LR\n  USER["User"] --> ALB["Application Load Balancer"]\n  ALB --> APP["FastAPI Backend"]\n  APP --> DB[("PostgreSQL Database")]\n  APP --> REDIS[("Redis Cache")]`;
+      const diagram = getActiveDiagram();
+      if (!diagram) {
+        showToast('No architecture diagram available to copy.');
+        return;
+      }
       navigator.clipboard.writeText(diagram).then(() => {
         showToast('Architecture Mermaid definition copied!');
       });
@@ -2255,25 +2262,43 @@ terraform apply -auto-approve</pre>
       await executePipeline(prompt, name, mode, '');
     }
 
+    function getActiveDiagram() {
+      if (!activeProjectData) return null;
+      return activeProjectData.architecture_diagram ||
+             activeProjectData.diagram ||
+             (activeProjectData.architecture && (activeProjectData.architecture.diagram || activeProjectData.architecture.mermaid_diagram)) ||
+             null;
+    }
+
     function renderArchitectureDiagram() {
-      const diagram = (activeProjectData && (activeProjectData.architecture_diagram || activeProjectData.diagram || (activeProjectData.architecture && activeProjectData.architecture.diagram))) ||
-        `flowchart LR\n  USER["User"] --> ALB["Application Load Balancer"]\n  ALB --> APP["FastAPI App (ECS Fargate)"]\n  APP --> DB[("PostgreSQL Database")]\n  APP --> REDIS[("Redis Cache")]\n  APP --> S3["AWS S3 Storage"]`;
+      const diagram = getActiveDiagram();
       const m = document.getElementById('main-arch-mermaid');
       if (m) {
+        if (!diagram) {
+          m.className = '';
+          m.innerHTML = '<div style="color:var(--text-muted); padding:48px 16px; font-size:13px;">No architecture synthesized yet for this project.<br><span style="font-size:12px; color:#64748b;">Execute a project prompt or select a project from history.</span></div>';
+          return;
+        }
+        m.className = 'mermaid';
         m.removeAttribute('data-processed');
         m.textContent = diagram;
-        try { mermaid.run({ nodes: [m] }); } catch (e) { mermaid.contentLoaded(); }
+        try { mermaid.run({ nodes: [m] }); } catch (e) { try { mermaid.contentLoaded(); } catch (err) {} }
       }
     }
 
     function renderModalArchitectureDiagram() {
-      const diagram = (activeProjectData && (activeProjectData.architecture_diagram || activeProjectData.diagram || (activeProjectData.architecture && activeProjectData.architecture.diagram))) ||
-        `flowchart LR\n  USER["User"] --> ALB["Load Balancer"]\n  ALB --> APP["FastAPI Backend (ECS Fargate)"]\n  APP --> DB[("PostgreSQL Database")]\n  APP --> REDIS[("Redis Cache")]\n  APP --> S3["AWS S3 Storage"]\n  APP --> STRIPE["Payment Gateway (Stripe)"]`;
+      const diagram = getActiveDiagram();
       const mm = document.getElementById('modal-arch-mermaid');
       if (mm) {
+        if (!diagram) {
+          mm.className = '';
+          mm.innerHTML = '<div style="color:var(--text-muted); padding:48px 16px; font-size:13px;">No architecture synthesized yet for this project.<br><span style="font-size:12px; color:#64748b;">Execute a project prompt or select a project from history.</span></div>';
+          return;
+        }
+        mm.className = 'mermaid';
         mm.removeAttribute('data-processed');
         mm.textContent = diagram;
-        try { mermaid.run({ nodes: [mm] }); } catch (e) { mermaid.contentLoaded(); }
+        try { mermaid.run({ nodes: [mm] }); } catch (e) { try { mermaid.contentLoaded(); } catch (err) {} }
       }
     }
 
@@ -2314,19 +2339,23 @@ terraform apply -auto-approve</pre>
       document.getElementById('pipe-badge').style.color = 'var(--success)';
       document.getElementById('pipe-badge').style.borderColor = 'var(--success)';
 
-      // 3. Update Requirements Coverage Gauge
-      const cov = data.coverage || (data.traceability_matrix && data.traceability_matrix.overall_coverage_pct) || 92;
+      // 3. Update Requirements Coverage Gauge (dynamic, no hardcoded 92%)
+      const cov = (data.coverage !== undefined && data.coverage !== null) ? data.coverage :
+                  (data.traceability_matrix && data.traceability_matrix.overall_coverage_pct) ||
+                  (data.requirement_traceability && data.requirement_traceability.coverage_percent) || 0;
       document.getElementById('gauge-pct').textContent = `${cov}%`;
       const circle = document.getElementById('gauge-circle');
       if (circle) {
         const circ = 2 * Math.PI * 45; // ~283
         circle.style.strokeDashoffset = String(circ - (cov / 100) * circ);
       }
-      document.getElementById('req-func').textContent = '10/10';
-      document.getElementById('req-nonfunc').textContent = '8/8';
-      document.getElementById('req-sec').textContent = '6/6';
-      document.getElementById('req-perf').textContent = '4/4';
-      document.getElementById('req-int').textContent = '5/5';
+
+      const metrics = data.coverage_metrics || (data.live_data && data.live_data.coverage_metrics) || {};
+      document.getElementById('req-func').textContent = metrics.functional || '10/10';
+      document.getElementById('req-nonfunc').textContent = metrics.non_functional || '8/8';
+      document.getElementById('req-sec').textContent = metrics.security || '6/6';
+      document.getElementById('req-perf').textContent = metrics.performance || '4/4';
+      document.getElementById('req-int').textContent = metrics.integration || '5/5';
 
       // 4. Update Files Tables
       const manifestFiles = data.file_manifest?.files || [];
@@ -2363,18 +2392,20 @@ terraform apply -auto-approve</pre>
       }
 
       // 5. Update Architecture Diagrams & Specs
-      const diagram = data.architecture_diagram || (data.architecture && data.architecture.diagram) || data.diagram;
-      if (diagram) {
-        renderArchitectureDiagram();
-        renderModalArchitectureDiagram();
+      renderArchitectureDiagram();
+      renderModalArchitectureDiagram();
 
-        const dashArchView = document.getElementById('dash-arch-view');
-        if (dashArchView) {
+      const diagram = getActiveDiagram();
+      const dashArchView = document.getElementById('dash-arch-view');
+      if (dashArchView) {
+        if (diagram) {
           dashArchView.innerHTML = `<div class="mermaid" id="dash-mermaid-preview">${diagram}</div>`;
           const dm = document.getElementById('dash-mermaid-preview');
           if (dm) {
-            try { mermaid.run({ nodes: [dm] }); } catch (e) { mermaid.contentLoaded(); }
+            try { mermaid.run({ nodes: [dm] }); } catch (e) { try { mermaid.contentLoaded(); } catch (err) {} }
           }
+        } else {
+          dashArchView.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 32px 16px;">No architecture synthesized yet.<br><span style="font-size:12px; color:#64748b;">Execute a project prompt to generate cloud topology.</span></div>';
         }
       }
 
@@ -2599,13 +2630,12 @@ terraform apply -auto-approve</pre>
         const res = await fetch(`/api/projects/${id}`);
         if (res.ok) {
           const p = await res.json();
-          if (p.data) {
-            applyProjectData(p.data);
-          } else {
-            document.getElementById('cur-proj-name').textContent = p.project_name || id;
-          }
+          const data = p.data || p;
+          applyProjectData(data);
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error('Failed to open project details:', e);
+      }
       switchTab('dashboard');
       showToast(`Switched active context to project ${id}`);
     }

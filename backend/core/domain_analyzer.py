@@ -97,6 +97,11 @@ class DomainSpec:
         self.secondary_entities = secondary_entities
         self.apis = apis
         self.ui_spec = ui_spec
+        if architecture_spec:
+            if "mermaid_diagram" in architecture_spec and "diagram" not in architecture_spec:
+                architecture_spec["diagram"] = architecture_spec["mermaid_diagram"]
+            elif "diagram" in architecture_spec and "mermaid_diagram" not in architecture_spec:
+                architecture_spec["mermaid_diagram"] = architecture_spec["diagram"]
         self.architecture_spec = architecture_spec
         self.traceability_matrix = traceability_matrix
 
