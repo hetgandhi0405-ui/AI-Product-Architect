@@ -1,0 +1,9 @@
+{
+  "diagram": "flowchart TD\n  subgraph Customer Clients\n    SHOPPER[\"Web Storefront (React 18)\"]\n    MOBILE[\"Mobile Responsive Web\"]\n  end\n\n  subgraph Edge & API Gateway\n    CDN[\"CloudFront / Edge CDN\"]\n    LB[\"Application Load Balancer\"]\n  end\n\n  subgraph Core Microservices\n    API[\"E-Commerce Platform FastAPI Gateway\"]\n    CATALOG[\"Catalog & Inventory Service\"]\n    ORDER_SVC[\"Order Processing Service\"]\n    CHECKOUT_SVC[\"Checkout & Payment Gateway Sandbox\"]\n  end\n\n  subgraph Data Tier\n    PG[(\"PostgreSQL (Products, Orders, OrderItems)\")]\n    S3[(\"S3 Bucket (Product Media Assets)\")]\n  end\n\n  SHOPPER --> CDN --> LB --> API\n  MOBILE --> LB --> API\n  API --> CATALOG\n  API --> ORDER_SVC\n  API --> CHECKOUT_SVC\n  CATALOG --> PG\n  ORDER_SVC --> PG\n  CHECKOUT_SVC --> PG\n  CATALOG --> S3",
+  "mermaid_diagram": "flowchart TD\n  subgraph Customer Clients\n    SHOPPER[\"Web Storefront (React 18)\"]\n    MOBILE[\"Mobile Responsive Web\"]\n  end\n\n  subgraph Edge & API Gateway\n    CDN[\"CloudFront / Edge CDN\"]\n    LB[\"Application Load Balancer\"]\n  end\n\n  subgraph Core Microservices\n    API[\"E-Commerce Platform FastAPI Gateway\"]\n    CATALOG[\"Catalog & Inventory Service\"]\n    ORDER_SVC[\"Order Processing Service\"]\n    CHECKOUT_SVC[\"Checkout & Payment Gateway Sandbox\"]\n  end\n\n  subgraph Data Tier\n    PG[(\"PostgreSQL (Products, Orders, OrderItems)\")]\n    S3[(\"S3 Bucket (Product Media Assets)\")]\n  end\n\n  SHOPPER --> CDN --> LB --> API\n  MOBILE --> LB --> API\n  API --> CATALOG\n  API --> ORDER_SVC\n  API --> CHECKOUT_SVC\n  CATALOG --> PG\n  ORDER_SVC --> PG\n  CHECKOUT_SVC --> PG\n  CATALOG --> S3",
+  "compute": "AWS ECS Fargate",
+  "database": "PostgreSQL 15 RDS Multi-AZ",
+  "cache": "None (catalog indexed directly in Postgres)",
+  "storage": "Amazon S3 (Product Media)",
+  "networking": "AWS VPC (Multi-AZ)"
+}

@@ -1,0 +1,27 @@
+flowchart TD
+  subgraph Employee Access
+    PORTAL["Employee Self-Service Web"]
+    HR_DESK["HR Manager Approval Console"]
+  end
+
+  subgraph Identity & Load Balancing
+    ALB["Application Load Balancer"]
+    AUTH["JWT Role-Based Auth Guard"]
+  end
+
+  subgraph Core HR Services
+    API["Employee Attendance Management HR Service"]
+    TIME_CLOCK["Attendance Punch Engine"]
+    LEAVE_MGR["Leave Balance Deductor"]
+  end
+
+  subgraph Persistence
+    PG[("PostgreSQL (Employees, Attendance, LeaveRequests)")]
+  end
+
+  PORTAL --> ALB --> AUTH --> API
+  HR_DESK --> ALB --> AUTH --> API
+  API --> TIME_CLOCK
+  API --> LEAVE_MGR
+  TIME_CLOCK --> PG
+  LEAVE_MGR --> PG

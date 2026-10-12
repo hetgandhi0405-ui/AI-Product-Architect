@@ -51,6 +51,8 @@ def generate_prompt_tailored_files(requirements: str, project_name: str, base_fi
     routers_import_str = ", ".join(routers_to_import)
 
     router_mounts = f'app.include_router({primary_plural}.router, prefix="/api/{primary_plural}", tags=["{primary} Management"])\n'
+    if primary_plural == "monitoredurls":
+        router_mounts += f'app.include_router({primary_plural}.router, prefix="/api/monitors", tags=["Monitors Management"])\n'
     if sec_plural and sec_plural != primary_plural:
         router_mounts += f'app.include_router({sec_plural}.router, prefix="/api/{sec_plural}", tags=["{sec_name} Management"])\n'
     router_mounts += 'app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])'
@@ -255,6 +257,8 @@ def create_{primary_lower}(payload: {primary}Create):
     _{primary_plural}_db.append(new_item)
     return new_item
 
+{domain_action_route}
+
 @router.get("/{{item_id}}")
 def get_{primary_lower}(item_id: int):
     for item in _{primary_plural}_db:
@@ -282,8 +286,6 @@ def delete_{primary_lower}(item_id: int):
     if len(_{primary_plural}_db) == initial_len:
         raise HTTPException(status_code=404, detail="{primary} record not found")
     return {{"deleted": True, "id": item_id, "message": "{primary} successfully removed"}}
-
-{domain_action_route}
 '''
 
     # 6. backend/routes/{sec_plural}.py (Secondary Entity Router if present)
@@ -340,13 +342,13 @@ def get_{sec_lower}(item_id: int):
     # 7. backend/routes/auth.py
     files["backend/routes/auth.py"] = '''# Authentication & JWT Handlers
 from fastapi import APIRouter, HTTPException, Depends, status
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from datetime import datetime, timedelta
 
 router = APIRouter()
 
 class LoginRequest(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 class TokenResponse(BaseModel):
@@ -669,6 +671,9 @@ curl http://localhost:8000/health
 - Interactive Swagger UI: `http://localhost:8000/docs`
 - Live Deployment Preview: `http://localhost:8000/preview/{clean_pname}`
 '''
+
+    # 19. pytest.ini
+    files["pytest.ini"] = "[pytest]\npythonpath = .\n"
 
     # 20. specification/traceability_matrix.json
     files["specification/traceability_matrix.json"] = json.dumps({

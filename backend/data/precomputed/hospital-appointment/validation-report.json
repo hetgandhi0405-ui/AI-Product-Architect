@@ -1,0 +1,41 @@
+{
+  "status": "PASSED",
+  "deployment_ready": true,
+  "gates_passed": 6,
+  "gates_total": 6,
+  "summary": "All automated gates passed cleanly. Syntax: 9/9 valid. Tests: 6/6 passed.",
+  "timestamp": "2026-10-12T16:24:13.381243+00:00",
+  "syntax_validation": {
+    "total_python_files": 9,
+    "passed": 9,
+    "errors": 0
+  },
+  "test_suite_execution": {
+    "total_tests": 6,
+    "passed": 6,
+    "failed": 0,
+    "duration_seconds": 4.34,
+    "output": "......                                                                   [100%]\n============================== warnings summary ===============================\nbackend\\routes\\doctors.py:24\n  E:\\AI-Product-Architect\\data\\precomputed\\hospital-appointment\\workspace\\backend\\routes\\doctors.py:24: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/\n    class DoctorResponse(BaseModel):\n\nbackend\\routes\\doctors.py:37\n  E:\\AI-Product-Architect\\data\\precomputed\\hospital-appointment\\workspace\\backend\\routes\\doctors.py:37: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n    {\"id\": 1, \"created_at\": datetime.utcnow(), \"name\": \"Dr. Meredith Grey, MD\", \"specialty\": \"General Surgery\", \"room\": \"OR-4B\", \"available\": True},\n\nbackend\\routes\\doctors.py:38\n  E:\\AI-Product-Architect\\data\\precomputed\\hospital-appointment\\workspace\\backend\\routes\\doctors.py:38: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n    {\"id\": 2, \"created_at\": datetime.utcnow(), \"name\": \"Dr. Gregory House, MD\", \"specialty\": \"Diagnostics & Infectious\", \"room\": \"Clinic-101\", \"available\": True},\n\nbackend\\routes\\doctors.py:39\n  E:\\AI-Product-Architect\\data\\precomputed\\hospital-appointment\\workspace\\backend\\routes\\doctors.py:39: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n    {\"id\": 3, \"created_at\": datetime.utcnow(), \"name\": \"Dr. Cristina Yang, MD\", \"specialty\": \"Cardiothoracic Surgery\", \"room\": \"OR-2A\", \"available\": False}\n\nbackend\\routes\\patients.py:21\n  E:\\AI-Product-Architect\\data\\precomputed\\hospital-appointment\\workspace\\backend\\routes\\patients.py:21: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n    {\"id\": 1, \"name\": \"Primary Patient Record\", \"status\": \"active\", \"created_at\": datetime.utcnow()},\n\nbackend\\routes\\patients.py:22\n  E:\\AI-Product-Architect\\data\\precomputed\\hospital-appointment\\workspace\\backend\\routes\\patients.py:22: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n    {\"id\": 2, \"name\": \"Secondary Patient Record\", \"status\": \"completed\", \"created_at\": datetime.utcnow()}\n\ntests/test_api.py::test_create_doctor\n  E:\\AI-Product-Architect\\data\\precomputed\\hospital-appointment\\workspace\\backend\\routes\\doctors.py:56: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n    \"created_at\": datetime.utcnow()\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n6 passed, 7 warnings in 1.19s"
+  },
+  "file_manifest_validation": {
+    "total_files": 21,
+    "missing_mandatory": 0,
+    "consistent": true
+  },
+  "coverage_audit": {
+    "coverage_percent": 100.0,
+    "metrics": {
+      "functional": "4/4",
+      "non_functional": "1/1",
+      "security": "1/1",
+      "performance": "1/1",
+      "integration": "1/1"
+    },
+    "status": "APPROVED"
+  },
+  "artifact_verification": {
+    "zip_path": "E:\\AI-Product-Architect\\data\\precomputed\\hospital-appointment\\project.zip",
+    "zip_size_bytes": 13578,
+    "verified": true
+  }
+}

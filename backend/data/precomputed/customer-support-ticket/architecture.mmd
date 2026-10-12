@@ -1,0 +1,27 @@
+flowchart TD
+  subgraph Ticket Channels
+    USER["Customer Help Center"]
+    AGENT["Support Agent Workspace"]
+  end
+
+  subgraph Ingress & Identity
+    ALB["Cloud Load Balancer"]
+    AUTH["RBAC (Customer / Agent / Admin)"]
+  end
+
+  subgraph Microservice Core
+    API["Customer Support Ticket System Ticket Core API"]
+    SLA["SLA Breached Deadline Monitor"]
+    NOTIF["Email / Webhook Notification Worker"]
+  end
+
+  subgraph Relational Database
+    PG[("PostgreSQL (Tickets, Comments, Departments)")]
+  end
+
+  USER --> ALB --> AUTH --> API
+  AGENT --> ALB --> AUTH --> API
+  API --> SLA
+  API --> NOTIF
+  SLA --> PG
+  API --> PG

@@ -1,0 +1,9 @@
+{
+  "diagram": "flowchart TD\n  subgraph DevOps Engineers\n    DASH[\"Uptime Status Page (React 18)\"]\n    ALERTS[\"Slack / PagerDuty Webhooks\"]\n  end\n\n  subgraph Ingress & SRE Services\n    ALB[\"Load Balancer\"]\n    API[\"Website Uptime Monitoring Uptime Controller\"]\n    SCHEDULER[\"Cron Probe Scheduler\"]\n    PROBER[\"Asynchronous HTTP/TLS Prober Engine\"]\n  end\n\n  subgraph Monitored Target Endpoints\n    SITE1[\"https://api.payments.com\"]\n    SITE2[\"https://auth.enterprise.io\"]\n  end\n\n  subgraph Telemetry Storage\n    PG[(\"PostgreSQL (Monitors, Checks, Incidents)\")]\n  end\n\n  DASH --> ALB --> API\n  API --> SCHEDULER\n  SCHEDULER --> PROBER\n  PROBER --> SITE1\n  PROBER --> SITE2\n  PROBER --> PG\n  PROBER --> ALERTS\n  API --> PG",
+  "mermaid_diagram": "flowchart TD\n  subgraph DevOps Engineers\n    DASH[\"Uptime Status Page (React 18)\"]\n    ALERTS[\"Slack / PagerDuty Webhooks\"]\n  end\n\n  subgraph Ingress & SRE Services\n    ALB[\"Load Balancer\"]\n    API[\"Website Uptime Monitoring Uptime Controller\"]\n    SCHEDULER[\"Cron Probe Scheduler\"]\n    PROBER[\"Asynchronous HTTP/TLS Prober Engine\"]\n  end\n\n  subgraph Monitored Target Endpoints\n    SITE1[\"https://api.payments.com\"]\n    SITE2[\"https://auth.enterprise.io\"]\n  end\n\n  subgraph Telemetry Storage\n    PG[(\"PostgreSQL (Monitors, Checks, Incidents)\")]\n  end\n\n  DASH --> ALB --> API\n  API --> SCHEDULER\n  SCHEDULER --> PROBER\n  PROBER --> SITE1\n  PROBER --> SITE2\n  PROBER --> PG\n  PROBER --> ALERTS\n  API --> PG",
+  "compute": "AWS ECS Fargate Synthetic Probers",
+  "database": "PostgreSQL 15 RDS Time-Series",
+  "cache": "None",
+  "storage": "S3 (Weekly Availability SLA Reports)",
+  "networking": "AWS VPC (Multi-AZ)"
+}

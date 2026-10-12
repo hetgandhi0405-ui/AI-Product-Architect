@@ -1,0 +1,29 @@
+flowchart TD
+  subgraph Client Tier
+    WEB["React Task Kanban SPA"]
+    MOB["Mobile Web Client"]
+  end
+
+  subgraph Ingress & Security
+    ALB["Cloud Load Balancer (HTTPS)"]
+    AUTH["JWT Auth & Session Guard"]
+  end
+
+  subgraph Application Microservice
+    API["Task Management System FastAPI Service"]
+    TASK_SVC["Task Lifecycle Manager"]
+    FILTER_SVC["Priority & Status Filter Engine"]
+  end
+
+  subgraph Persistence Tier
+    PG[("PostgreSQL 15 (Tasks, Users, Categories)")]
+  end
+
+  WEB --> ALB
+  MOB --> ALB
+  ALB --> AUTH
+  AUTH --> API
+  API --> TASK_SVC
+  API --> FILTER_SVC
+  TASK_SVC --> PG
+  FILTER_SVC --> PG

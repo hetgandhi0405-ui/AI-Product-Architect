@@ -1,0 +1,139 @@
+{
+  "project_name": "Hospital Appointment System",
+  "domain_id": "hospital",
+  "coverage_percent": 100.0,
+  "status": "APPROVED",
+  "requirements": [
+    {
+      "req_id": "REQ-001",
+      "title": "Doctor Directory & Specialty Search",
+      "description": "Patients can search physicians by specialty, license, and clinical availability",
+      "type": "functional",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Doctor list returns specialty and room",
+        "Availability flag exposed in API"
+      ],
+      "implemented_files": [
+        "backend/routes/doctors.py",
+        "backend/models/appointment.py",
+        "frontend/src/App.jsx"
+      ],
+      "related_apis": [
+        "/api/doctors"
+      ],
+      "related_models": [
+        "Doctor"
+      ],
+      "tests": [
+        "test_list_doctors",
+        "test_create_doctor"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-002",
+      "title": "Appointment Slot Booking",
+      "description": "Patients book appointments with specified doctors for available time slots",
+      "type": "functional",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Appointment saved with doctor and patient IDs",
+        "Returns 201 Created"
+      ],
+      "implemented_files": [
+        "backend/routes/appointments.py",
+        "backend/models/appointment.py",
+        "frontend/src/App.jsx"
+      ],
+      "related_apis": [
+        "/api/appointments"
+      ],
+      "related_models": [
+        "Appointment"
+      ],
+      "tests": [
+        "test_book_appointment"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-003",
+      "title": "Appointment Cancellation",
+      "description": "Patients or staff can cancel an appointment and release the booked slot",
+      "type": "functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Cancellation route updates status to 'cancelled'",
+        "Releases time slot"
+      ],
+      "implemented_files": [
+        "backend/routes/appointments.py"
+      ],
+      "related_apis": [
+        "/api/appointments/{appointment_id}/cancel"
+      ],
+      "related_models": [
+        "Appointment"
+      ],
+      "tests": [
+        "test_cancel_appointment"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-004",
+      "title": "Clinical Schedule UI",
+      "description": "Responsive doctor scheduling UI with appointment booking form and patient badge list",
+      "type": "functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Physician profile cards",
+        "Appointment booking modal",
+        "Cancel action button"
+      ],
+      "implemented_files": [
+        "frontend/src/App.jsx"
+      ],
+      "related_apis": [
+        "/api/doctors",
+        "/api/appointments"
+      ],
+      "related_models": [
+        "Doctor",
+        "Appointment"
+      ],
+      "tests": [
+        "test_health"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-005",
+      "title": "HIPAA Data Privacy & Encryption",
+      "description": "Protected health information (PHI) stored in encrypted tables with strict foreign key constraints",
+      "type": "security",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Foreign keys between users, patients, and appointments",
+        "Role-based authorization"
+      ],
+      "implemented_files": [
+        "database/schema.sql",
+        "backend/models/appointment.py"
+      ],
+      "related_apis": [
+        "/api/appointments"
+      ],
+      "related_models": [
+        "Doctor",
+        "Patient",
+        "Appointment"
+      ],
+      "tests": [
+        "test_list_doctors"
+      ],
+      "status": "SATISFIED"
+    }
+  ]
+}

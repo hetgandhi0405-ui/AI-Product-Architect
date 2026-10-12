@@ -1,0 +1,9 @@
+{
+  "diagram": "flowchart TD\n  subgraph Event Producers\n    APP[\"Web & Mobile Apps\"]\n    SRV[\"Backend Microservices\"]\n    IOT[\"Edge Sensor Gateways\"]\n  end\n\n  subgraph Ingestion & Caching (Redis Justified)\n    LB[\"High-Throughput NLB\"]\n    API[\"Real-Time Analytics Dashboard Ingestion Gateway\"]\n    REDIS_STREAM[(\"Redis 7 Ingestion Buffer & Aggregate Cache\")]\n  end\n\n  subgraph Worker & Aggregation\n    AGGREGATOR[\"Stream Sliding-Window Aggregator Worker\"]\n  end\n\n  subgraph Permanent Archival\n    PG[(\"PostgreSQL 15 Columnar/Timeseries Archival\")]\n    DASH[\"Live Stream Analytics Dashboard\"]\n  end\n\n  APP --> LB --> API\n  SRV --> LB --> API\n  IOT --> LB --> API\n  API --> REDIS_STREAM\n  REDIS_STREAM --> AGGREGATOR\n  AGGREGATOR --> REDIS_STREAM\n  AGGREGATOR --> PG\n  DASH --> REDIS_STREAM",
+  "mermaid_diagram": "flowchart TD\n  subgraph Event Producers\n    APP[\"Web & Mobile Apps\"]\n    SRV[\"Backend Microservices\"]\n    IOT[\"Edge Sensor Gateways\"]\n  end\n\n  subgraph Ingestion & Caching (Redis Justified)\n    LB[\"High-Throughput NLB\"]\n    API[\"Real-Time Analytics Dashboard Ingestion Gateway\"]\n    REDIS_STREAM[(\"Redis 7 Ingestion Buffer & Aggregate Cache\")]\n  end\n\n  subgraph Worker & Aggregation\n    AGGREGATOR[\"Stream Sliding-Window Aggregator Worker\"]\n  end\n\n  subgraph Permanent Archival\n    PG[(\"PostgreSQL 15 Columnar/Timeseries Archival\")]\n    DASH[\"Live Stream Analytics Dashboard\"]\n  end\n\n  APP --> LB --> API\n  SRV --> LB --> API\n  IOT --> LB --> API\n  API --> REDIS_STREAM\n  REDIS_STREAM --> AGGREGATOR\n  AGGREGATOR --> REDIS_STREAM\n  AGGREGATOR --> PG\n  DASH --> REDIS_STREAM",
+  "compute": "AWS ECS Fargate High-Concurrency Workers",
+  "database": "PostgreSQL 15 RDS (Permanent Cold Storage)",
+  "cache": "Redis 7 Cluster (Stream Buffer & In-Memory Real-time Aggregates - Justified)",
+  "storage": "S3",
+  "networking": "AWS VPC (Multi-AZ)"
+}

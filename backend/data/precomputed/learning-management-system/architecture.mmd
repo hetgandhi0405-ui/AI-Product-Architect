@@ -1,0 +1,32 @@
+flowchart TD
+  subgraph User Access
+    STUDENT["Student Web Portal"]
+    FACULTY["Instructor Dashboard"]
+  end
+
+  subgraph API & Routing Tier
+    ALB["Cloud Load Balancer"]
+    AUTH["RBAC Guard (Student / Instructor)"]
+    API["Student Learning Management System FastAPI Service"]
+  end
+
+  subgraph Academic Engines
+    COURSE_MGR["Course & Enrollment Manager"]
+    ASSIGN_MGR["Assignment & Deadline Tracker"]
+    GRADE_ENGINE["Grading & Assessment Evaluator"]
+  end
+
+  subgraph Storage
+    PG[("PostgreSQL (Courses, Enrollments, Submissions)")]
+    DOCS[("S3 Course Material & Files")]
+  end
+
+  STUDENT --> ALB --> AUTH --> API
+  FACULTY --> ALB --> AUTH --> API
+  API --> COURSE_MGR
+  API --> ASSIGN_MGR
+  API --> GRADE_ENGINE
+  COURSE_MGR --> PG
+  ASSIGN_MGR --> PG
+  GRADE_ENGINE --> PG
+  COURSE_MGR --> DOCS

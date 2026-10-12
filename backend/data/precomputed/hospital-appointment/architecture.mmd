@@ -1,0 +1,29 @@
+flowchart TD
+  subgraph Clinical Clients
+    PATIENT_PORTAL["Patient Booking Portal"]
+    STAFF_DESK["Clinic Reception Dashboard"]
+  end
+
+  subgraph Security & Perimeter
+    WAF["AWS WAF (HIPAA Guard)"]
+    ALB["Application Load Balancer"]
+    AUTH["OAuth2 / JWT Identity Validator"]
+  end
+
+  subgraph Microservice Layer
+    API["Hospital Appointment System Clinical API"]
+    SCHEDULER["Slot Availability & Booking Engine"]
+    AUDIT["HIPAA Audit & Access Logger"]
+  end
+
+  subgraph Secure Data Tier
+    PG[("PostgreSQL RDS (AES-256 Encrypted at Rest)")]
+    AUDIT_LOG[("CloudWatch Immutable Audit Trails")]
+  end
+
+  PATIENT_PORTAL --> WAF --> ALB --> AUTH --> API
+  STAFF_DESK --> WAF --> ALB --> AUTH --> API
+  API --> SCHEDULER
+  API --> AUDIT
+  SCHEDULER --> PG
+  AUDIT --> AUDIT_LOG

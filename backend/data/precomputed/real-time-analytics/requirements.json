@@ -1,0 +1,138 @@
+{
+  "project_id": "proj-analytics",
+  "project_name": "Real-Time Analytics Dashboard",
+  "domain_id": "analytics",
+  "canonical_prompt": "Build a real-time analytics dashboard with event ingestion, aggregation, time-based filtering, charts, and activity summaries.",
+  "requirements": [
+    {
+      "req_id": "REQ-001",
+      "title": "High-Throughput Ingestion API",
+      "description": "Sub-millisecond ingestion endpoint buffering events into Redis queue",
+      "type": "performance",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Handles JSON event payloads",
+        "Buffers to Redis memory for decoupled processing"
+      ],
+      "implemented_files": [
+        "backend/routes/events.py",
+        "backend/models/event.py"
+      ],
+      "related_apis": [
+        "/api/events/ingest"
+      ],
+      "related_models": [
+        "Event"
+      ],
+      "tests": [
+        "test_ingest_event"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-002",
+      "title": "Real-Time Sliding Window Aggregates",
+      "description": "Compute moving metrics (count, sum, avg) over 1m, 5m, and 1h sliding windows",
+      "type": "functional",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Cached in Redis for sub-5ms query response",
+        "Calculates count and sum value"
+      ],
+      "implemented_files": [
+        "backend/routes/events.py",
+        "backend/models/event.py",
+        "frontend/src/App.jsx"
+      ],
+      "related_apis": [
+        "/api/analytics/realtime"
+      ],
+      "related_models": [
+        "MetricAggregation"
+      ],
+      "tests": [
+        "test_realtime_metrics"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-003",
+      "title": "Stream Source Key Management",
+      "description": "Authorize high-throughput event producers with hashed API keys and monitor EPS",
+      "type": "security",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Stream source registration records status",
+        "EPS rate monitored"
+      ],
+      "implemented_files": [
+        "backend/routes/events.py"
+      ],
+      "related_apis": [
+        "/api/streams"
+      ],
+      "related_models": [
+        "StreamSource"
+      ],
+      "tests": [
+        "test_list_streams"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-004",
+      "title": "Real-Time Analytics Dashboard",
+      "description": "Live reactive throughput graphs, event count tickers, and stream status overview",
+      "type": "functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Live EPS counter",
+        "Recent ingested event stream view",
+        "Stream registration form"
+      ],
+      "implemented_files": [
+        "frontend/src/App.jsx"
+      ],
+      "related_apis": [
+        "/api/analytics/realtime",
+        "/api/streams"
+      ],
+      "related_models": [
+        "MetricAggregation",
+        "Event"
+      ],
+      "tests": [
+        "test_health"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-005",
+      "title": "Redis Cache & Stream Buffer Architecture",
+      "description": "Architectural justification for Redis as an in-memory ring buffer and read cache",
+      "type": "non_functional",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Redis 7 container configured in docker-compose.yml",
+        "PostgreSQL for persistent cold storage"
+      ],
+      "implemented_files": [
+        "docker-compose.yml",
+        "backend/config.py",
+        "database/schema.sql"
+      ],
+      "related_apis": [
+        "/api/events/ingest",
+        "/api/analytics/realtime"
+      ],
+      "related_models": [
+        "Event",
+        "MetricAggregation"
+      ],
+      "tests": [
+        "test_ingest_event"
+      ],
+      "status": "SATISFIED"
+    }
+  ]
+}
