@@ -441,6 +441,11 @@
       border-color: #34d399;
       box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
     }
+    .stepper-node.failed .node-bubble {
+      background: #dc2626;
+      border-color: #f87171;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+    }
     .node-name { font-size: 12px; font-weight: 600; color: var(--text); }
     .node-time { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
@@ -602,6 +607,45 @@
     }
     table.data-table tr:hover td {
       background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Hierarchical File Tree */
+    .file-tree-node {
+      margin: 1px 0;
+      user-select: none;
+    }
+    .file-tree-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      color: #cbd5e1;
+      transition: background 0.15s, color 0.15s;
+    }
+    .file-tree-row:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: #fff;
+    }
+    .file-tree-toggle {
+      width: 14px;
+      text-align: center;
+      font-size: 10px;
+      color: #94a3b8;
+      display: inline-block;
+    }
+    .file-tree-folder-icon { color: #f59e0b; }
+    .file-tree-file-icon { color: #60a5fa; }
+    .file-tree-children {
+      margin-left: 18px;
+      border-left: 1px dashed rgba(255, 255, 255, 0.1);
+      padding-left: 6px;
+    }
+    .file-tree-size {
+      margin-left: auto;
+      font-size: 11px;
+      color: #64748b;
     }
 
     /* Release Gate Checklist */
@@ -918,6 +962,25 @@
                 </button>
               </div>
             </div>
+
+            <!-- Unrecognized Prompt Alert Banner -->
+            <div id="prompt-error-banner" style="display:none; margin-top:14px; background:rgba(239, 68, 68, 0.12); border:1px solid #ef4444; border-radius:8px; padding:12px 16px; color:#fca5a5; font-size:13px; line-height:1.5;">
+              <div style="font-weight:700; color:#ef4444; margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+                <span>⚠️ Unrecognized Project Prompt</span>
+              </div>
+              <div id="prompt-error-msg">Please enter a prompt matching one of the 10 supported pre-generated projects.</div>
+            </div>
+
+            <!-- Preview Ready Success Banner & Fallback Opener -->
+            <div id="preview-success-banner" style="display:none; margin-top:14px; background:rgba(16, 185, 129, 0.12); border:1px solid #10b981; border-radius:8px; padding:12px 16px; color:#a7f3d0; font-size:13px; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:16px;">🎉</span>
+                <span><strong>Project Generation Complete!</strong> Live application preview is ready.</span>
+              </div>
+              <a id="btn-fallback-preview-link" href="#" target="_blank" class="btn btn-primary btn-sm" style="background:#10b981; border:none; font-weight:600; text-decoration:none; padding:6px 14px; display:inline-flex; align-items:center; gap:6px;">
+                ↗ Open Live Preview in New Tab
+              </a>
+            </div>
           </form>
         </div>
 
@@ -1025,13 +1088,13 @@
           <div class="stepper-chain" id="pipeline-stepper">
             <div class="stepper-node" id="step-node-0">
               <div class="node-bubble">1</div>
-              <div class="node-name">Requirements Agent</div>
+              <div class="node-name">Requirement Agent</div>
               <div class="node-time">Idle</div>
             </div>
             <div class="node-arrow">→</div>
             <div class="stepper-node" id="step-node-1">
               <div class="node-bubble">2</div>
-              <div class="node-name">Product Planner</div>
+              <div class="node-name">Suggestion Agent</div>
               <div class="node-time">Idle</div>
             </div>
             <div class="node-arrow">→</div>
@@ -1043,7 +1106,7 @@
             <div class="node-arrow">→</div>
             <div class="stepper-node" id="step-node-3">
               <div class="node-bubble">4</div>
-              <div class="node-name">Security Agent</div>
+              <div class="node-name">Diagram Agent</div>
               <div class="node-time">Idle</div>
             </div>
             <div class="node-arrow">→</div>
@@ -1055,19 +1118,25 @@
             <div class="node-arrow">→</div>
             <div class="stepper-node" id="step-node-5">
               <div class="node-bubble">6</div>
-              <div class="node-name">Code Generation</div>
+              <div class="node-name">Terraform Agent</div>
               <div class="node-time">Idle</div>
             </div>
             <div class="node-arrow">→</div>
             <div class="stepper-node" id="step-node-6">
               <div class="node-bubble">7</div>
-              <div class="node-name">Validation & Testing</div>
+              <div class="node-name">Validation Agent</div>
               <div class="node-time">Idle</div>
             </div>
             <div class="node-arrow">→</div>
             <div class="stepper-node" id="step-node-7">
               <div class="node-bubble">8</div>
-              <div class="node-name">Release Gate</div>
+              <div class="node-name">Self-Correction Agent</div>
+              <div class="node-time">Idle</div>
+            </div>
+            <div class="node-arrow">→</div>
+            <div class="stepper-node" id="step-node-8">
+              <div class="node-bubble">9</div>
+              <div class="node-name">Project Generation</div>
               <div class="node-time">Idle</div>
             </div>
           </div>
@@ -1082,10 +1151,16 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="8" height="8" x="3" y="3" rx="2"></rect><rect width="8" height="8" x="13" y="13" rx="2"></rect></svg>
                 <span>Generated Architecture</span>
               </div>
-              <button class="btn btn-outline btn-sm" onclick="openArchModal()">View Full Screen</button>
+              <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                <button class="btn btn-outline btn-sm" onclick="zoomDashArch(1.2)" title="Zoom In">🔍+</button>
+                <button class="btn btn-outline btn-sm" onclick="zoomDashArch(0.8)" title="Zoom Out">🔍-</button>
+                <button class="btn btn-outline btn-sm" onclick="resetDashArchZoom()" title="Reset Zoom">↺</button>
+                <button class="btn btn-outline btn-sm" onclick="toggleArchFormat()" id="btn-toggle-arch-format" title="Toggle SVG / Mermaid">Mermaid</button>
+                <button class="btn btn-outline btn-sm" onclick="openArchModal()">Fullscreen</button>
+              </div>
             </div>
 
-            <div class="arch-diagram-box" id="dash-arch-view">
+            <div class="arch-diagram-box" id="dash-arch-view" style="overflow: auto; max-height: 420px; text-align: center; position: relative;">
               <div style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 32px 16px;">
                 No architecture synthesized yet.<br>
                 <span style="font-size:12px; color:#64748b;">Execute a project prompt to generate cloud topology.</span>
@@ -1180,10 +1255,17 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"></path></svg>
                 <span>Generated Files</span>
               </div>
-              <button class="btn btn-outline btn-sm" onclick="switchTab('generated-files')">View All Files</button>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <button class="btn btn-outline btn-sm" id="btn-toggle-file-view" onclick="toggleDashboardFileView()">🌳 Tree View</button>
+                <button class="btn btn-outline btn-sm" onclick="switchTab('generated-files')">View All Files</button>
+              </div>
             </div>
 
-            <div class="table-container">
+            <div id="dash-files-tree-container" style="display: none; max-height: 280px; overflow-y: auto; padding: 10px; background: #090d16; border: 1px solid var(--border); border-radius: 6px; font-size: 12.5px; font-family: var(--font-mono, monospace);">
+              <div style="text-align: center; color: var(--text-muted); padding: 16px;">No files generated yet</div>
+            </div>
+
+            <div class="table-container" id="dash-files-table-container">
               <table class="data-table">
                 <thead>
                   <tr><th>File/Folder</th><th>Type</th><th>Size</th><th>Status</th></tr>
@@ -1375,13 +1457,13 @@
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 12px;" id="pipeline-agents-list">
-            <!-- 8 detailed interactive agent cards with click-to-expand details and retry -->
+            <!-- 9 detailed interactive agent cards with click-to-expand details and retry -->
             <div class="val-item" style="padding: 14px; flex-direction: column; align-items: flex-start; gap: 6px; cursor: pointer;" onclick="toggleAgentDetails(1)">
               <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-                <strong>1. Requirements Agent</strong>
+                <strong>1. Requirement Agent</strong>
                 <div style="display: flex; gap: 8px; align-items: center;">
-                  <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); retryStage('Requirements Agent')">🔄 Retry</button>
-                  <span class="badge-success">Completed (12s)</span>
+                  <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); retryStage('Requirement Agent')">🔄 Retry</button>
+                  <span class="badge-success">Completed</span>
                 </div>
               </div>
               <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Analyzes natural-language customer prompt, extracts functional & non-functional requirements, and establishes the product boundary.</p>
@@ -1396,19 +1478,18 @@
 
             <div class="val-item" style="padding: 14px; flex-direction: column; align-items: flex-start; gap: 6px; cursor: pointer;" onclick="toggleAgentDetails(2)">
               <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-                <strong>2. Product Planner Agent</strong>
+                <strong>2. Suggestion Agent</strong>
                 <div style="display: flex; gap: 8px; align-items: center;">
-                  <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); retryStage('Product Planner')">🔄 Retry</button>
-                  <span class="badge-success">Completed (18s)</span>
+                  <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); retryStage('Suggestion Agent')">🔄 Retry</button>
+                  <span class="badge-success">Completed</span>
                 </div>
               </div>
-              <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Defines user personas, journeys, core features, technology stack constraints, and technical specifications.</p>
+              <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Identifies optimal architectural patterns, domain models, and solution blueprints for the requested system.</p>
               <div id="agent-detail-2" style="display: none; width: 100%; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12px;">
                 <div style="color: #60a5fa; font-weight: 600;">Execution Logs & Artifacts:</div>
-                <pre class="code-viewer" style="margin-top: 6px;">[INFO] Synthesizing product user journeys & schema specifications.
-[INFO] Personas identified: Store Owner (Admin), Shopper (Customer).
-[INFO] Target concurrency: 10,000 DAU, 99.9% uptime target SLA.
-[SUCCESS] Product blueprint generated successfully.</pre>
+                <pre class="code-viewer" style="margin-top: 6px;">[INFO] Analyzing system requirements against catalog topologies.
+[INFO] Matching domain capabilities, database schema blueprints, and service boundaries.
+[SUCCESS] Solution pattern mapped successfully.</pre>
               </div>
             </div>
 
@@ -1417,34 +1498,32 @@
                 <strong>3. Architecture Agent</strong>
                 <div style="display: flex; gap: 8px; align-items: center;">
                   <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); retryStage('Architecture Agent')">🔄 Retry</button>
-                  <span class="badge-success">Completed (25s)</span>
+                  <span class="badge-success">Completed</span>
                 </div>
               </div>
-              <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Infers cloud architecture spec, component topology, API endpoints contract, database relational schema, and Mermaid flowchart.</p>
+              <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Infers cloud architecture spec, component topology, API contracts, and database relational schema.</p>
               <div id="agent-detail-3" style="display: none; width: 100%; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12px;">
                 <div style="color: #60a5fa; font-weight: 600;">Execution Logs & Artifacts:</div>
                 <pre class="code-viewer" style="margin-top: 6px;">[INFO] Selecting compute, persistence, and caching architectures.
-[INFO] Selected: AWS ECS Fargate, RDS PostgreSQL db.t3.medium, ElastiCache Redis.
-[INFO] Synthesized Mermaid flowchart topology with ALB ingress.
+[INFO] Selected: Multi-tier microservices with relational persistence.
 [SUCCESS] Architecture specification locked.</pre>
               </div>
             </div>
 
             <div class="val-item" style="padding: 14px; flex-direction: column; align-items: flex-start; gap: 6px; cursor: pointer;" onclick="toggleAgentDetails(4)">
               <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-                <strong>4. Security Agent</strong>
+                <strong>4. Diagram Agent</strong>
                 <div style="display: flex; gap: 8px; align-items: center;">
-                  <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); retryStage('Security Agent')">🔄 Retry</button>
-                  <span class="badge-success">Completed (20s)</span>
+                  <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); retryStage('Diagram Agent')">🔄 Retry</button>
+                  <span class="badge-success">Completed</span>
                 </div>
               </div>
-              <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Performs secret scanning, validates CORS policy, verifies JWT encryption, and audits AWS IAM least-privilege policies.</p>
+              <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Generates vector SVG cloud topology diagrams and Mermaid flowchart definitions.</p>
               <div id="agent-detail-4" style="display: none; width: 100%; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12px;">
                 <div style="color: #60a5fa; font-weight: 600;">Execution Logs & Artifacts:</div>
-                <pre class="code-viewer" style="margin-top: 6px;">[INFO] Scanning for hardcoded API keys, passwords, and private tokens.
-[INFO] Zero secrets found. All secrets routed via AWS Secrets Manager environment.
-[INFO] Validating IAM roles: Least privilege AmazonECS_FullTaskExecution applied.
-[SUCCESS] Security verification audit passed (Score: 98/100).</pre>
+                <pre class="code-viewer" style="margin-top: 6px;">[INFO] Synthesizing cloud-architecture.svg and cloud-architecture.mmd.
+[INFO] Rendering visual network topology and service connections.
+[SUCCESS] High-fidelity architecture visual generated.</pre>
               </div>
             </div>
 
@@ -1453,73 +1532,86 @@
                 <strong>5. Infrastructure Agent</strong>
                 <div style="display: flex; gap: 8px; align-items: center;">
                   <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); retryStage('Infrastructure Agent')">🔄 Retry</button>
-                  <span class="badge-success">Completed (18s)</span>
+                  <span class="badge-success">Completed</span>
                 </div>
               </div>
-              <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Synthesizes clean Terraform HCL infrastructure modules for AWS VPC, ECS Fargate, RDS PostgreSQL, and Security Groups.</p>
+              <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Synthesizes container definitions, Dockerfiles, and environment configurations.</p>
               <div id="agent-detail-5" style="display: none; width: 100%; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12px;">
                 <div style="color: #60a5fa; font-weight: 600;">Execution Logs & Artifacts:</div>
-                <pre class="code-viewer" style="margin-top: 6px;">[INFO] Generating Terraform modules in infrastructure/terraform/:
-  - provider.tf, variables.tf, vpc.tf, compute.tf, database.tf, outputs.tf
-[INFO] Terraform validate check: syntax valid, zero interpolation errors.
-[SUCCESS] Infrastructure modules generated.</pre>
+                <pre class="code-viewer" style="margin-top: 6px;">[INFO] Generating Dockerfiles & docker-compose orchestration.
+[INFO] Configuring environment variables, networking, and volume bindings.
+[SUCCESS] Infrastructure definitions synthesized.</pre>
               </div>
             </div>
 
             <div class="val-item" style="padding: 14px; flex-direction: column; align-items: flex-start; gap: 6px; cursor: pointer;" onclick="toggleAgentDetails(6)">
               <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-                <strong>6. Code Generation Agent</strong>
+                <strong>6. Terraform Agent</strong>
                 <div style="display: flex; gap: 8px; align-items: center;">
-                  <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); retryStage('Code Generation')">🔄 Retry</button>
-                  <span class="badge-success">Completed (1m 42s)</span>
+                  <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); retryStage('Terraform Agent')">🔄 Retry</button>
+                  <span class="badge-success">Completed</span>
                 </div>
               </div>
-              <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Synthesizes production source code for React frontend, FastAPI asynchronous routes, SQLAlchemy models, and Dockerfiles.</p>
+              <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Loads and structures Terraform HCL infrastructure modules for cloud provisioning.</p>
               <div id="agent-detail-6" style="display: none; width: 100%; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12px;">
                 <div style="color: #60a5fa; font-weight: 600;">Execution Logs & Artifacts:</div>
-                <pre class="code-viewer" style="margin-top: 6px;">[INFO] Generating React frontend (App.jsx, api.js, package.json).
-[INFO] Generating FastAPI backend routes (main.py, models.py, schemas.py).
-[INFO] Generating Database migrations (schema.sql, seed.sql).
-[INFO] Generating Dockerfiles & docker-compose orchestration.
-[SUCCESS] 18 production source code files synthesized.</pre>
+                <pre class="code-viewer" style="margin-top: 6px;">[INFO] Generating Terraform modules in infrastructure/terraform/:
+  - provider.tf, variables.tf, vpc.tf, compute.tf, database.tf, outputs.tf
+[INFO] Terraform validate check: syntax valid.
+[SUCCESS] Terraform configuration ready.</pre>
               </div>
             </div>
 
             <div class="val-item" style="padding: 14px; flex-direction: column; align-items: flex-start; gap: 6px; cursor: pointer;" onclick="toggleAgentDetails(7)">
               <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-                <strong>7. Validation & Testing Agent</strong>
+                <strong>7. Validation Agent</strong>
                 <div style="display: flex; gap: 8px; align-items: center;">
-                  <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); retryStage('Validation & Testing')">🔄 Retry</button>
-                  <span class="badge-success">Completed (52s)</span>
+                  <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); retryStage('Validation Agent')">🔄 Retry</button>
+                  <span class="badge-success">Completed</span>
                 </div>
               </div>
-              <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Runs py_compile syntax verification, Pydantic schema validation, FastAPI contract checks, and SQL schema integration testing.</p>
+              <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Validates code syntax, requirements traceability, and API contract compliance.</p>
               <div id="agent-detail-7" style="display: none; width: 100%; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12px;">
                 <div style="color: #60a5fa; font-weight: 600;">Execution Logs & Artifacts:</div>
                 <pre class="code-viewer" style="margin-top: 6px;">[INFO] py_compile verification: All Python files compiled cleanly.
-[INFO] OpenAPI schema audit: 14 REST endpoints matched contract.
-[INFO] SQL syntax test: Schema DDL passed with foreign key constraints.
-[SUCCESS] Multi-stage test matrix passed 8/8 gates.</pre>
+[INFO] OpenAPI schema audit: REST endpoints matched contract.
+[INFO] Traceability matrix check: Functional & non-functional gates satisfied.
+[SUCCESS] Validation tests passed.</pre>
               </div>
             </div>
 
             <div class="val-item" style="padding: 14px; flex-direction: column; align-items: flex-start; gap: 6px; cursor: pointer;" onclick="toggleAgentDetails(8)">
               <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-                <strong>8. Release Gate Agent</strong>
+                <strong>8. Self-Correction Agent</strong>
                 <div style="display: flex; gap: 8px; align-items: center;">
-                  <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); retryStage('Release Gate')">🔄 Retry</button>
-                  <span class="badge-success">Completed (15s)</span>
+                  <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); retryStage('Self-Correction Agent')">🔄 Retry</button>
+                  <span class="badge-success">Completed</span>
                 </div>
               </div>
-              <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Enforces the hard compliance gates, approves the delivery package, and builds the deployable ZIP archive.</p>
+              <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Performs automated sanity verification, lint checks, and self-heals inconsistencies.</p>
               <div id="agent-detail-8" style="display: none; width: 100%; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12px;">
                 <div style="color: #60a5fa; font-weight: 600;">Execution Logs & Artifacts:</div>
-                <pre class="code-viewer" style="margin-top: 6px;">[INFO] Checking Release Gate acceptance thresholds:
-  - Unit tests: PASS (100%)
-  - Coverage: Verified (>= 90% threshold)
-  - Security audit: PASS (0 Critical)
-  - Docker valid: PASS
-[SUCCESS] Release Gate status: APPROVED. Deliverable ZIP packaged.</pre>
+                <pre class="code-viewer" style="margin-top: 6px;">[INFO] Running static analysis checks and consistency audit.
+[INFO] Verifying cross-references between frontend and backend APIs.
+[SUCCESS] Zero regressions detected. Release criteria verified.</pre>
+              </div>
+            </div>
+
+            <div class="val-item" style="padding: 14px; flex-direction: column; align-items: flex-start; gap: 6px; cursor: pointer;" onclick="toggleAgentDetails(9)">
+              <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                <strong>9. Project Generation</strong>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); retryStage('Project Generation')">🔄 Retry</button>
+                  <span class="badge-success">Completed</span>
+                </div>
+              </div>
+              <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Packages source files, builds deliverable ZIP, and launches the live interactive browser preview.</p>
+              <div id="agent-detail-9" style="display: none; width: 100%; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12px;">
+                <div style="color: #60a5fa; font-weight: 600;">Execution Logs & Artifacts:</div>
+                <pre class="code-viewer" style="margin-top: 6px;">[INFO] Preparing project workspace files and manifest.
+[INFO] Packaging authentic project deliverable ZIP archive.
+[INFO] Serving live frontend index.html application preview.
+[SUCCESS] Project generation complete!</pre>
               </div>
             </div>
           </div>
@@ -1969,12 +2061,216 @@ terraform apply -auto-approve</pre>
       });
     }
 
-    // 9. Real-Time Pipeline Execution Engine with Live Artifact Streaming
+    // 9. Architecture Diagram Controls (SVG Vector & Mermaid)
+    let dashArchFormat = 'svg'; // 'svg' or 'mermaid'
+    let dashArchZoom = 1.0;
+
+    function zoomDashArch(factor) {
+      dashArchZoom = Math.max(0.4, Math.min(3.0, dashArchZoom * factor));
+      applyDashArchTransform();
+    }
+
+    function resetDashArchZoom() {
+      dashArchZoom = 1.0;
+      applyDashArchTransform();
+    }
+
+    function applyDashArchTransform() {
+      const el = document.getElementById('dash-arch-content');
+      if (el) el.style.transform = `scale(${dashArchZoom})`;
+    }
+
+    function toggleArchFormat() {
+      dashArchFormat = (dashArchFormat === 'svg') ? 'mermaid' : 'svg';
+      const btn = document.getElementById('btn-toggle-arch-format');
+      if (btn) btn.textContent = dashArchFormat === 'svg' ? 'Mermaid' : 'SVG';
+      renderDashboardArchDiagram();
+    }
+
+    function getActiveSvg() {
+      if (!activeProjectData) return null;
+      return activeProjectData.architecture_svg ||
+             (activeProjectData.live_data && activeProjectData.live_data.architecture_svg) ||
+             null;
+    }
+
+    function renderDashboardArchDiagram() {
+      const dashArchView = document.getElementById('dash-arch-view');
+      if (!dashArchView) return;
+      const svg = getActiveSvg();
+      const mermaidDiag = getActiveDiagram();
+
+      if (dashArchFormat === 'svg' && svg) {
+        dashArchView.innerHTML = `<div id="dash-arch-content" style="transform: scale(${dashArchZoom}); transform-origin: top center; transition: transform 0.2s ease; overflow: visible;">${svg}</div>`;
+        const svgEl = dashArchView.querySelector('svg');
+        if (svgEl) {
+          svgEl.style.maxWidth = '100%';
+          svgEl.style.height = 'auto';
+          svgEl.style.maxHeight = '380px';
+          svgEl.style.display = 'inline-block';
+        }
+        return;
+      }
+
+      if (mermaidDiag) {
+        dashArchView.innerHTML = `<div id="dash-arch-content" style="transform: scale(${dashArchZoom}); transform-origin: top center; transition: transform 0.2s ease;"><div class="mermaid" id="dash-mermaid-preview">${mermaidDiag}</div></div>`;
+        const dm = document.getElementById('dash-mermaid-preview');
+        if (dm) {
+          try { mermaid.run({ nodes: [dm] }); } catch (e) { try { mermaid.contentLoaded(); } catch (err) {} }
+        }
+        return;
+      }
+
+      if (svg) {
+        // Fallback to SVG if Mermaid is not available
+        dashArchView.innerHTML = `<div id="dash-arch-content" style="transform: scale(${dashArchZoom}); transform-origin: top center; transition: transform 0.2s ease;">${svg}</div>`;
+        const svgEl = dashArchView.querySelector('svg');
+        if (svgEl) {
+          svgEl.style.maxWidth = '100%';
+          svgEl.style.height = 'auto';
+          svgEl.style.maxHeight = '380px';
+          svgEl.style.display = 'inline-block';
+        }
+        return;
+      }
+
+      dashArchView.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 32px 16px;">No architecture synthesized yet.<br><span style="font-size:12px; color:#64748b;">Execute a project prompt to generate cloud topology.</span></div>';
+    }
+
+    // 10. Hierarchical File Tree Explorer
+    let isDashboardFileTreeView = false;
+
+    function toggleDashboardFileView() {
+      isDashboardFileTreeView = !isDashboardFileTreeView;
+      const treeContainer = document.getElementById('dash-files-tree-container');
+      const tableContainer = document.getElementById('dash-files-table-container');
+      const btn = document.getElementById('btn-toggle-file-view');
+      if (treeContainer && tableContainer) {
+        if (isDashboardFileTreeView) {
+          treeContainer.style.display = 'block';
+          tableContainer.style.display = 'none';
+          if (btn) btn.textContent = '📋 Table View';
+          renderDashboardFileTree();
+        } else {
+          treeContainer.style.display = 'none';
+          tableContainer.style.display = 'block';
+          if (btn) btn.textContent = '🌳 Tree View';
+        }
+      }
+    }
+
+    function buildFileTree(files) {
+      const root = { name: '', isDir: true, children: {} };
+      (files || []).forEach(f => {
+        const rawPath = typeof f === 'string' ? f : f.path;
+        if (!rawPath) return;
+        const parts = rawPath.replace(/\\/g, '/').split('/');
+        let curr = root;
+        for (let i = 0; i < parts.length; i++) {
+          const part = parts[i];
+          const isFile = (i === parts.length - 1);
+          if (!curr.children[part]) {
+            curr.children[part] = {
+              name: part,
+              path: parts.slice(0, i + 1).join('/'),
+              isDir: !isFile,
+              size: isFile ? (f.size || 0) : 0,
+              children: isFile ? null : {}
+            };
+          }
+          curr = curr.children[part];
+        }
+      });
+      return root;
+    }
+
+    function renderTreeHTML(node) {
+      if (!node.children) return '';
+      const sortedKeys = Object.keys(node.children).sort((a, b) => {
+        const nodeA = node.children[a];
+        const nodeB = node.children[b];
+        if (nodeA.isDir !== nodeB.isDir) return nodeA.isDir ? -1 : 1;
+        return a.localeCompare(b);
+      });
+
+      return sortedKeys.map(key => {
+        const item = node.children[key];
+        const safePath = (item.path || key).replace(/'/g, "\\'");
+        if (item.isDir) {
+          const childHtml = renderTreeHTML(item);
+          return `
+            <div class="file-tree-node">
+              <div class="file-tree-row" onclick="toggleTreeNode(this)">
+                <span class="file-tree-toggle">▼</span>
+                <span class="file-tree-folder-icon">📁</span>
+                <strong>${key}</strong>
+              </div>
+              <div class="file-tree-children">${childHtml}</div>
+            </div>
+          `;
+        } else {
+          const szText = item.size ? (item.size > 1024 ? (item.size / 1024).toFixed(1) + ' KB' : item.size + ' B') : '';
+          return `
+            <div class="file-tree-node">
+              <div class="file-tree-row" onclick="previewFile('${safePath}')" title="Click to view file content">
+                <span class="file-tree-toggle">&nbsp;</span>
+                <span class="file-tree-file-icon">📄</span>
+                <span>${key}</span>
+                <span class="file-tree-size">${szText}</span>
+              </div>
+            </div>
+          `;
+        }
+      }).join('');
+    }
+
+    function toggleTreeNode(rowEl) {
+      const childrenEl = rowEl.nextElementSibling;
+      const toggleEl = rowEl.querySelector('.file-tree-toggle');
+      if (childrenEl) {
+        if (childrenEl.style.display === 'none') {
+          childrenEl.style.display = 'block';
+          if (toggleEl) toggleEl.textContent = '▼';
+        } else {
+          childrenEl.style.display = 'none';
+          if (toggleEl) toggleEl.textContent = '▶';
+        }
+      }
+    }
+
+    function renderDashboardFileTree() {
+      const container = document.getElementById('dash-files-tree-container');
+      if (!container) return;
+      const manifestFiles = (activeProjectData && activeProjectData.file_manifest && activeProjectData.file_manifest.files) || [];
+      if (!manifestFiles || manifestFiles.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 16px;">No files generated yet</div>';
+        return;
+      }
+      const tree = buildFileTree(manifestFiles);
+      container.innerHTML = renderTreeHTML(tree);
+    }
+
+    // 11. Real-Time Pipeline Execution Engine with Live Artifact Streaming
+    function showPromptError(msg) {
+      const errBanner = document.getElementById('prompt-error-banner');
+      const errMsg = document.getElementById('prompt-error-msg');
+      if (errBanner && errMsg) {
+        errMsg.textContent = msg;
+        errBanner.style.display = 'block';
+      } else {
+        alert(msg);
+      }
+      if (window.activePreviewTab && !window.activePreviewTab.closed) {
+        try { window.activePreviewTab.close(); } catch (_) {}
+        window.activePreviewTab = null;
+      }
+    }
+
     function updateLiveStreamingData(liveData, currentStageIdx) {
       if (!liveData) return;
 
       // 1. Coverage gauge & metrics
-      const cov = liveData.coverage_pct ?? (20 + currentStageIdx * 10);
+      const cov = liveData.coverage_pct ?? (20 + currentStageIdx * 9);
       const gaugeEl = document.getElementById('gauge-pct');
       if (gaugeEl) gaugeEl.textContent = `${cov}%`;
       const circle = document.getElementById('gauge-circle');
@@ -1991,27 +2287,21 @@ terraform apply -auto-approve</pre>
         if (document.getElementById('req-int')) document.getElementById('req-int').textContent = liveData.coverage_metrics.integration;
       }
 
-      // 2. Real-time Architecture diagram as soon as stage 3 is reached
-      if (liveData.architecture_diagram) {
-        const dashArchView = document.getElementById('dash-arch-view');
-        if (dashArchView && (!dashArchView.dataset.rendered || dashArchView.dataset.rendered !== 'true')) {
-          dashArchView.innerHTML = `<div class="mermaid" id="dash-mermaid-preview">${liveData.architecture_diagram}</div>`;
-          dashArchView.dataset.rendered = 'true';
-          const dm = document.getElementById('dash-mermaid-preview');
-          if (dm) {
-            try { mermaid.run({ nodes: [dm] }); } catch (e) { try { mermaid.contentLoaded(); } catch (err) {} }
-          }
+      // 2. Real-time Architecture diagram
+      if (liveData.architecture_svg || liveData.architecture_diagram) {
+        if (activeProjectData) {
+          if (liveData.architecture_svg) activeProjectData.architecture_svg = liveData.architecture_svg;
+          if (liveData.architecture_diagram) activeProjectData.architecture_diagram = liveData.architecture_diagram;
+        } else {
+          activeProjectData = {
+            architecture_svg: liveData.architecture_svg,
+            architecture_diagram: liveData.architecture_diagram
+          };
         }
-        const mainMermaid = document.getElementById('main-arch-mermaid');
-        if (mainMermaid && (!mainMermaid.dataset.rendered || mainMermaid.dataset.rendered !== 'true')) {
-          mainMermaid.removeAttribute('data-processed');
-          mainMermaid.textContent = liveData.architecture_diagram;
-          mainMermaid.dataset.rendered = 'true';
-          try { mermaid.run({ nodes: [mainMermaid] }); } catch (e) { try { mermaid.contentLoaded(); } catch (err) {} }
-        }
+        renderDashboardArchDiagram();
       }
 
-      // 3. Real-time Generated Files as soon as stage 5 is reached
+      // 3. Real-time Generated Files
       if (liveData.generated_files && liveData.generated_files.length > 0) {
         const dashTbody = document.getElementById('dash-files-table');
         if (dashTbody) {
@@ -2044,7 +2334,7 @@ terraform apply -auto-approve</pre>
         }
       }
 
-      // 4. Real-time Validation Report as soon as stage 6 is reached
+      // 4. Real-time Validation Report
       if (currentStageIdx >= 6) {
         const dashVal = document.getElementById('dash-val-summary');
         if (dashVal) {
@@ -2082,12 +2372,12 @@ terraform apply -auto-approve</pre>
         const agentDetailEl = document.getElementById(`agent-detail-${currentStageIdx + 1}`);
         if (agentDetailEl) {
           const pre = agentDetailEl.querySelector('pre');
-          if (pre) pre.textContent = `[INFO] ${liveData.log}\n[SUCCESS] Phase verified: ${liveData.stage_name}.`;
+          if (pre) pre.textContent = `[INFO] ${liveData.log}\n[SUCCESS] Phase verified: ${liveData.stage_name || 'Agent'}.`;
         }
       }
     }
 
-    async function executePipeline(prompt, projectName, mode, stack) {
+    async function executePipeline(prompt, projectName, mode, stack, requireCanonical = false) {
       if (isSubmitting) {
         showToast('A pipeline execution is already in progress. Please wait.');
         return;
@@ -2120,20 +2410,21 @@ terraform apply -auto-approve</pre>
       // Reset architecture view
       const dashArchView = document.getElementById('dash-arch-view');
       if (dashArchView) {
-        dashArchView.dataset.rendered = 'false';
-        dashArchView.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-size:13px; padding:32px 16px;">Synthesizing cloud architecture topology...<br><span style="font-size:12px; color:#60a5fa;">Streaming multi-tier Mermaid diagram</span></div>';
+        dashArchView.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-size:13px; padding:32px 16px;">Synthesizing cloud architecture topology...<br><span style="font-size:12px; color:#60a5fa;">Streaming multi-tier cloud topology diagram</span></div>';
       }
       const dashTbody = document.getElementById('dash-files-table');
       if (dashTbody) dashTbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#60a5fa; padding:16px;">Synthesizing project codebase...</td></tr>';
+      const treeContainer = document.getElementById('dash-files-tree-container');
+      if (treeContainer) treeContainer.innerHTML = '<div style="text-align:center; color:#60a5fa; padding:16px;">Synthesizing project codebase...</div>';
       const gaugeEl = document.getElementById('gauge-pct');
       if (gaugeEl) gaugeEl.textContent = '0%';
       const circle = document.getElementById('gauge-circle');
       if (circle) circle.style.strokeDashoffset = '283';
 
-      // Reset stepper nodes
+      // Reset stepper nodes (9 stages)
       const nodes = document.querySelectorAll('#pipeline-stepper .stepper-node');
       nodes.forEach((n, idx) => {
-        n.classList.remove('done', 'active');
+        n.classList.remove('done', 'active', 'failed');
         const timeEl = n.querySelector('.node-time');
         if (timeEl) timeEl.textContent = idx === 0 ? 'Starting...' : 'Waiting';
       });
@@ -2153,18 +2444,23 @@ terraform apply -auto-approve</pre>
           body: JSON.stringify({
             description: prompt,
             project_name: projectName,
-            execution_mode: mode || 'QUICK'
+            execution_mode: mode || 'QUICK',
+            require_canonical: Boolean(requireCanonical)
           })
         });
 
         const startData = await startRes.json();
-        if (!startRes.ok) throw new Error(startData.detail || 'Failed to start pipeline');
+        if (!startRes.ok) {
+          const errMsg = startData.detail || 'Failed to start pipeline';
+          showPromptError(errMsg);
+          throw new Error(errMsg);
+        }
 
         const jobId = startData.job_id;
         activeProjectId = startData.project_id || jobId;
         document.getElementById('cur-proj-id').textContent = activeProjectId;
 
-        // Poll /api/requirements/status/${jobId} with live artifact streaming and resilient retries
+        // Poll /api/requirements/status/${jobId} with live artifact streaming
         let consecutiveFailures = 0;
         const result = await new Promise((resolve, reject) => {
           pollingInterval = setInterval(async () => {
@@ -2173,7 +2469,6 @@ terraform apply -auto-approve</pre>
               if (!stRes.ok) {
                 consecutiveFailures++;
                 console.warn(`[Pipeline Poll] Transient HTTP ${stRes.status}, retry ${consecutiveFailures}/30...`);
-                // Attempt state recovery if consecutive failures accumulate
                 if (consecutiveFailures >= 5 && activeProjectId) {
                   try {
                     const recRes = await fetch(`/api/projects/${activeProjectId}`);
@@ -2196,29 +2491,31 @@ terraform apply -auto-approve</pre>
               consecutiveFailures = 0;
               const stData = await stRes.json();
 
-              // Update stepper nodes live
+              // Update stepper nodes live (9 stages)
               const currentStageIdx = stData.stage_index ?? 0;
+              const totalStages = 9;
               nodes.forEach((n, idx) => {
                 const timeEl = n.querySelector('.node-time');
                 if (idx < currentStageIdx) {
-                  n.classList.remove('active');
+                  n.classList.remove('active', 'failed');
                   n.classList.add('done');
                   if (timeEl) timeEl.textContent = '✓ Done';
                 } else if (idx === currentStageIdx) {
-                  n.classList.remove('done');
+                  n.classList.remove('done', 'failed');
                   n.classList.add('active');
                   if (timeEl) timeEl.textContent = 'Running...';
                 } else {
-                  n.classList.remove('done', 'active');
+                  n.classList.remove('done', 'active', 'failed');
                   if (timeEl) timeEl.textContent = 'Waiting';
                 }
               });
 
               const statusMsg = document.getElementById('exec-status-msg');
-              if (statusMsg) statusMsg.textContent = `Stage ${currentStageIdx + 1}/8: ${stData.stage}`;
+              const stagePct = Math.round(((currentStageIdx + 1) / totalStages) * 100);
+              if (statusMsg) statusMsg.textContent = `Stage ${currentStageIdx + 1}/9 (${stagePct}%): ${stData.stage}`;
               document.getElementById('pipe-badge').textContent = `● ${stData.stage}`;
 
-              // Stream live data (gauge, mermaid, files, validation)
+              // Stream live data (gauge, architecture SVG/mermaid, files, validation)
               if (stData.live_data) {
                 updateLiveStreamingData(stData.live_data, currentStageIdx);
               }
@@ -2226,14 +2523,22 @@ terraform apply -auto-approve</pre>
               if (stData.status === 'done') {
                 clearInterval(pollingInterval);
                 nodes.forEach(n => {
-                  n.classList.remove('active');
+                  n.classList.remove('active', 'failed');
                   n.classList.add('done');
                   const timeEl = n.querySelector('.node-time');
                   if (timeEl) timeEl.textContent = '✓ Done';
                 });
+                if (statusMsg) statusMsg.textContent = 'Stage 9/9 (100%): Complete';
+                document.getElementById('pipe-badge').textContent = '✓ Completed';
                 resolve(stData.result);
               } else if (stData.status === 'error') {
                 clearInterval(pollingInterval);
+                if (nodes[currentStageIdx]) {
+                  nodes[currentStageIdx].classList.remove('active');
+                  nodes[currentStageIdx].classList.add('failed');
+                  const timeEl = nodes[currentStageIdx].querySelector('.node-time');
+                  if (timeEl) timeEl.textContent = '✗ Failed';
+                }
                 reject(new Error(stData.error || 'Pipeline execution failed'));
               }
             } catch (pollErr) {
@@ -2251,18 +2556,39 @@ terraform apply -auto-approve</pre>
         if (overlay) overlay.style.display = 'none';
         applyProjectData(result);
         switchTab('dashboard');
-        showToast('Autonomous pipeline completed successfully! Project ready for deployment.');
+
+        // Automatically navigate synchronously opened tab to the project preview
+        const previewUrl = window.location.origin + '/preview/' + activeProjectId;
+        if (window.activePreviewTab && !window.activePreviewTab.closed) {
+          try {
+            window.activePreviewTab.location.href = previewUrl;
+          } catch (e) {
+            console.warn('Could not navigate tab:', e);
+          }
+        }
+        // Always display fallback preview banner
+        const prevBanner = document.getElementById('preview-success-banner');
+        const prevLink = document.getElementById('preview-direct-link');
+        if (prevBanner && prevLink) {
+          prevLink.href = previewUrl;
+          prevBanner.style.display = 'block';
+        }
+
+        showToast('Autonomous pipeline completed successfully! Project preview loaded in new tab.');
       } catch (err) {
         clearInterval(timerInterval);
         if (pollingInterval) clearInterval(pollingInterval);
         if (overlay) overlay.style.display = 'none';
         console.error('Pipeline error:', err);
-        showToast('Pipeline notice: ' + (err.message || 'Execution error'), 'error');
+        showPromptError(err.message || 'Execution error');
         document.getElementById('cur-proj-status').textContent = 'Failed';
         document.getElementById('cur-proj-status').style.background = 'rgba(239, 68, 68, 0.2)';
         document.getElementById('cur-proj-status').style.color = '#ef4444';
         document.getElementById('cur-proj-status').style.borderColor = '#ef4444';
         document.getElementById('pipe-badge').textContent = 'Failed';
+        document.getElementById('pipe-badge').style.background = 'rgba(239, 68, 68, 0.2)';
+        document.getElementById('pipe-badge').style.color = '#ef4444';
+        document.getElementById('pipe-badge').style.borderColor = '#ef4444';
       } finally {
         isSubmitting = false;
         if (npBtn) npBtn.disabled = false;
@@ -2273,14 +2599,44 @@ terraform apply -auto-approve</pre>
 
     async function handleDashboardPromptSubmit(e) {
       if (e && e.preventDefault) e.preventDefault();
+
+      // Clear any previous error / preview banners
+      const errBanner = document.getElementById('prompt-error-banner');
+      if (errBanner) errBanner.style.display = 'none';
+      const prevBanner = document.getElementById('preview-success-banner');
+      if (prevBanner) prevBanner.style.display = 'none';
+
       const pEl = document.getElementById('dash-quick-prompt');
       const prompt = pEl ? pEl.value.trim() : '';
       const nameEl = document.getElementById('dash-quick-name');
       const name = (nameEl && nameEl.value.trim()) || 'AI Generated Project';
-      if (!prompt) { alert('Please enter project requirements.'); return; }
+      if (!prompt) {
+        showPromptError('Please enter a project prompt.');
+        return;
+      }
+
+      // Synchronously open blank tab to prevent browser popup blockers
+      let previewTab = null;
+      try {
+        previewTab = window.open('about:blank', '_blank');
+        if (previewTab && !previewTab.closed) {
+          previewTab.document.write(`<!DOCTYPE html><html><head><title>Synthesizing Project Preview...</title><style>body{margin:0;background:#070a12;color:#94a3b8;font-family:system-ui,-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;}h2{color:#f8fafc;margin:0;font-size:20px;}.spinner{width:38px;height:38px;border:3px solid #1e293b;border-top-color:#3b82f6;border-radius:50%;animation:spin 0.8s linear infinite;}@keyframes spin{to{transform:rotate(360deg);}}p{font-size:13px;color:#64748b;margin:0;}</style></head><body><div class="spinner"></div><h2>Autonomous Agent Pipeline Running...</h2><p>Your interactive application preview will load here automatically once generation finishes.</p></body></html>`);
+        }
+      } catch (tabErr) {
+        console.warn('Popup window open warning:', tabErr);
+      }
+      window.activePreviewTab = previewTab;
+
       const dashBtn = document.getElementById('dash-quick-submit-btn');
       if (dashBtn) dashBtn.disabled = true;
-      await executePipeline(prompt, name, 'QUICK', '');
+
+      try {
+        await executePipeline(prompt, name, 'QUICK', '', true);
+      } catch (err) {
+        console.error('Submit error:', err);
+      } finally {
+        if (dashBtn) dashBtn.disabled = false;
+      }
     }
 
     async function handlePipelineSubmit(e) {
@@ -2288,7 +2644,7 @@ terraform apply -auto-approve</pre>
       const pEl = document.getElementById('dash-quick-prompt') || document.getElementById('np-prompt');
       const prompt = pEl ? pEl.value.trim() : '';
       if (!prompt) { alert('Please enter requirements.'); return; }
-      await executePipeline(prompt, 'AI Generated Cloud App', 'QUICK', '');
+      await executePipeline(prompt, 'AI Generated Cloud App', 'QUICK', '', true);
     }
 
     async function handleDedicatedNewProject(e) {
@@ -2297,7 +2653,7 @@ terraform apply -auto-approve</pre>
       const prompt = document.getElementById('np-prompt').value.trim();
       const mode = document.getElementById('np-mode').value || 'QUICK';
       if (!prompt) { alert('Please enter project requirements.'); return; }
-      await executePipeline(prompt, name, mode, '');
+      await executePipeline(prompt, name, mode, '', true);
     }
 
     function getActiveDiagram() {
@@ -2326,8 +2682,19 @@ terraform apply -auto-approve</pre>
 
     function renderModalArchitectureDiagram() {
       const diagram = getActiveDiagram();
+      const svg = getActiveSvg();
       const mm = document.getElementById('modal-arch-mermaid');
       if (mm) {
+        if (dashArchFormat === 'svg' && svg) {
+          mm.className = '';
+          mm.innerHTML = svg;
+          const svgEl = mm.querySelector('svg');
+          if (svgEl) {
+            svgEl.style.maxWidth = '100%';
+            svgEl.style.height = 'auto';
+          }
+          return;
+        }
         if (!diagram) {
           mm.className = '';
           mm.innerHTML = '<div style="color:var(--text-muted); padding:48px 16px; font-size:13px;">No architecture synthesized yet for this project.<br><span style="font-size:12px; color:#64748b;">Execute a project prompt or select a project from history.</span></div>';
@@ -2377,7 +2744,7 @@ terraform apply -auto-approve</pre>
       document.getElementById('pipe-badge').style.color = 'var(--success)';
       document.getElementById('pipe-badge').style.borderColor = 'var(--success)';
 
-      // 3. Update Requirements Coverage Gauge (dynamic, no hardcoded 92%)
+      // 3. Update Requirements Coverage Gauge (dynamic)
       const cov = (data.coverage !== undefined && data.coverage !== null) ? data.coverage :
                   (data.traceability_matrix && data.traceability_matrix.overall_coverage_pct) ||
                   (data.requirement_traceability && data.requirement_traceability.coverage_percent) || 0;
@@ -2395,7 +2762,7 @@ terraform apply -auto-approve</pre>
       document.getElementById('req-perf').textContent = metrics.performance || '4/4';
       document.getElementById('req-int').textContent = metrics.integration || '5/5';
 
-      // 4. Update Files Tables
+      // 4. Update Files Tables & Hierarchical Tree
       let manifestFiles = data.file_manifest?.files || [];
       if ((!manifestFiles || manifestFiles.length === 0) && data.code_generation?.files) {
         manifestFiles = Object.keys(data.code_generation.files).map(p => ({
@@ -2419,6 +2786,8 @@ terraform apply -auto-approve</pre>
           </tr>
         `;
         }).join('');
+
+        renderDashboardFileTree();
 
         if (fullTbody) {
           fullTbody.innerHTML = manifestFiles.map(f => {
@@ -2449,22 +2818,9 @@ terraform apply -auto-approve</pre>
       if (valGate) valGate.textContent = (data.release_gate?.status || 'APPROVED').toUpperCase();
 
       // 5. Update Architecture Diagrams & Specs
+      renderDashboardArchDiagram();
       renderArchitectureDiagram();
       renderModalArchitectureDiagram();
-
-      const diagram = getActiveDiagram();
-      const dashArchView = document.getElementById('dash-arch-view');
-      if (dashArchView) {
-        if (diagram) {
-          dashArchView.innerHTML = `<div class="mermaid" id="dash-mermaid-preview">${diagram}</div>`;
-          const dm = document.getElementById('dash-mermaid-preview');
-          if (dm) {
-            try { mermaid.run({ nodes: [dm] }); } catch (e) { try { mermaid.contentLoaded(); } catch (err) {} }
-          }
-        } else {
-          dashArchView.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 32px 16px;">No architecture synthesized yet.<br><span style="font-size:12px; color:#64748b;">Execute a project prompt to generate cloud topology.</span></div>';
-        }
-      }
 
       const arch = data.architecture || {};
       const cloudSpec = data.cloud_architecture_spec || {};

@@ -42,3 +42,9 @@ class RequirementRequest(BaseModel):
         "QUICK",
         description="Execution mode: QUICK, TEST, or FULL"
     )
+
+    require_canonical: Optional[bool] = Field(
+        False,
+        description="Whether the prompt must strictly match one of the 10 pre-generated projects"
+    )
+

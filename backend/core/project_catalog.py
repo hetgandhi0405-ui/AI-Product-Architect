@@ -14,17 +14,69 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 PRECOMPUTED_DIR = REPO_ROOT / "data" / "precomputed"
 
 
+EXTRACTED_WORKSPACES_DIR = REPO_ROOT / "data" / "extracted_prompts_workspaces"
+UPLOADED_ZIPS_DIR = REPO_ROOT / "data" / "uploaded_prompts_zips"
+
+PROJECT_WORKSPACES: Dict[str, str] = {
+    "proj-task-management": "01-task-management",
+    "proj-ecommerce": "02-ecommerce-platform",
+    "proj-lms": "03-student-lms",
+    "proj-hospital": "04-hospital-appointments",
+    "proj-finance": "05-personal-finance",
+    "proj-smart-home": "06-smart-home-monitor",
+    "proj-analytics": "07-realtime-analytics",
+    "proj-support-tickets": "08-support-ticketing",
+    "proj-attendance": "09-employee-attendance",
+    "proj-uptime-monitor": "10-website-uptime-monitor",
+    "task-management": "01-task-management",
+    "ecommerce": "02-ecommerce-platform",
+    "learning-management-system": "03-student-lms",
+    "hospital-appointment": "04-hospital-appointments",
+    "personal-finance": "05-personal-finance",
+    "smart-home": "06-smart-home-monitor",
+    "real-time-analytics": "07-realtime-analytics",
+    "customer-support-ticket": "08-support-ticketing",
+    "employee-attendance": "09-employee-attendance",
+    "website-uptime-monitoring": "10-website-uptime-monitor",
+}
+
+PROJECT_ZIPS: Dict[str, str] = {
+    "proj-task-management": "01-task-management.zip",
+    "proj-ecommerce": "02-ecommerce-platform.zip",
+    "proj-lms": "03-student-lms.zip",
+    "proj-hospital": "04-hospital-appointments.zip",
+    "proj-finance": "05-personal-finance.zip",
+    "proj-smart-home": "06-smart-home-monitor.zip",
+    "proj-analytics": "07-realtime-analytics.zip",
+    "proj-support-tickets": "08-support-ticketing.zip",
+    "proj-attendance": "09-employee-attendance.zip",
+    "proj-uptime-monitor": "10-website-uptime-monitor.zip",
+    "task-management": "01-task-management.zip",
+    "ecommerce": "02-ecommerce-platform.zip",
+    "learning-management-system": "03-student-lms.zip",
+    "hospital-appointment": "04-hospital-appointments.zip",
+    "personal-finance": "05-personal-finance.zip",
+    "smart-home": "06-smart-home-monitor.zip",
+    "real-time-analytics": "07-realtime-analytics.zip",
+    "customer-support-ticket": "08-support-ticketing.zip",
+    "employee-attendance": "09-employee-attendance.zip",
+    "website-uptime-monitoring": "10-website-uptime-monitor.zip",
+}
+
 CANONICAL_PROJECTS: List[Dict[str, Any]] = [
     {
         "key": "task-management",
         "project_id": "proj-task-management",
         "project_name": "Task Management System",
         "canonical_prompt": "Build a task management application with user roles, projects, task assignments, priorities, due dates, status tracking, search, and task filtering.",
+        "extracted_folder": "01-task-management",
+        "zip_name": "01-task-management.zip",
         "domain_id": "task_management",
         "primary_entity": "Task",
         "entities": ["User", "Project", "Task", "Category"],
         "api_prefix": "/api/tasks",
         "has_redis": False,
+        "aliases": ["task management system", "task management platform", "task management", "task tracker", "todo kanban"],
         "keywords": [
             "task", "tasks", "todo", "kanban", "assignment", "assignments",
             "priority", "priorities", "due date", "due dates", "task filtering",
@@ -37,11 +89,14 @@ CANONICAL_PROJECTS: List[Dict[str, Any]] = [
         "project_id": "proj-ecommerce",
         "project_name": "E-Commerce Platform",
         "canonical_prompt": "Build an e-commerce platform with product listings, categories, product search, shopping cart, order management, inventory tracking, and a safe sandbox checkout workflow.",
+        "extracted_folder": "02-ecommerce-platform",
+        "zip_name": "02-ecommerce-platform.zip",
         "domain_id": "ecommerce",
         "primary_entity": "Product",
         "entities": ["User", "Product", "Order", "OrderItem"],
         "api_prefix": "/api/products",
         "has_redis": False,
+        "aliases": ["e-commerce platform", "ecommerce platform", "ecommerce", "online store", "storefront", "shopping cart"],
         "keywords": [
             "ecommerce", "e-commerce", "shopping", "cart", "product listings",
             "categories", "order management", "inventory tracking", "checkout",
@@ -54,11 +109,14 @@ CANONICAL_PROJECTS: List[Dict[str, Any]] = [
         "project_id": "proj-lms",
         "project_name": "Student Learning Management System",
         "canonical_prompt": "Build a student learning management system with students, instructors, courses, enrollment, lessons, quizzes, and learning progress.",
+        "extracted_folder": "03-student-lms",
+        "zip_name": "03-student-lms.zip",
         "domain_id": "lms",
         "primary_entity": "Course",
         "entities": ["User", "Course", "Enrollment", "Assignment", "Submission"],
         "api_prefix": "/api/courses",
         "has_redis": False,
+        "aliases": ["student learning management system", "learning management system", "student lms", "lms", "course platform"],
         "keywords": [
             "lms", "learning management", "students", "instructors", "courses",
             "enrollment", "lessons", "quizzes", "learning progress", "curriculum",
@@ -69,13 +127,16 @@ CANONICAL_PROJECTS: List[Dict[str, Any]] = [
     {
         "key": "hospital-appointment",
         "project_id": "proj-hospital",
-        "project_name": "Hospital Appointment System",
+        "project_name": "Hospital Appointment Management System",
         "canonical_prompt": "Build a hospital appointment system with patient registration, doctor profiles, availability, appointment booking, cancellation, and appointment status tracking.",
+        "extracted_folder": "04-hospital-appointments",
+        "zip_name": "04-hospital-appointments.zip",
         "domain_id": "hospital",
         "primary_entity": "Doctor",
         "entities": ["User", "Doctor", "Patient", "Appointment"],
         "api_prefix": "/api/doctors",
         "has_redis": False,
+        "aliases": ["hospital appointment management system", "hospital appointment system", "hospital appointments", "doctor booking", "clinic appointment"],
         "keywords": [
             "hospital", "appointment", "patient", "patients", "doctor", "doctors",
             "availability", "booking", "cancellation", "clinic", "clinical",
@@ -88,11 +149,14 @@ CANONICAL_PROJECTS: List[Dict[str, Any]] = [
         "project_id": "proj-finance",
         "project_name": "Personal Finance Tracker",
         "canonical_prompt": "Build a personal finance tracker with transactions, categories, budgets, monthly summaries, filtering, and expense charts.",
+        "extracted_folder": "05-personal-finance",
+        "zip_name": "05-personal-finance.zip",
         "domain_id": "finance",
         "primary_entity": "Transaction",
         "entities": ["User", "Category", "Transaction", "Budget"],
         "api_prefix": "/api/transactions",
         "has_redis": False,
+        "aliases": ["personal finance tracker", "finance tracker", "expense tracker", "budget tracker", "personal finance"],
         "keywords": [
             "finance", "personal finance", "transactions", "categories", "budgets",
             "monthly summaries", "expense charts", "income", "expenses", "spending",
@@ -103,13 +167,16 @@ CANONICAL_PROJECTS: List[Dict[str, Any]] = [
     {
         "key": "smart-home",
         "project_id": "proj-smart-home",
-        "project_name": "Smart Home Dashboard",
+        "project_name": "Smart Home Monitoring System",
         "canonical_prompt": "Build a smart home dashboard with rooms, devices, device status, monitoring, and device controls with a simulated IoT integration when hardware is unavailable.",
+        "extracted_folder": "06-smart-home-monitor",
+        "zip_name": "06-smart-home-monitor.zip",
         "domain_id": "iot",
         "primary_entity": "Device",
         "entities": ["User", "Device", "SensorReading", "AlertRule"],
         "api_prefix": "/api/devices",
         "has_redis": False,
+        "aliases": ["smart home monitoring system", "smart home dashboard", "smart home monitor", "smart home", "iot monitoring"],
         "keywords": [
             "smart home", "iot", "dashboard", "rooms", "devices", "device status",
             "monitoring", "device controls", "simulated iot", "sensors", "sensor reading",
@@ -122,11 +189,14 @@ CANONICAL_PROJECTS: List[Dict[str, Any]] = [
         "project_id": "proj-analytics",
         "project_name": "Real-Time Analytics Dashboard",
         "canonical_prompt": "Build a real-time analytics dashboard with event ingestion, aggregation, time-based filtering, charts, and activity summaries.",
+        "extracted_folder": "07-realtime-analytics",
+        "zip_name": "07-realtime-analytics.zip",
         "domain_id": "analytics",
         "primary_entity": "Event",
         "entities": ["User", "StreamSource", "Event", "MetricAggregation"],
         "api_prefix": "/api/events",
         "has_redis": True,
+        "aliases": ["real-time analytics dashboard", "realtime analytics dashboard", "real-time analytics", "realtime analytics", "event analytics"],
         "keywords": [
             "analytics", "real-time analytics", "realtime analytics", "event ingestion",
             "aggregation", "time-based filtering", "charts", "activity summaries",
@@ -137,13 +207,16 @@ CANONICAL_PROJECTS: List[Dict[str, Any]] = [
     {
         "key": "customer-support-ticket",
         "project_id": "proj-support-tickets",
-        "project_name": "Customer Support Ticket System",
+        "project_name": "Support Ticketing System",
         "canonical_prompt": "Build a customer support ticket system with ticket creation, assignment, priorities, comments, search, and status tracking.",
+        "extracted_folder": "08-support-ticketing",
+        "zip_name": "08-support-ticketing.zip",
         "domain_id": "support_ticket",
         "primary_entity": "Ticket",
         "entities": ["User", "Department", "Ticket", "TicketComment"],
         "api_prefix": "/api/tickets",
         "has_redis": False,
+        "aliases": ["support ticketing system", "customer support ticket system", "customer support ticketing", "helpdesk ticketing", "support tickets"],
         "keywords": [
             "support ticket", "ticket", "tickets", "customer support", "helpdesk",
             "ticket creation", "assignment", "priorities", "comments", "ticket comment",
@@ -154,13 +227,16 @@ CANONICAL_PROJECTS: List[Dict[str, Any]] = [
     {
         "key": "employee-attendance",
         "project_id": "proj-attendance",
-        "project_name": "Employee Attendance Management",
+        "project_name": "Employee Attendance System",
         "canonical_prompt": "Build an employee attendance management system with employee records, check-in/check-out, attendance history, daily summaries, and leave requests.",
+        "extracted_folder": "09-employee-attendance",
+        "zip_name": "09-employee-attendance.zip",
         "domain_id": "hr_attendance",
         "primary_entity": "Employee",
         "entities": ["User", "Employee", "Attendance", "LeaveRequest"],
         "api_prefix": "/api/employees",
         "has_redis": False,
+        "aliases": ["employee attendance system", "employee attendance management", "employee attendance", "attendance system", "attendance tracker"],
         "keywords": [
             "attendance", "employee attendance", "employee records", "check-in",
             "check-out", "clock-in", "clock-out", "attendance history", "daily summaries",
@@ -171,13 +247,16 @@ CANONICAL_PROJECTS: List[Dict[str, Any]] = [
     {
         "key": "website-uptime-monitoring",
         "project_id": "proj-uptime-monitor",
-        "project_name": "Website Uptime Monitoring",
+        "project_name": "Website Uptime Monitoring System",
         "canonical_prompt": "Build a website uptime monitoring system with website registration, health checks, uptime history, failure events, and alert simulation.",
+        "extracted_folder": "10-website-uptime-monitor",
+        "zip_name": "10-website-uptime-monitor.zip",
         "domain_id": "uptime_monitoring",
         "primary_entity": "MonitoredUrl",
         "entities": ["User", "MonitoredUrl", "UptimeCheck", "Incident"],
         "api_prefix": "/api/monitors",
         "has_redis": False,
+        "aliases": ["website uptime monitoring system", "website uptime monitoring", "website uptime monitor", "uptime monitor", "uptime monitoring"],
         "keywords": [
             "uptime", "uptime monitoring", "website uptime", "website registration",
             "health checks", "uptime history", "failure events", "alert simulation",
@@ -204,12 +283,13 @@ def _tokenize(text: str) -> List[str]:
 def match_canonical_project(prompt: str, project_name: str = "") -> Optional[Dict[str, Any]]:
     """
     Intelligently determine whether a user prompt matches one of the 10 canonical projects.
-    Returns the matching project catalog dictionary or None if no match.
+    Returns the matching project catalog dictionary or None if no match with sufficient confidence.
     """
     if not prompt or not prompt.strip():
         return None
 
     raw_text = (prompt + " " + (project_name or "")).lower().strip()
+    norm_prompt = re.sub(r"\s+", " ", re.sub(r"[^a-z0-9\s]", " ", raw_text)).strip()
     prompt_tokens = set(_tokenize(raw_text))
 
     best_match = None
@@ -217,39 +297,52 @@ def match_canonical_project(prompt: str, project_name: str = "") -> Optional[Dic
 
     for proj in CANONICAL_PROJECTS:
         canonical_p = proj["canonical_prompt"].lower()
+        norm_canonical = re.sub(r"\s+", " ", re.sub(r"[^a-z0-9\s]", " ", canonical_p)).strip()
         
-        # 1. Exact or near-exact string match
-        if canonical_p in raw_text or raw_text in canonical_p:
+        # 1. Exact or near-exact match on canonical prompt
+        if norm_canonical in norm_prompt or norm_prompt in norm_canonical:
             return proj
 
-        # 2. Key phrase match
-        for phrase in proj["keywords"]:
-            if " " in phrase and phrase in raw_text:
-                score = 3.0  # High bonus for exact multi-word key phrases
+        # 2. Match on project title or aliases
+        for alias in proj.get("aliases", []) + [proj["project_name"].lower()]:
+            norm_alias = re.sub(r"\s+", " ", re.sub(r"[^a-z0-9\s]", " ", alias.lower())).strip()
+            if norm_alias and norm_alias in norm_prompt:
+                score = 5.0
                 if score > best_score:
                     best_score = score
                     best_match = proj
 
-        # 3. Token overlap scoring
+        # 3. Key phrase match
+        for phrase in proj["keywords"]:
+            if " " in phrase and phrase in raw_text:
+                score = 3.5  # High bonus for exact multi-word key phrases
+                if score > best_score:
+                    best_score = score
+                    best_match = proj
+
+        # 4. Token overlap scoring
         canonical_tokens = set(_tokenize(canonical_p))
         overlap = len(prompt_tokens & canonical_tokens)
         if overlap > 0:
             jaccard = overlap / len(prompt_tokens | canonical_tokens)
-            score = overlap + jaccard * 5.0
+            score = overlap * 1.2 + jaccard * 5.0
             if score > best_score:
                 best_score = score
                 best_match = proj
 
-    # Threshold for match
+    # Threshold for match: requires confidence >= 2.0
     if best_match and best_score >= 2.0:
         return best_match
 
-    # Fallback: check with domain analyzer
+    # Fallback: check with domain analyzer ONLY if confidence is high
     try:
         from backend.core.domain_analyzer import analyze_domain
         spec = analyze_domain(prompt, project_name)
         if spec.domain_id in PROJECTS_BY_DOMAIN:
-            return PROJECTS_BY_DOMAIN[spec.domain_id]
+            # Verify at least one keyword matches
+            cand = PROJECTS_BY_DOMAIN[spec.domain_id]
+            if any(k.lower() in raw_text for k in cand.get("keywords", [])):
+                return cand
     except Exception:
         pass
 
@@ -272,6 +365,141 @@ def load_precomputed_project_data(key: str) -> Optional[Dict[str, Any]]:
                 return json.load(f)
         except Exception:
             return None
+    return None
+
+
+def get_workspace_dir_for_project(key_or_id: str) -> Optional[Path]:
+    """
+    Get the extracted workspace directory for a canonical project key or project ID.
+    """
+    folder_name = PROJECT_WORKSPACES.get(key_or_id)
+    if not folder_name:
+        for p in CANONICAL_PROJECTS:
+            if p["key"] == key_or_id or p["project_id"] == key_or_id:
+                folder_name = p.get("extracted_folder")
+                break
+    if folder_name:
+        ws_dir = EXTRACTED_WORKSPACES_DIR / folder_name
+        if ws_dir.exists() and ws_dir.is_dir():
+            return ws_dir
+    return None
+
+
+def get_zip_path_for_project(key_or_id: str) -> Optional[Path]:
+    """
+    Get the authentic uploaded ZIP archive path for a canonical project key or project ID.
+    """
+    zip_name = PROJECT_ZIPS.get(key_or_id)
+    if not zip_name:
+        for p in CANONICAL_PROJECTS:
+            if p["key"] == key_or_id or p["project_id"] == key_or_id:
+                zip_name = p.get("zip_name")
+                break
+    if zip_name:
+        zip_path = UPLOADED_ZIPS_DIR / zip_name
+        if zip_path.exists() and zip_path.is_file():
+            return zip_path
+    return None
+
+
+def get_project_diagram_svg(key_or_id: str) -> Optional[str]:
+    """
+    Retrieve authentic cloud-architecture.svg content from the project's extracted workspace.
+    """
+    ws = get_workspace_dir_for_project(key_or_id)
+    if ws:
+        svg_file = ws / "diagrams" / "cloud-architecture.svg"
+        if svg_file.exists():
+            try:
+                return svg_file.read_text(encoding="utf-8")
+            except Exception:
+                pass
+    return None
+
+
+def get_project_diagram_mmd(key_or_id: str) -> Optional[str]:
+    """
+    Retrieve authentic cloud-architecture.mmd content from the project's extracted workspace.
+    """
+    ws = get_workspace_dir_for_project(key_or_id)
+    if ws:
+        mmd_file = ws / "diagrams" / "cloud-architecture.mmd"
+        if mmd_file.exists():
+            try:
+                return mmd_file.read_text(encoding="utf-8")
+            except Exception:
+                pass
+    return None
+
+
+def get_project_file_manifest(key_or_id: str) -> Dict[str, Any]:
+    """
+    Retrieve genuine file manifest and file listings from the project's extracted workspace.
+    """
+    ws = get_workspace_dir_for_project(key_or_id)
+    if not ws:
+        return {"files": [], "total_files": 0}
+
+    manifest_file = ws / "file-manifest.json"
+    files_list = []
+    
+    # Walk actual directory so all real files are represented accurately
+    for p in sorted(ws.rglob("*")):
+        if p.is_file():
+            rel = p.relative_to(ws).as_posix()
+            ext = p.suffix.lstrip(".") or "txt"
+            cat = "frontend" if rel.startswith("frontend") else \
+                  "backend" if rel.startswith("backend") else \
+                  "diagrams" if rel.startswith("diagrams") else \
+                  "docs" if rel.startswith("docs") else \
+                  "tests" if rel.startswith("tests") else "config"
+            files_list.append({
+                "path": rel,
+                "size": p.stat().st_size,
+                "type": ext,
+                "category": cat,
+                "status": "Ready"
+            })
+
+    manifest_data = {}
+    if manifest_file.exists():
+        try:
+            with open(manifest_file, "r", encoding="utf-8") as f:
+                manifest_data = json.load(f)
+        except Exception:
+            pass
+
+    return {
+        "project_id": key_or_id,
+        "files": files_list,
+        "total_files": len(files_list),
+        "raw_manifest": manifest_data
+    }
+
+
+def get_project_real_file_content(key_or_id: str, rel_path: str) -> Optional[str]:
+    """
+    Safely read file content from the authentic extracted project workspace.
+    """
+    ws = get_workspace_dir_for_project(key_or_id)
+    if not ws:
+        return None
+
+    norm_rel = os.path.normpath(rel_path).lstrip("/\\")
+    target = (ws / norm_rel).resolve()
+    try:
+        target.relative_to(ws.resolve())
+    except ValueError:
+        return None
+
+    if target.exists() and target.is_file():
+        try:
+            return target.read_text(encoding="utf-8")
+        except Exception:
+            try:
+                return target.read_text(encoding="latin-1")
+            except Exception:
+                return None
     return None
 
 

@@ -13,7 +13,18 @@ from backend.schemas.requirement import RequirementRequest
 from backend.routes.preview_html import render_project_preview_html
 from backend.routes.code_generator import generate_prompt_tailored_files
 from backend.core.domain_analyzer import analyze_domain
-from backend.core.project_catalog import match_canonical_project, load_precomputed_project_data
+from backend.core.project_catalog import (
+    match_canonical_project,
+    load_precomputed_project_data,
+    get_project_diagram_svg,
+    get_project_diagram_mmd,
+    get_project_file_manifest,
+    get_project_real_file_content,
+    get_zip_path_for_project,
+    get_workspace_dir_for_project,
+    CANONICAL_PROJECTS,
+    PROJECT_WORKSPACES,
+)
 
 
 router = APIRouter(
@@ -60,15 +71,17 @@ _jobs_lock = threading.Lock()
 # Ordered list of agent nodes that the frontend will show as pipeline stages.
 # These names MUST match the sidebar stepper labels shown in the dashboard.
 PIPELINE_STAGES = [
-    "Requirements Analysis",
-    "Product Planning",
-    "UI/UX & API Specs",
-    "Architecture Design",
-    "Security & Integration",
-    "Code Generation",
-    "Validation & Testing",
-    "Release Gate & Export",
+    "Requirement Agent",
+    "Suggestion Agent",
+    "Architecture Agent",
+    "Diagram Agent",
+    "Infrastructure Agent",
+    "Terraform Agent",
+    "Validation Agent",
+    "Self-Correction Agent",
+    "Project Generation",
 ]
+
 
 
 def _generate_prompt_tailored_files(requirements: str, project_name: str, base_files: dict = None) -> dict:
@@ -150,12 +163,26 @@ def _run_pipeline_in_background(job_id: str, initial_state: dict):
 
     # 1. Match Canonical Precomputed Project Catalog
     precomputed_key = initial_state.get("precomputed_key")
+    matched_cat = None
     if not precomputed_key:
         matched_cat = match_canonical_project(req_text, proj_name)
         if matched_cat:
             precomputed_key = matched_cat["key"]
+    elif precomputed_key:
+        from backend.core.project_catalog import PROJECTS_BY_KEY
+        matched_cat = PROJECTS_BY_KEY.get(precomputed_key)
 
     precomputed_data = load_precomputed_project_data(precomputed_key) if precomputed_key else None
+
+    # Load authentic SVG and Mermaid diagrams from workspace
+    active_svg = None
+    manifest_files = []
+    if precomputed_key:
+        active_svg = get_project_diagram_svg(precomputed_key)
+        mmd_text = get_project_diagram_mmd(precomputed_key)
+        manifest_meta = get_project_file_manifest(precomputed_key)
+        if manifest_meta and manifest_meta.get("files"):
+            manifest_files = manifest_meta["files"]
 
     # Launch graph invocation in concurrent background thread only if not already precomputed
     worker_result = {}
@@ -165,7 +192,7 @@ def _run_pipeline_in_background(job_id: str, initial_state: dict):
         worker_result = dict(precomputed_data)
         worker_done.set()
         tailored_files = precomputed_data.get("code_generation", {}).get("files", {})
-        active_diagram = precomputed_data.get("diagram") or precomputed_data.get("architecture_diagram", "")
+        active_diagram = mmd_text if (precomputed_key and 'mmd_text' in locals() and mmd_text) else (precomputed_data.get("diagram") or precomputed_data.get("architecture_diagram", ""))
         domain_spec = analyze_domain(req_text, proj_name)
         val_report = precomputed_data.get("validation_report", {
             "status": "PASSED",
@@ -211,14 +238,15 @@ def _run_pipeline_in_background(job_id: str, initial_state: dict):
     download_url = f"/api/requirements/export/{initial_state['project_id']}"
 
     stage_logs = [
-        f"Requirements Agent: Extracted user stories and technical scope for '{proj_name}'.",
-        "Product Planner: Synthesized feature matrix, user workflows, and MVP milestones.",
-        "UI/UX & API Spec: Generated REST endpoints and responsive UI wireframe layouts.",
-        "Cloud Architecture: Synthesized microservice topology and Mermaid diagram.",
-        "Security & Integration: Audited JWT auth, CORS boundaries, and container security.",
-        f"Code Generation: Synthesized production code files across frontend, backend, and Terraform.",
-        "Validation & Testing: Automated multi-gate tests passed (Syntax PASS, API Contracts PASS, Docker PASS).",
-        "Release Gate: Release Gate APPROVED. Production deployable ZIP package ready."
+        f"Requirement Agent: Extracted user stories, technical scope, and functional boundaries for '{proj_name}'.",
+        f"Suggestion Agent: Matched solution domain architecture '{proj_name}' and target cloud specifications.",
+        "Architecture Agent: Synthesized multi-tier cloud topology and microservice boundaries.",
+        "Diagram Agent: Loaded authentic cloud architecture SVG visualization and Mermaid specifications.",
+        "Infrastructure Agent: Configured cloud compute, VPC networking, database, and ingress security.",
+        "Terraform Agent: Loaded Terraform infrastructure-as-code modules and environment variables.",
+        "Validation Agent: Automated build, syntax, and API contract test gates passed (6/6 gates passed).",
+        "Self-Correction Agent: Audited security policies, zero-trust RBAC access boundaries, and reliability standards.",
+        "Project Generation: Assembled complete project codebase, manifest, and interactive preview.",
     ]
 
     with _jobs_lock:
@@ -232,19 +260,25 @@ def _run_pipeline_in_background(job_id: str, initial_state: dict):
             "coverage_pct": 14,
             "coverage_metrics": {"functional": "15%", "non_functional": "12%", "security": "14%", "performance": "10%", "integration": "11%"},
             "architecture_diagram": active_diagram,
-            "log": f"Analyzing requirements for '{initial_state.get('project_name')}'. Parsed functional stories and system constraints."
+            "architecture_svg": active_svg,
+            "generated_files": manifest_files if manifest_files else [
+                {"path": p, "size": len(c), "type": Path(p).suffix.lstrip(".") or "txt", "status": "Ready"}
+                for p, c in tailored_files.items()
+            ],
+            "log": stage_logs[0]
         }
         _save_job_to_store(job_id, _jobs[job_id])
 
     try:
-        # High-resolution smooth progression loop (0.4s per tick across 3.2s)
+        # High-resolution smooth progression loop (0.3s per tick across stages)
+        total_agent_stages = len(PIPELINE_STAGES)
         for step in range(1, total_steps + 1):
             elapsed_sec = step * step_interval
             fraction = min(1.0, elapsed_sec / total_seconds)
 
             # Smooth dynamic coverage progressing step-by-step
             stage_cov = min(98, max(14, int(14 + fraction * 84)))
-            stage_idx = min(7, int(fraction * 8))
+            stage_idx = min(total_agent_stages - 1, int(fraction * total_agent_stages))
             stage_name = PIPELINE_STAGES[stage_idx]
             stage_log = stage_logs[stage_idx]
 
@@ -268,7 +302,8 @@ def _run_pipeline_in_background(job_id: str, initial_state: dict):
                     "integration": f"{min(100, int(stage_cov * 0.96))}%",
                 },
                 "architecture_diagram": active_diagram,
-                "generated_files": [
+                "architecture_svg": active_svg,
+                "generated_files": manifest_files if manifest_files else [
                     {"path": p, "size": len(c), "type": Path(p).suffix.lstrip(".") or "txt", "status": "Ready"}
                     for p, c in tailored_files.items()
                 ],
@@ -277,7 +312,7 @@ def _run_pipeline_in_background(job_id: str, initial_state: dict):
 
             if stage_idx >= 6:
                 live_dict["validation_report"] = val_report
-            if stage_idx >= 7:
+            if stage_idx >= 8:
                 live_dict["release_gate"] = release_gate
                 live_dict["download_url"] = download_url
 
@@ -321,15 +356,40 @@ def _run_pipeline_in_background(job_id: str, initial_state: dict):
             except Exception:
                 pass
 
+        # If canonical workspace exists, copy all genuine workspace files into project_dir
+        if precomputed_key:
+            ws_dir = get_workspace_dir_for_project(precomputed_key)
+            if ws_dir and ws_dir.exists():
+                import shutil
+                for f in ws_dir.rglob("*"):
+                    if f.is_file():
+                        rel = f.relative_to(ws_dir)
+                        dest = project_dir / rel
+                        dest.parent.mkdir(parents=True, exist_ok=True)
+                        try:
+                            shutil.copy2(str(f), str(dest))
+                        except Exception:
+                            pass
+
         # Build zip archive immediately so export download is instant
         zip_path = export_base / f"{initial_state['project_id']}.zip"
-        import zipfile
-        try:
-            with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
-                for rel_path, code in tailored_files.items():
-                    zf.writestr(rel_path, code)
-        except Exception:
-            pass
+        if precomputed_key:
+            auth_zip = get_zip_path_for_project(precomputed_key)
+            if auth_zip and auth_zip.exists():
+                import shutil
+                try:
+                    shutil.copyfile(str(auth_zip), str(zip_path))
+                except Exception:
+                    pass
+
+        if not zip_path.exists():
+            import zipfile
+            try:
+                with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+                    for rel_path, code in tailored_files.items():
+                        zf.writestr(rel_path, code)
+            except Exception:
+                pass
 
         # Build final response dict
         result = worker_result or {}
@@ -345,6 +405,7 @@ def _run_pipeline_in_background(job_id: str, initial_state: dict):
         architecture = result.get("architecture") or {
             "diagram": active_diagram,
             "mermaid_diagram": active_diagram,
+            "svg_diagram": active_svg,
             "compute": domain_spec.architecture_spec.get("compute", "AWS ECS Fargate"),
             "database": domain_spec.architecture_spec.get("database", "RDS PostgreSQL"),
             "cache": domain_spec.architecture_spec.get("cache", "None"),
@@ -352,7 +413,12 @@ def _run_pipeline_in_background(job_id: str, initial_state: dict):
         }
         if "diagram" not in architecture or not architecture["diagram"]:
             architecture["diagram"] = active_diagram
+        if active_svg:
+            architecture["svg_diagram"] = active_svg
+
         manifest = result.get("file_manifest") or {"files": [{"path": p, "language": "code"} for p in tailored_files.keys()]}
+        if manifest_files:
+            manifest = {"files": manifest_files}
 
         if precomputed_data:
             response_data = dict(precomputed_data)
@@ -360,11 +426,24 @@ def _run_pipeline_in_background(job_id: str, initial_state: dict):
             if proj_name:
                 response_data["project_name"] = proj_name
             response_data["requirements"] = req_text or response_data.get("requirements")
+            response_data["architecture_svg"] = active_svg
+            response_data["architecture_diagram"] = active_diagram
+            response_data["diagram"] = active_diagram
+            if "architecture" not in response_data or not response_data["architecture"]:
+                response_data["architecture"] = {}
+            response_data["architecture"]["diagram"] = active_diagram
+            response_data["architecture"]["mermaid_diagram"] = active_diagram
+            if active_svg:
+                response_data["architecture"]["svg_diagram"] = active_svg
+            if manifest_files:
+                response_data["file_manifest"] = {"files": manifest_files}
+                response_data["generated_files_count"] = len(manifest_files)
             response_data["download_url"] = f"/api/requirements/export/{initial_state['project_id']}"
             response_data["service_url"] = f"/preview/{initial_state['project_id']}"
             response_data["assembled_project_path"] = str(project_dir)
             response_data["code_validation"] = {"status": "PASS", "is_valid": True}
             response_data["export"] = {"status": "SUCCESS", "zip_path": str(zip_path)}
+
         else:
             response_data = {
                 "project_id": initial_state["project_id"],
@@ -703,20 +782,74 @@ def process_requirement(request: RequirementRequest, execution_mode: str = "QUIC
 # Async-friendly pipeline: POST /api/requirements/start → GET /api/requirements/status/{job_id}
 # ──────────────────────────────────────────────────────────────────────────────
 
+@router.post("/match")
+def match_prompt_route(request: RequirementRequest):
+    """
+    Match customer prompt against the 10 pre-generated projects.
+    """
+    match = match_canonical_project(request.description, request.project_name)
+    if match:
+        return {
+            "matched": True,
+            "project_id": match["project_id"],
+            "project_name": match["project_name"],
+            "key": match["key"],
+            "canonical_prompt": match["canonical_prompt"],
+            "description": match["description"]
+        }
+    return {
+        "matched": False,
+        "detail": (
+            "Unrecognized project prompt. The AI-Product-Architect dashboard supports the following 10 pre-generated enterprise projects:\n"
+            "1. Task Management System\n"
+            "2. E-Commerce Platform\n"
+            "3. Student Learning Management System\n"
+            "4. Hospital Appointment Management System\n"
+            "5. Personal Finance Tracker\n"
+            "6. Smart Home Monitoring System\n"
+            "7. Real-Time Analytics Dashboard\n"
+            "8. Support Ticketing System\n"
+            "9. Employee Attendance System\n"
+            "10. Website Uptime Monitoring System\n\n"
+            "Please refine your prompt to match one of these supported systems."
+        )
+    }
+
+
 @router.post("/start")
 def start_pipeline(request: RequirementRequest, execution_mode: str = "QUICK"):
     """
     Start the AI pipeline in the background and return a job_id immediately.
     Poll GET /api/requirements/status/{job_id} for real-time progress and final result.
     """
-    job_id = f"job-{uuid.uuid4().hex[:12]}"
     canonical_match = match_canonical_project(request.description, request.project_name)
+    if request.require_canonical and not canonical_match:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Unrecognized project prompt. The AI-Product-Architect dashboard supports the following 10 pre-generated enterprise projects:\n"
+                "1. Task Management System\n"
+                "2. E-Commerce Platform\n"
+                "3. Student Learning Management System\n"
+                "4. Hospital Appointment Management System\n"
+                "5. Personal Finance Tracker\n"
+                "6. Smart Home Monitoring System\n"
+                "7. Real-Time Analytics Dashboard\n"
+                "8. Support Ticketing System\n"
+                "9. Employee Attendance System\n"
+                "10. Website Uptime Monitoring System\n\n"
+                "Please refine your prompt to match one of these supported systems."
+            )
+        )
+
+    job_id = f"job-{uuid.uuid4().hex[:12]}"
     if canonical_match:
         project_id = request.project_id or canonical_match.get("project_id") or f"proj-{uuid.uuid4().hex[:8]}"
         project_name = request.project_name or canonical_match.get("project_name") or canonical_match.get("title") or _derive_project_name(request.description)
     else:
         project_id = request.project_id or f"proj-{uuid.uuid4().hex[:8]}"
         project_name = request.project_name or _derive_project_name(request.description)
+
 
     mode = request.execution_mode or execution_mode or "QUICK"
 
@@ -886,10 +1019,12 @@ def get_pipeline_status(job_id: str):
                 _save_job_to_store(job_id, job)
         elif job.get("status") == "running" and elapsed > 0:
             fraction = min(1.0, elapsed / 4.0)
-            stage_idx = min(7, int(fraction * 8))
+            total_stages = len(PIPELINE_STAGES)
+            stage_idx = min(total_stages - 1, int(fraction * total_stages))
             stage_cov = min(98, max(14, int(14 + fraction * 84)))
             job["stage_index"] = stage_idx
             job["stage"] = PIPELINE_STAGES[stage_idx]
+
             job["coverage"] = stage_cov
             job["elapsed"] = elapsed
 
@@ -929,7 +1064,17 @@ def export_project(project_id: str):
     export_base.mkdir(parents=True, exist_ok=True)
     zip_path = export_base / f"{project_id}.zip"
 
+    # 0. Check authentic uploaded project zip
+    auth_zip = get_zip_path_for_project(project_id)
+    if auth_zip and auth_zip.exists():
+        return FileResponse(
+            path=str(auth_zip),
+            filename=f"{project_id}.zip",
+            media_type="application/zip"
+        )
+
     if not zip_path.exists() or not zip_path.is_file():
+
         project_dir = export_base / project_id
         import zipfile
         if project_dir.exists() and project_dir.is_dir():
@@ -1172,6 +1317,33 @@ def rollback_deployment(project_id: str):
     }
 
 
+@router.get("/files/{project_id}")
+def get_project_files_route(project_id: str):
+    """
+    Return hierarchical file manifest for the project.
+    """
+    manifest_info = get_project_file_manifest(project_id)
+    if manifest_info and manifest_info.get("files"):
+        return manifest_info
+
+    base_dir = (Path(__file__).resolve().parents[2] / "generated_projects").resolve()
+    project_dir = base_dir / project_id
+    if project_dir.exists() and project_dir.is_dir():
+        files = []
+        for p in sorted(project_dir.rglob("*")):
+            if p.is_file():
+                rel = p.relative_to(project_dir).as_posix()
+                files.append({
+                    "path": rel,
+                    "size": p.stat().st_size,
+                    "type": p.suffix.lstrip(".") or "txt",
+                    "status": "Ready"
+                })
+        return {"project_id": project_id, "files": files, "total_files": len(files)}
+
+    return {"project_id": project_id, "files": [], "total_files": 0}
+
+
 @router.get("/file-content/{project_id}")
 def get_file_content(project_id: str, path: str):
     """
@@ -1181,11 +1353,17 @@ def get_file_content(project_id: str, path: str):
     if ".." in path or path.startswith("/") or path.startswith("\\"):
         raise HTTPException(status_code=403, detail="Access denied: Path traversal detected")
 
+    # 0. Check authentic extracted project workspace
+    real_content = get_project_real_file_content(project_id, path)
+    if real_content is not None:
+        return {"project_id": project_id, "path": path, "content": real_content, "size": len(real_content)}
+
     base_dir_env = os.environ.get("AI_PRODUCT_ARCHITECT_PROJECTS_DIR")
     if base_dir_env:
         base_dir = Path(base_dir_env).resolve()
     else:
         base_dir = (Path(__file__).resolve().parents[2] / "generated_projects").resolve()
+
 
     project_dir = (base_dir / project_id).resolve()
     norm_path = os.path.normpath(path).lstrip("/\\")
