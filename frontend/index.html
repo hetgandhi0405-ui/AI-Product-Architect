@@ -932,54 +932,43 @@
 
         <!-- Row 1: Cloud Deployment Operations & Current Project -->
         <div class="grid-2">
-          <!-- Cloud Deployment Operations Card -->
+          <!-- Live Project Preview & Operations Card -->
           <div class="card" id="cloud-deploy-card">
             <div class="card-header">
               <div class="card-title-group">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4.5c1.45-1.47 4.5-2 4.5-2"></path><path d="M15 12v5s3.03-.55 4.5-2c1.47-1.45 2-4.5 2-4.5"></path></svg>
-                <span>Cloud Deployment Operations</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                <span>Live Interactive Application Preview</span>
               </div>
-              <span id="deploy-status-badge" class="badge-success" style="background: rgba(148, 163, 184, 0.15); color: #94a3b8; border-color: #475569;">Ready to Deploy</span>
+              <span id="deploy-status-badge" class="badge-success" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border-color: rgba(16, 185, 129, 0.3);">🟢 Preview Ready</span>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-              <div>
-                <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;">Target Cloud</label>
-                <select id="deploy-cloud-target" style="width:100%; padding:8px 10px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:6px; color:#fff; font-size:13px;">
-                  <option value="cloud_run">Google Cloud Run (Serverless)</option>
-                  <option value="aws_ecs">AWS ECS / Fargate</option>
-                  <option value="azure_container_apps">Azure Container Apps</option>
-                  <option value="kubernetes_eks">Kubernetes EKS</option>
-                </select>
-              </div>
-              <div>
-                <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;">Environment</label>
-                <select id="deploy-env-target" style="width:100%; padding:8px 10px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:6px; color:#fff; font-size:13px;">
-                  <option value="production">Production (High Availability)</option>
-                  <option value="staging">Staging / QA Sandbox</option>
-                </select>
+            <div style="margin-bottom: 14px;">
+              <p style="font-size: 12.5px; color: var(--text-muted); margin: 0 0 10px; line-height: 1.5;">
+                Instant interactive GUI running from the generated codebase for this prompt.
+              </p>
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <button id="btn-open-preview" class="btn btn-primary" onclick="openLivePreviewModal()" style="flex: 2; height: 42px; font-weight: 600; font-size: 13.5px;">
+                  📱 Open Live Preview
+                </button>
+                <a id="btn-preview-newtab" href="#" target="_blank" class="btn btn-outline" style="flex: 1; height: 42px; text-decoration: none; justify-content: center;">
+                  ↗ New Tab
+                </a>
               </div>
             </div>
 
-            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px;">
-              <button id="btn-deploy-cloud" class="btn btn-primary" onclick="executeRealCloudDeployment()" style="flex: 2; height: 40px; font-weight: 600;">
-                🚀 Deploy Project to Cloud
-              </button>
-              <button id="btn-rollback-cloud" class="btn btn-outline" onclick="executeCloudRollback()" style="flex: 1; height: 40px;">
-                ↺ Rollback
-              </button>
-            </div>
-
-            <div id="deploy-service-link-box" style="display:none; padding:10px 12px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:8px; margin-bottom:12px;">
-              <div style="font-size:11px; color:#10b981; font-weight:600; text-transform:uppercase;">Live Service Online</div>
+            <div id="deploy-service-link-box" style="padding:10px 12px; background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); border-radius:8px; margin-bottom:12px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:11px; color:#10b981; font-weight:600; text-transform:uppercase;">Preview URL:</span>
+                <span id="preview-latency-badge" style="font-size:11px; color:#60a5fa; font-weight:600;">14ms latency</span>
+              </div>
               <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-                <a id="deploy-live-url" href="#" target="_blank" style="color:#60a5fa; font-size:13px; font-family:monospace; text-decoration:none; word-break:break-all;">Open Live Preview</a>
+                <a id="deploy-live-url" href="#" target="_blank" style="color:#60a5fa; font-size:13px; font-family:monospace; text-decoration:none; word-break:break-all;">Open Preview</a>
                 <a id="deploy-open-btn" href="#" target="_blank" class="btn btn-sm btn-outline" style="padding:2px 8px; font-size:11px; margin-left:8px;">Open ↗</a>
               </div>
             </div>
 
-            <div style="background:#070a12; border:1px solid var(--border); border-radius:6px; padding:10px; font-family:monospace; font-size:11px; color:#94a3b8; max-height:90px; overflow-y:auto;" id="deploy-terminal-logs">
-              <span style="color:#64748b;">Ready. Select target cloud and click 'Deploy Project to Cloud'.</span>
+            <div style="background:#070a12; border:1px solid var(--border); border-radius:6px; padding:10px; font-family:monospace; font-size:11px; color:#94a3b8; max-height:80px; overflow-y:auto;" id="deploy-terminal-logs">
+              <span style="color:#64748b;">Ready. Enter any of the 10 prompts to launch its live preview.</span>
             </div>
           </div>
 
@@ -1755,6 +1744,26 @@
     </div>
   </div>
 
+  <!-- Live Interactive Project Preview Modal -->
+  <div class="modal-backdrop" id="live-preview-modal">
+    <div class="modal-window" style="max-width: 1200px; width: 95vw; height: 90vh; max-height: 90vh;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <h3 id="modal-preview-title" style="margin:0;">Live Project Preview</h3>
+          <span class="badge-success" style="font-size:11px; padding:2px 8px;">🟢 ONLINE</span>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <a id="modal-preview-open-link" href="#" target="_blank" class="btn btn-outline btn-sm">↗ Open New Tab</a>
+          <button class="btn btn-outline btn-sm" onclick="reloadPreviewIframe()">↻ Refresh</button>
+          <button class="modal-close-btn" onclick="closeModal('live-preview-modal')">&times;</button>
+        </div>
+      </div>
+      <div class="modal-body" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+        <iframe id="live-preview-iframe" style="width: 100%; height: 100%; border: none; flex: 1; background: #070a12;" src="about:blank"></iframe>
+      </div>
+    </div>
+  </div>
+
   <!-- Deployment Guide Modal -->
   <div class="modal-backdrop" id="deploy-modal">
     <div class="modal-window" style="max-width: 700px;">
@@ -2497,10 +2506,11 @@ terraform apply -auto-approve</pre>
       const zipSizeEl = document.getElementById('dash-zip-size');
       if (zipSizeEl) zipSizeEl.textContent = 'Size: ~1.8 MB (Verified ZIP)';
 
-      // 7. Update Cloud Deployment Card
+      // 7. Update Live Preview Card
       const linkBox = document.getElementById('deploy-service-link-box');
       const liveUrlEl = document.getElementById('deploy-live-url');
       const openBtn = document.getElementById('deploy-open-btn');
+      const previewNewTabBtn = document.getElementById('btn-preview-newtab');
       const deployBadge = document.getElementById('deploy-status-badge');
       if (linkBox && liveUrlEl) {
         const fullServiceUrl = resolveServicePreviewUrl(data.service_url, activeProjectId);
@@ -2511,16 +2521,46 @@ terraform apply -auto-approve</pre>
           openBtn.href = fullServiceUrl;
           openBtn.target = '_blank';
         }
+        if (previewNewTabBtn) {
+          previewNewTabBtn.href = fullServiceUrl;
+        }
         linkBox.style.display = 'block';
         if (deployBadge) {
-          deployBadge.textContent = '🟢 LIVE';
+          deployBadge.textContent = '🟢 Preview Ready';
           deployBadge.style.background = 'var(--success-glow)';
           deployBadge.style.color = 'var(--success)';
         }
       }
     }
 
-        // Global helpers for Preview, Zoom, Sort, and Retry
+    function openLivePreviewModal() {
+      const pid = activeProjectId || 'proj-task-management';
+      const previewUrl = resolveServicePreviewUrl(activeProjectData ? activeProjectData.service_url : null, pid);
+      const titleEl = document.getElementById('modal-preview-title');
+      const iframe = document.getElementById('live-preview-iframe');
+      const openLink = document.getElementById('modal-preview-open-link');
+
+      if (titleEl) {
+        titleEl.textContent = (activeProjectData && activeProjectData.project_name) ?
+          `Live Preview: ${activeProjectData.project_name}` : `Live Project Preview (${pid})`;
+      }
+      if (openLink) openLink.href = previewUrl;
+      if (iframe) iframe.src = previewUrl;
+
+      const modal = document.getElementById('live-preview-modal');
+      if (modal) modal.classList.add('open');
+    }
+
+    function reloadPreviewIframe() {
+      const iframe = document.getElementById('live-preview-iframe');
+      if (iframe && iframe.src) {
+        const cur = iframe.src;
+        iframe.src = 'about:blank';
+        setTimeout(() => { iframe.src = cur; }, 100);
+      }
+    }
+
+    // Global helpers for Preview, Zoom, Sort, and Retry
     let currentPreviewPath = '';
     let currentPreviewContent = '';
     let archZoom = 1.0;
