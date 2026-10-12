@@ -44,6 +44,18 @@ def render_project_preview_html(project_id: str, metadata: Optional[Dict[str, An
         except Exception:
             pass
 
+    # 3. Check Canonical Catalog & Precomputed data for exact match
+    if not requirements or project_name == "Cloud Enterprise Application":
+        try:
+            from backend.core.project_catalog import CANONICAL_PROJECTS, load_precomputed_project_data
+            for cp in CANONICAL_PROJECTS:
+                if cp.get("project_id") == project_id or cp.get("key") in project_id or project_id in cp.get("key"):
+                    project_name = cp.get("project_name") or project_name
+                    requirements = cp.get("canonical_prompt") or cp.get("description") or requirements
+                    break
+        except Exception:
+            pass
+
     # Dynamic Domain Spec extraction
     from backend.core.domain_analyzer import analyze_domain
     spec = analyze_domain(requirements, project_name)
