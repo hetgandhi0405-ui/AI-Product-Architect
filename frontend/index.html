@@ -988,9 +988,6 @@
         <div id="exec-overlay">
           <div class="spinner-ring"></div>
           <h3 style="color:#fff;" id="exec-title">Executing Multi-Agent Autonomous Pipeline...</h3>
-          <p style="color:var(--text-muted); margin-top:8px; font-size:13px;" id="exec-status-msg">
-            Requirements Analysis → Architecture Synthesis → Code Generation → Product Validation → Terraform HCL → RL Evaluation
-          </p>
         </div>
 
         <!-- Row 1: Cloud Deployment Operations & Current Project -->
@@ -1080,7 +1077,7 @@
               <span>Agent Pipeline Execution</span>
             </div>
             <div style="display: flex; align-items: center; gap: 12px;">
-              <span style="font-size: 12px; color: var(--text-muted);" id="pipe-total-time">9 Agents</span>
+              <span style="display: none; font-size: 12px; color: var(--text-muted);" id="pipe-total-time"></span>
               <span class="badge-success" id="pipe-badge" style="background: rgba(148, 163, 184, 0.15); color: #94a3b8; border-color: #475569;">Idle</span>
             </div>
           </div>
@@ -2567,11 +2564,7 @@ terraform apply -auto-approve</pre>
                 }
               });
 
-              const statusMsg = document.getElementById('exec-status-msg');
-              const overallPct = Math.min(99, Math.max(1, Math.round((currentElapsed / 180) * 100)));
-              document.getElementById('pipe-total-time').textContent = `Stage ${currentStageIdx + 1} of 9`;
-              if (statusMsg) statusMsg.textContent = `Stage ${currentStageIdx + 1}/9 (${overallPct}%): ${stData.stage}`;
-              document.getElementById('pipe-badge').textContent = `● Stage ${currentStageIdx + 1}/9: ${stData.stage} (${overallPct}%)`;
+              document.getElementById('pipe-badge').textContent = `● Running: ${stData.stage}`;
 
               // Stream live data (gauge, architecture SVG/mermaid, files, validation)
               if (stData.live_data) {
@@ -2595,8 +2588,6 @@ terraform apply -auto-approve</pre>
                     badgeEl.style.borderColor = 'var(--success)';
                   }
                 });
-                document.getElementById('pipe-total-time').textContent = '9 / 9 Stages Verified';
-                if (statusMsg) statusMsg.textContent = 'Stage 9/9 (100%): Complete';
                 document.getElementById('pipe-badge').textContent = '✓ Completed';
                 resolve(stData.result);
               } else if (stData.status === 'error') {
