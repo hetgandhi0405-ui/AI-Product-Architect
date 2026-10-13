@@ -300,7 +300,7 @@ def _run_pipeline_in_background(job_id: str, initial_state: dict):
             stage_idx = min(total_agent_stages - 1, int((elapsed_sec - 0.001) / stage_duration_sec))
             stage_elapsed_sec = max(1, int(elapsed_sec - stage_idx * stage_duration_sec))
             stage_name = PIPELINE_STAGES[stage_idx]
-            stage_log = f"[{int(elapsed_sec)}s / {int(total_seconds)}s] {stage_logs[stage_idx]}"
+            stage_log = stage_logs[stage_idx]
 
             # Incorporate worker results dynamically if ready
             if worker_result and (worker_result.get("architecture_diagram") or worker_result.get("architecture", {}).get("diagram")):

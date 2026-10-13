@@ -1080,7 +1080,7 @@
               <span>Agent Pipeline Execution</span>
             </div>
             <div style="display: flex; align-items: center; gap: 12px;">
-              <span style="font-size: 12px; color: var(--text-muted);" id="pipe-total-time">Total Time: —</span>
+              <span style="font-size: 12px; color: var(--text-muted);" id="pipe-total-time">9 Agents</span>
               <span class="badge-success" id="pipe-badge" style="background: rgba(148, 163, 184, 0.15); color: #94a3b8; border-color: #475569;">Idle</span>
             </div>
           </div>
@@ -1996,7 +1996,7 @@ terraform apply -auto-approve</pre>
       document.getElementById('cur-proj-name').textContent = '—';
       document.getElementById('cur-proj-id').textContent = '—';
       document.getElementById('cur-proj-date').textContent = '—';
-      document.getElementById('pipe-total-time').textContent = 'Total Time: —';
+      document.getElementById('pipe-total-time').textContent = '9 Agents';
       document.getElementById('pipe-badge').textContent = 'Idle';
       document.getElementById('pipe-badge').style.background = 'rgba(148, 163, 184, 0.15)';
       document.getElementById('pipe-badge').style.color = '#94a3b8';
@@ -2424,12 +2424,13 @@ terraform apply -auto-approve</pre>
       // Reset dashboard to clean initial state
       document.getElementById('cur-proj-name').textContent = projectName || 'AI Cloud Project';
       document.getElementById('cur-proj-id').textContent = 'Initializing...';
-      document.getElementById('cur-proj-status').textContent = '⏳ Synthesizing (3m 00s)';
+      document.getElementById('cur-proj-status').textContent = '⏳ Synthesizing';
       document.getElementById('cur-proj-status').className = 'badge-success';
       document.getElementById('cur-proj-status').style.background = 'rgba(59, 130, 246, 0.2)';
       document.getElementById('cur-proj-status').style.color = '#60a5fa';
       document.getElementById('cur-proj-status').style.borderColor = '#3b82f6';
 
+      document.getElementById('pipe-total-time').textContent = 'Stage 1 of 9';
       document.getElementById('pipe-badge').textContent = '● Running Pipeline (0%)';
       document.getElementById('pipe-badge').style.background = 'rgba(59, 130, 246, 0.2)';
       document.getElementById('pipe-badge').style.color = '#60a5fa';
@@ -2456,7 +2457,7 @@ terraform apply -auto-approve</pre>
       nodes.forEach((n, idx) => {
         n.classList.remove('done', 'active', 'failed');
         const timeEl = n.querySelector('.node-time');
-        if (timeEl) timeEl.textContent = idx === 0 ? 'Running (1s / 20s)' : 'Waiting';
+        if (timeEl) timeEl.textContent = idx === 0 ? 'Running...' : 'Waiting';
       });
       if (nodes[0]) nodes[0].classList.add('active');
 
@@ -2465,7 +2466,7 @@ terraform apply -auto-approve</pre>
         const badgeEl = card.querySelector('.badge-success');
         if (!badgeEl) return;
         if (idx === 0) {
-          badgeEl.textContent = '● Running (1s / 20s)';
+          badgeEl.textContent = '● Running...';
           badgeEl.style.background = 'rgba(59, 130, 246, 0.2)';
           badgeEl.style.color = '#60a5fa';
           badgeEl.style.borderColor = '#3b82f6';
@@ -2478,12 +2479,6 @@ terraform apply -auto-approve</pre>
       });
 
       const startTime = Date.now();
-      const timerInterval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        const mins = Math.floor(elapsed / 60);
-        const secs = elapsed % 60;
-        document.getElementById('pipe-total-time').textContent = `Elapsed: ${mins}m ${secs < 10 ? '0' : ''}${secs}s / 3m 00s`;
-      }, 1000);
 
       try {
         // Trigger background execution via POST /api/requirements/start
@@ -2530,24 +2525,19 @@ terraform apply -auto-approve</pre>
               consecutiveFailures = 0;
               const stData = await stRes.json();
 
-              // Update stepper nodes live with real progressive elapsed time (3 min = 180s total, 20s per stage)
+              // Update stepper nodes live across all 9 stages
               const currentStageIdx = stData.stage_index ?? 0;
-              const totalStages = 9;
               const currentElapsed = stData.elapsed || Math.floor((Date.now() - startTime) / 1000);
-              const stageApproxTime = (stData.live_data && stData.live_data.stage_duration) ? stData.live_data.stage_duration : 20;
               nodes.forEach((n, idx) => {
                 const timeEl = n.querySelector('.node-time');
                 if (idx < currentStageIdx) {
                   n.classList.remove('active', 'failed');
                   n.classList.add('done');
-                  if (timeEl) timeEl.textContent = `✓ Done (${stageApproxTime}s)`;
+                  if (timeEl) timeEl.textContent = '✓ Done';
                 } else if (idx === currentStageIdx) {
                   n.classList.remove('done', 'failed');
                   n.classList.add('active');
-                  const stageSec = (stData.live_data && stData.live_data.stage_elapsed)
-                    ? stData.live_data.stage_elapsed
-                    : Math.min(stageApproxTime, Math.max(1, currentElapsed - idx * stageApproxTime));
-                  if (timeEl) timeEl.textContent = `Running (${stageSec}s / ${stageApproxTime}s)`;
+                  if (timeEl) timeEl.textContent = 'Running...';
                 } else {
                   n.classList.remove('done', 'active', 'failed');
                   if (timeEl) timeEl.textContent = 'Waiting';
@@ -2560,15 +2550,12 @@ terraform apply -auto-approve</pre>
                 const badgeEl = card.querySelector('.badge-success');
                 if (!badgeEl) return;
                 if (idx < currentStageIdx) {
-                  badgeEl.textContent = `✓ Completed (${stageApproxTime}s)`;
+                  badgeEl.textContent = '✓ Completed';
                   badgeEl.style.background = 'var(--success-glow)';
                   badgeEl.style.color = 'var(--success)';
                   badgeEl.style.borderColor = 'var(--success)';
                 } else if (idx === currentStageIdx) {
-                  const stageSec = (stData.live_data && stData.live_data.stage_elapsed)
-                    ? stData.live_data.stage_elapsed
-                    : Math.min(stageApproxTime, Math.max(1, currentElapsed - idx * stageApproxTime));
-                  badgeEl.textContent = `● Running (${stageSec}s / ${stageApproxTime}s)`;
+                  badgeEl.textContent = '● Running...';
                   badgeEl.style.background = 'rgba(59, 130, 246, 0.2)';
                   badgeEl.style.color = '#60a5fa';
                   badgeEl.style.borderColor = '#3b82f6';
@@ -2582,9 +2569,8 @@ terraform apply -auto-approve</pre>
 
               const statusMsg = document.getElementById('exec-status-msg');
               const overallPct = Math.min(99, Math.max(1, Math.round((currentElapsed / 180) * 100)));
-              const eMins = Math.floor(currentElapsed / 60);
-              const eSecs = currentElapsed % 60;
-              if (statusMsg) statusMsg.textContent = `Stage ${currentStageIdx + 1}/9 (${overallPct}% — ${eMins}m ${eSecs < 10 ? '0' : ''}${eSecs}s / 3m 00s): ${stData.stage}`;
+              document.getElementById('pipe-total-time').textContent = `Stage ${currentStageIdx + 1} of 9`;
+              if (statusMsg) statusMsg.textContent = `Stage ${currentStageIdx + 1}/9 (${overallPct}%): ${stData.stage}`;
               document.getElementById('pipe-badge').textContent = `● Stage ${currentStageIdx + 1}/9: ${stData.stage} (${overallPct}%)`;
 
               // Stream live data (gauge, architecture SVG/mermaid, files, validation)
@@ -2598,19 +2584,20 @@ terraform apply -auto-approve</pre>
                   n.classList.remove('active', 'failed');
                   n.classList.add('done');
                   const timeEl = n.querySelector('.node-time');
-                  if (timeEl) timeEl.textContent = `✓ Done (${stageApproxTime}s)`;
+                  if (timeEl) timeEl.textContent = '✓ Done';
                 });
                 tab4Cards.forEach(card => {
                   const badgeEl = card.querySelector('.badge-success');
                   if (badgeEl) {
-                    badgeEl.textContent = `✓ Completed (${stageApproxTime}s)`;
+                    badgeEl.textContent = '✓ Completed';
                     badgeEl.style.background = 'var(--success-glow)';
                     badgeEl.style.color = 'var(--success)';
                     badgeEl.style.borderColor = 'var(--success)';
                   }
                 });
-                if (statusMsg) statusMsg.textContent = 'Stage 9/9 (100% — 3m 00s): Complete';
-                document.getElementById('pipe-badge').textContent = '✓ Completed (3m 00s)';
+                document.getElementById('pipe-total-time').textContent = '9 / 9 Stages Verified';
+                if (statusMsg) statusMsg.textContent = 'Stage 9/9 (100%): Complete';
+                document.getElementById('pipe-badge').textContent = '✓ Completed';
                 resolve(stData.result);
               } else if (stData.status === 'error') {
                 clearInterval(pollingInterval);
@@ -2633,7 +2620,6 @@ terraform apply -auto-approve</pre>
           }, 500);
         });
 
-        clearInterval(timerInterval);
         if (overlay) overlay.style.display = 'none';
         applyProjectData(result);
         switchTab('dashboard');
@@ -2647,9 +2633,8 @@ terraform apply -auto-approve</pre>
           prevBanner.style.display = 'flex';
         }
 
-        showToast('Autonomous pipeline completed in 3m 00s! Preloaded code and preview ready.');
+        showToast('Autonomous pipeline completed! Preloaded code and preview ready.');
       } catch (err) {
-        clearInterval(timerInterval);
         if (pollingInterval) clearInterval(pollingInterval);
         if (overlay) overlay.style.display = 'none';
         console.error('Pipeline error:', err);
@@ -2818,12 +2803,12 @@ terraform apply -auto-approve</pre>
       document.getElementById('cur-proj-status').style.color = 'var(--success)';
       document.getElementById('cur-proj-status').style.borderColor = 'var(--success)';
       document.getElementById('cur-proj-type').textContent = 'Full Stack Web App';
-      document.getElementById('cur-proj-duration').textContent = data.duration || (data.elapsed ? `${Math.floor(data.elapsed / 60)}m ${data.elapsed % 60}s` : '3m 00s');
+      document.getElementById('cur-proj-duration').textContent = '9 / 9 Agents Verified';
       document.getElementById('cur-proj-date').textContent = data.created_at || 'Just now';
 
-      // 2. Total pipeline time, Stepper bubbles, and Tab 4 Agent Pipeline cards
-      document.getElementById('pipe-total-time').textContent = `Total Time: ${data.duration || (data.elapsed ? `${Math.floor(data.elapsed / 60)}m ${data.elapsed % 60}s` : '3m 00s')}`;
-      document.getElementById('pipe-badge').textContent = '✓ Completed (3m 00s)';
+      // 2. Pipeline status, Stepper bubbles, and Tab 4 Agent Pipeline cards
+      document.getElementById('pipe-total-time').textContent = '9 / 9 Stages Verified';
+      document.getElementById('pipe-badge').textContent = '✓ Completed';
       document.getElementById('pipe-badge').style.background = 'var(--success-glow)';
       document.getElementById('pipe-badge').style.color = 'var(--success)';
       document.getElementById('pipe-badge').style.borderColor = 'var(--success)';
@@ -2833,13 +2818,13 @@ terraform apply -auto-approve</pre>
         n.classList.remove('active', 'failed');
         n.classList.add('done');
         const timeEl = n.querySelector('.node-time');
-        if (timeEl) timeEl.textContent = '✓ Done (20s)';
+        if (timeEl) timeEl.textContent = '✓ Done';
       });
       const tab4Cards = document.querySelectorAll('#pipeline-agents-list .val-item');
       tab4Cards.forEach(card => {
         const badgeEl = card.querySelector('.badge-success');
         if (badgeEl) {
-          badgeEl.textContent = '✓ Completed (20s)';
+          badgeEl.textContent = '✓ Completed';
           badgeEl.style.background = 'var(--success-glow)';
           badgeEl.style.color = 'var(--success)';
           badgeEl.style.borderColor = 'var(--success)';
