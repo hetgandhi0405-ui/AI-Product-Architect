@@ -1,0 +1,9 @@
+{
+  "diagram": "flowchart TD\n  subgraph Clinical Clients\n    PATIENT_PORTAL[\"Patient Booking Portal\"]\n    STAFF_DESK[\"Clinic Reception Dashboard\"]\n  end\n\n  subgraph Security & Perimeter\n    WAF[\"AWS WAF (HIPAA Guard)\"]\n    ALB[\"Application Load Balancer\"]\n    AUTH[\"OAuth2 / JWT Identity Validator\"]\n  end\n\n  subgraph Microservice Layer\n    API[\"Hospital Appointment System Clinical API\"]\n    SCHEDULER[\"Slot Availability & Booking Engine\"]\n    AUDIT[\"HIPAA Audit & Access Logger\"]\n  end\n\n  subgraph Secure Data Tier\n    PG[(\"PostgreSQL RDS (AES-256 Encrypted at Rest)\")]\n    AUDIT_LOG[(\"CloudWatch Immutable Audit Trails\")]\n  end\n\n  PATIENT_PORTAL --> WAF --> ALB --> AUTH --> API\n  STAFF_DESK --> WAF --> ALB --> AUTH --> API\n  API --> SCHEDULER\n  API --> AUDIT\n  SCHEDULER --> PG\n  AUDIT --> AUDIT_LOG",
+  "mermaid_diagram": "flowchart TD\n  subgraph Clinical Clients\n    PATIENT_PORTAL[\"Patient Booking Portal\"]\n    STAFF_DESK[\"Clinic Reception Dashboard\"]\n  end\n\n  subgraph Security & Perimeter\n    WAF[\"AWS WAF (HIPAA Guard)\"]\n    ALB[\"Application Load Balancer\"]\n    AUTH[\"OAuth2 / JWT Identity Validator\"]\n  end\n\n  subgraph Microservice Layer\n    API[\"Hospital Appointment System Clinical API\"]\n    SCHEDULER[\"Slot Availability & Booking Engine\"]\n    AUDIT[\"HIPAA Audit & Access Logger\"]\n  end\n\n  subgraph Secure Data Tier\n    PG[(\"PostgreSQL RDS (AES-256 Encrypted at Rest)\")]\n    AUDIT_LOG[(\"CloudWatch Immutable Audit Trails\")]\n  end\n\n  PATIENT_PORTAL --> WAF --> ALB --> AUTH --> API\n  STAFF_DESK --> WAF --> ALB --> AUTH --> API\n  API --> SCHEDULER\n  API --> AUDIT\n  SCHEDULER --> PG\n  AUDIT --> AUDIT_LOG",
+  "compute": "AWS ECS Fargate in Private Subnet",
+  "database": "PostgreSQL 15 RDS with AES-256 Storage Encryption",
+  "cache": "None",
+  "storage": "S3 (Encrypted Medical Attachments)",
+  "networking": "AWS VPC (Multi-AZ)"
+}

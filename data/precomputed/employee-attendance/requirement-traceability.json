@@ -1,0 +1,148 @@
+{
+  "coverage_percent": 100.0,
+  "metrics": {
+    "functional": "4/4",
+    "non_functional": "1/1",
+    "security": "1/1",
+    "performance": "1/1",
+    "integration": "1/1"
+  },
+  "total_requirements": 5,
+  "satisfied": 5,
+  "matrix": [
+    {
+      "req_id": "REQ-001",
+      "title": "Employee Profile & Balance Tracking",
+      "description": "Manage employee records with department, role, and remaining leave quotas",
+      "type": "functional",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Employee code uniquely indexed",
+        "Leave balance initial quota assigned"
+      ],
+      "implemented_files": [
+        "backend/routes/employees.py",
+        "backend/models/employee.py",
+        "frontend/src/App.jsx"
+      ],
+      "related_apis": [
+        "/api/employees"
+      ],
+      "related_models": [
+        "Employee"
+      ],
+      "tests": [
+        "test_list_employees",
+        "test_create_employee"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-002",
+      "title": "Attendance Clock-In & Clock-Out",
+      "description": "Daily timesheet logging recording clock-in and clock-out timestamps with status",
+      "type": "functional",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Clock-in stores exact timestamp",
+        "Clock-out updates existing daily log"
+      ],
+      "implemented_files": [
+        "backend/routes/attendance.py",
+        "backend/models/employee.py"
+      ],
+      "related_apis": [
+        "/api/attendance/clock-in",
+        "/api/attendance/clock-out"
+      ],
+      "related_models": [
+        "Attendance"
+      ],
+      "tests": [
+        "test_clock_in",
+        "test_clock_out"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-003",
+      "title": "Leave Application & Approval Workflow",
+      "description": "Employees apply for annual/sick leave and managers approve or reject requests",
+      "type": "functional",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Request status transitions to approved",
+        "Approved leave decrements employee leave_balance"
+      ],
+      "implemented_files": [
+        "backend/routes/leave.py",
+        "backend/models/employee.py"
+      ],
+      "related_apis": [
+        "/api/leave-requests",
+        "/api/leave-requests/{request_id}/approve"
+      ],
+      "related_models": [
+        "LeaveRequest"
+      ],
+      "tests": [
+        "test_approve_leave"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-004",
+      "title": "Self-Service HR Portal UI",
+      "description": "Interactive React dashboard with one-click clock-in button, timesheet calendar, and leave modal",
+      "type": "functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "One-click punch clock button",
+        "Leave quota progress bar",
+        "Pending approvals queue"
+      ],
+      "implemented_files": [
+        "frontend/src/App.jsx"
+      ],
+      "related_apis": [
+        "/api/attendance/clock-in",
+        "/api/leave-requests"
+      ],
+      "related_models": [
+        "Employee",
+        "Attendance"
+      ],
+      "tests": [
+        "test_health"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-005",
+      "title": "Relational Integrity & Cascade",
+      "description": "PostgreSQL relational schemas with foreign key references from attendance to employees",
+      "type": "non_functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Cascade on delete when employee deactivated",
+        "Unique constraint on employee_id + date"
+      ],
+      "implemented_files": [
+        "database/schema.sql",
+        "backend/models/employee.py"
+      ],
+      "related_apis": [
+        "/api/employees"
+      ],
+      "related_models": [
+        "Employee",
+        "Attendance",
+        "LeaveRequest"
+      ],
+      "tests": [
+        "test_list_employees"
+      ],
+      "status": "SATISFIED"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+flowchart LR
+  User[User] --> UI[Browser UI]
+  UI --> API[FastAPI REST API]
+  API --> Domain[Domain logic: Task Management Platform]
+  Domain --> Store[(In-memory development store)]
+  API --> Docs[OpenAPI documentation]

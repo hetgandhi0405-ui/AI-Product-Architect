@@ -1,0 +1,12 @@
+erDiagram
+  TRANSACTION ||--o{ BUDGET : "domain relationship to be finalized"
+  TRANSACTION {
+    int id PK
+    string name
+    string description
+  }
+  BUDGET {
+    int id PK
+    string name
+    string description
+  }

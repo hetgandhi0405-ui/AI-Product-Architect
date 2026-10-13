@@ -1,0 +1,150 @@
+{
+  "coverage_percent": 100.0,
+  "metrics": {
+    "functional": "3/3",
+    "non_functional": "1/1",
+    "security": "1/1",
+    "performance": "1/1",
+    "integration": "1/1"
+  },
+  "total_requirements": 5,
+  "satisfied": 5,
+  "matrix": [
+    {
+      "req_id": "REQ-001",
+      "title": "User Identity & Authentication",
+      "description": "Secure user registration, authentication, and JWT token issuance",
+      "type": "security",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "JWT token generation",
+        "Password hashing with bcrypt",
+        "Auth headers verified on private routes"
+      ],
+      "implemented_files": [
+        "backend/routes/auth.py",
+        "backend/models/task.py"
+      ],
+      "related_apis": [
+        "/api/auth/login",
+        "/api/auth/register",
+        "/api/auth/me"
+      ],
+      "related_models": [
+        "User"
+      ],
+      "tests": [
+        "test_auth_flow"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-002",
+      "title": "Task Lifecycle CRUD",
+      "description": "Create, read, update, and delete tasks with title, description, priority, and deadline",
+      "type": "functional",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Task creation persists to DB",
+        "Task ID lookup returns 200",
+        "Delete removes task cleanly"
+      ],
+      "implemented_files": [
+        "backend/routes/tasks.py",
+        "backend/models/task.py",
+        "frontend/src/App.jsx"
+      ],
+      "related_apis": [
+        "/api/tasks",
+        "/api/tasks/{task_id}"
+      ],
+      "related_models": [
+        "Task"
+      ],
+      "tests": [
+        "test_create_task",
+        "test_list_tasks"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-003",
+      "title": "Priority & Status Filtering",
+      "description": "Filter work items by low, medium, high, urgent priorities and pending/completed status",
+      "type": "functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Status transition patch updates DB",
+        "Query parameters filter task lists"
+      ],
+      "implemented_files": [
+        "backend/routes/tasks.py",
+        "frontend/src/App.jsx"
+      ],
+      "related_apis": [
+        "/api/tasks/{task_id}/status",
+        "/api/tasks"
+      ],
+      "related_models": [
+        "Task"
+      ],
+      "tests": [
+        "test_filter_tasks_by_status"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-004",
+      "title": "Interactive Kanban UI",
+      "description": "Responsive task board with priority badges and quick state toggle",
+      "type": "functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Responsive React 18 layout",
+        "Quick task submission form",
+        "Instant DOM item deletion"
+      ],
+      "implemented_files": [
+        "frontend/src/App.jsx",
+        "frontend/index.html"
+      ],
+      "related_apis": [
+        "/api/tasks"
+      ],
+      "related_models": [
+        "Task"
+      ],
+      "tests": [
+        "test_health"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-005",
+      "title": "PostgreSQL Relational Schema",
+      "description": "Structured tables for users, tasks, and categories with foreign key constraints",
+      "type": "non_functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Foreign key cascades on delete",
+        "B-tree indexes on title and status"
+      ],
+      "implemented_files": [
+        "database/schema.sql",
+        "backend/models/task.py"
+      ],
+      "related_apis": [
+        "/api/tasks"
+      ],
+      "related_models": [
+        "User",
+        "Task",
+        "Category"
+      ],
+      "tests": [
+        "test_list_tasks"
+      ],
+      "status": "SATISFIED"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+---
+title: Cloud Architecture — Employee Attendance Management
+---
+flowchart LR
+  E[Employees and HR] --> CDN[Secure Web Hosting]
+  CDN --> IDP[SSO / Identity Provider]
+  IDP --> LB[Application Load Balancer]
+  LB --> APP[Attendance and Leave Service]
+  APP --> DB[(Managed HR Database)]
+  APP --> Q[Timesheet / Leave Event Queue]
+  Q --> WORKER[Policy and Payroll Export Worker]
+  WORKER --> PAY[Payroll / HR Integrations]
+  APP --> OBJ[Private Document Storage]
+  APP --> AUDIT[Audit Logs]
+  DB --> BACKUP[Backup and Recovery]

@@ -1,0 +1,23 @@
+flowchart TD
+  subgraph Client App
+    WEB["Personal Finance Web Dashboard"]
+    EXPORT["CSV Exporter Stream"]
+  end
+
+  subgraph API & Services
+    ALB["Load Balancer"]
+    API["Personal Finance Tracker Financial Core API"]
+    BUDGET_ENG["Budget Tracking & Cap Engine"]
+    CSV_GEN["CSV Streaming Serializer"]
+  end
+
+  subgraph Storage
+    PG[("PostgreSQL (Transactions, Budgets, Categories)")]
+  end
+
+  WEB --> ALB --> API
+  EXPORT --> ALB --> API
+  API --> BUDGET_ENG
+  API --> CSV_GEN
+  BUDGET_ENG --> PG
+  CSV_GEN --> PG

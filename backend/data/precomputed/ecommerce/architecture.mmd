@@ -1,0 +1,32 @@
+flowchart TD
+  subgraph Customer Clients
+    SHOPPER["Web Storefront (React 18)"]
+    MOBILE["Mobile Responsive Web"]
+  end
+
+  subgraph Edge & API Gateway
+    CDN["CloudFront / Edge CDN"]
+    LB["Application Load Balancer"]
+  end
+
+  subgraph Core Microservices
+    API["E-Commerce Platform FastAPI Gateway"]
+    CATALOG["Catalog & Inventory Service"]
+    ORDER_SVC["Order Processing Service"]
+    CHECKOUT_SVC["Checkout & Payment Gateway Sandbox"]
+  end
+
+  subgraph Data Tier
+    PG[("PostgreSQL (Products, Orders, OrderItems)")]
+    S3[("S3 Bucket (Product Media Assets)")]
+  end
+
+  SHOPPER --> CDN --> LB --> API
+  MOBILE --> LB --> API
+  API --> CATALOG
+  API --> ORDER_SVC
+  API --> CHECKOUT_SVC
+  CATALOG --> PG
+  ORDER_SVC --> PG
+  CHECKOUT_SVC --> PG
+  CATALOG --> S3

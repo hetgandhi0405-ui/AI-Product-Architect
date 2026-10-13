@@ -1,0 +1,35 @@
+openapi: 3.1.0
+info:
+  title: Hospital Appointment Management System API
+  version: 0.1.0
+servers:
+  - url: http://127.0.0.1:8000
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: Service available
+  /providers:
+    get:
+      summary: List provider records
+      responses:
+        "200":
+          description: Records returned
+    post:
+      summary: Create provider record
+      responses:
+        "201":
+          description: Record created
+  /appointments:
+    get:
+      summary: List appointment records
+      responses:
+        "200":
+          description: Records returned
+    post:
+      summary: Create appointment record
+      responses:
+        "201":
+          description: Record created

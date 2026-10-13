@@ -1,0 +1,9 @@
+{
+  "diagram": "flowchart TD\n  subgraph Employee Access\n    PORTAL[\"Employee Self-Service Web\"]\n    HR_DESK[\"HR Manager Approval Console\"]\n  end\n\n  subgraph Identity & Load Balancing\n    ALB[\"Application Load Balancer\"]\n    AUTH[\"JWT Role-Based Auth Guard\"]\n  end\n\n  subgraph Core HR Services\n    API[\"Employee Attendance Management HR Service\"]\n    TIME_CLOCK[\"Attendance Punch Engine\"]\n    LEAVE_MGR[\"Leave Balance Deductor\"]\n  end\n\n  subgraph Persistence\n    PG[(\"PostgreSQL (Employees, Attendance, LeaveRequests)\")]\n  end\n\n  PORTAL --> ALB --> AUTH --> API\n  HR_DESK --> ALB --> AUTH --> API\n  API --> TIME_CLOCK\n  API --> LEAVE_MGR\n  TIME_CLOCK --> PG\n  LEAVE_MGR --> PG",
+  "mermaid_diagram": "flowchart TD\n  subgraph Employee Access\n    PORTAL[\"Employee Self-Service Web\"]\n    HR_DESK[\"HR Manager Approval Console\"]\n  end\n\n  subgraph Identity & Load Balancing\n    ALB[\"Application Load Balancer\"]\n    AUTH[\"JWT Role-Based Auth Guard\"]\n  end\n\n  subgraph Core HR Services\n    API[\"Employee Attendance Management HR Service\"]\n    TIME_CLOCK[\"Attendance Punch Engine\"]\n    LEAVE_MGR[\"Leave Balance Deductor\"]\n  end\n\n  subgraph Persistence\n    PG[(\"PostgreSQL (Employees, Attendance, LeaveRequests)\")]\n  end\n\n  PORTAL --> ALB --> AUTH --> API\n  HR_DESK --> ALB --> AUTH --> API\n  API --> TIME_CLOCK\n  API --> LEAVE_MGR\n  TIME_CLOCK --> PG\n  LEAVE_MGR --> PG",
+  "compute": "AWS ECS Fargate",
+  "database": "PostgreSQL 15 RDS",
+  "cache": "None",
+  "storage": "S3 (Medical certificates & Leave Docs)",
+  "networking": "AWS VPC (Multi-AZ)"
+}

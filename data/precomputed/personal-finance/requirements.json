@@ -1,0 +1,138 @@
+{
+  "project_id": "proj-finance",
+  "project_name": "Personal Finance Tracker",
+  "domain_id": "finance",
+  "canonical_prompt": "Build a personal finance tracker with transactions, categories, budgets, monthly summaries, filtering, and expense charts.",
+  "requirements": [
+    {
+      "req_id": "REQ-001",
+      "title": "Income & Expense Transaction Ledger",
+      "description": "Log debit/credit transactions with amount, category, date, and description",
+      "type": "functional",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Transaction persists amount and type",
+        "Balance arithmetic correctly updated"
+      ],
+      "implemented_files": [
+        "backend/routes/transactions.py",
+        "backend/models/transaction.py",
+        "frontend/src/App.jsx"
+      ],
+      "related_apis": [
+        "/api/transactions"
+      ],
+      "related_models": [
+        "Transaction"
+      ],
+      "tests": [
+        "test_list_transactions",
+        "test_create_transaction"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-002",
+      "title": "Monthly Budget Planning & Caps",
+      "description": "Set monthly expenditure limits per category and track current spending percentage",
+      "type": "functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Budget records monthly_limit",
+        "Alerts when current_spent approaches limit"
+      ],
+      "implemented_files": [
+        "backend/routes/transactions.py",
+        "backend/models/transaction.py"
+      ],
+      "related_apis": [
+        "/api/budgets"
+      ],
+      "related_models": [
+        "Budget"
+      ],
+      "tests": [
+        "test_create_budget"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-003",
+      "title": "CSV Data Export",
+      "description": "Stream transactional history into formatted CSV for external tax or spreadsheet analysis",
+      "type": "functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Returns text/csv MIME type",
+        "Includes id, date, type, amount, category"
+      ],
+      "implemented_files": [
+        "backend/routes/transactions.py"
+      ],
+      "related_apis": [
+        "/api/transactions/export-csv"
+      ],
+      "related_models": [
+        "Transaction"
+      ],
+      "tests": [
+        "test_export_csv"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-004",
+      "title": "Financial KPI Dashboard",
+      "description": "Interactive React dashboard showcasing total net worth, monthly burn rate, and category breakdown",
+      "type": "functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Dynamic income vs expense summary",
+        "One-click CSV download button",
+        "Quick transaction form"
+      ],
+      "implemented_files": [
+        "frontend/src/App.jsx"
+      ],
+      "related_apis": [
+        "/api/transactions",
+        "/api/analytics/summary"
+      ],
+      "related_models": [
+        "Transaction",
+        "Budget"
+      ],
+      "tests": [
+        "test_health"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-005",
+      "title": "Precision Decimal Arithmetic",
+      "description": "Financial ledger storing NUMERIC(12, 2) to eliminate floating-point rounding errors",
+      "type": "non_functional",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Currency stored as exact SQL numeric",
+        "Foreign keys link user and category"
+      ],
+      "implemented_files": [
+        "database/schema.sql",
+        "backend/models/transaction.py"
+      ],
+      "related_apis": [
+        "/api/transactions"
+      ],
+      "related_models": [
+        "Transaction",
+        "Budget",
+        "Category"
+      ],
+      "tests": [
+        "test_list_transactions"
+      ],
+      "status": "SATISFIED"
+    }
+  ]
+}

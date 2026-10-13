@@ -1,0 +1,6 @@
+flowchart LR
+  User[User] --> UI[Browser UI]
+  UI --> API[FastAPI REST API]
+  API --> Domain[Domain logic: Smart Home Monitoring Dashboard]
+  Domain --> Store[(In-memory development store)]
+  API --> Docs[OpenAPI documentation]

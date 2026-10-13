@@ -1,0 +1,12 @@
+erDiagram
+  MONITOR ||--o{ CHECKRESULT : "domain relationship to be finalized"
+  MONITOR {
+    int id PK
+    string name
+    string description
+  }
+  CHECKRESULT {
+    int id PK
+    string name
+    string description
+  }

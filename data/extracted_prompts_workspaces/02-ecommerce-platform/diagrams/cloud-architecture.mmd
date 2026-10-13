@@ -1,0 +1,17 @@
+---
+title: Cloud Architecture — E-Commerce Platform
+---
+flowchart LR
+  C[Customers] --> CDN[CDN and Static Storefront]
+  CDN --> WAF[WAF / Bot Protection]
+  WAF --> LB[Load Balancer]
+  LB --> API[Storefront and Catalog Services]
+  API --> SEARCH[Managed Search]
+  API --> DB[(Managed Product / Order Database)]
+  API --> CACHE[Product Cache]
+  API --> PAY[Payment Provider]
+  API --> Q[Order Event Queue]
+  Q --> WORKER[Order Fulfilment Worker]
+  WORKER --> MAIL[Email / Shipping Notifications]
+  API --> OBJ[Product Image Object Storage]
+  API --> OBS[Monitoring and Audit Logs]

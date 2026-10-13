@@ -1,0 +1,16 @@
+---
+title: Cloud Architecture — Real-Time Analytics Dashboard
+---
+flowchart LR
+  SRC[Web / App Event Producers] --> ING[Event Ingestion Gateway]
+  ING --> STREAM[Managed Event Streaming]
+  STREAM --> PROC[Stream Processing Jobs]
+  PROC --> HOT[(Low-Latency Analytics Store)]
+  PROC --> LAKE[(Object Storage Data Lake)]
+  LAKE --> ETL[Batch ETL / Warehouse Loads]
+  ETL --> WH[(Cloud Data Warehouse)]
+  HOT --> API[Dashboard Query Service]
+  WH --> API
+  API --> CDN[Dashboard Web Hosting / CDN]
+  CDN --> U[Analysts and Product Teams]
+  ING --> OBS[Monitoring / Dead-Letter Queue]

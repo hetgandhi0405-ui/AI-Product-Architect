@@ -1,0 +1,142 @@
+{
+  "project_id": "proj-ecommerce",
+  "project_name": "E-Commerce Platform",
+  "domain_id": "ecommerce",
+  "canonical_prompt": "Build an e-commerce platform with product listings, categories, product search, shopping cart, order management, inventory tracking, and a safe sandbox checkout workflow.",
+  "requirements": [
+    {
+      "req_id": "REQ-001",
+      "title": "Product Catalog & Search",
+      "description": "Browse store inventory, filter by category and price, and view product details",
+      "type": "functional",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Catalog returns active products",
+        "SKU and price properly serialized",
+        "Inventory stock tracked"
+      ],
+      "implemented_files": [
+        "backend/routes/products.py",
+        "backend/models/product.py",
+        "frontend/src/App.jsx"
+      ],
+      "related_apis": [
+        "/api/products",
+        "/api/products/{product_id}"
+      ],
+      "related_models": [
+        "Product"
+      ],
+      "tests": [
+        "test_list_products",
+        "test_create_product"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-002",
+      "title": "Shopping Cart & Order Creation",
+      "description": "Add items to cart and convert cart items into persistent customer purchase orders",
+      "type": "functional",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Order calculates correct total amount",
+        "Order items linked via foreign keys"
+      ],
+      "implemented_files": [
+        "backend/routes/orders.py",
+        "backend/models/product.py",
+        "frontend/src/App.jsx"
+      ],
+      "related_apis": [
+        "/api/orders"
+      ],
+      "related_models": [
+        "Order",
+        "OrderItem"
+      ],
+      "tests": [
+        "test_create_order"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-003",
+      "title": "Sandbox Checkout Simulation",
+      "description": "Secure payment checkout sandbox transition from pending to paid status",
+      "type": "functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Checkout endpoint validates order exists",
+        "Status transitions to 'paid'"
+      ],
+      "implemented_files": [
+        "backend/routes/orders.py"
+      ],
+      "related_apis": [
+        "/api/orders/{order_id}/checkout"
+      ],
+      "related_models": [
+        "Order"
+      ],
+      "tests": [
+        "test_order_checkout"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-004",
+      "title": "Interactive Storefront UI",
+      "description": "Responsive product cards, instant cart drawer, and one-click checkout modal",
+      "type": "functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Interactive React cart counter",
+        "Order total reactive calculation",
+        "Instant order placement"
+      ],
+      "implemented_files": [
+        "frontend/src/App.jsx"
+      ],
+      "related_apis": [
+        "/api/products",
+        "/api/orders"
+      ],
+      "related_models": [
+        "Product",
+        "Order"
+      ],
+      "tests": [
+        "test_health"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-005",
+      "title": "Relational Foreign Keys & Cascading",
+      "description": "PostgreSQL schema ensuring order_items reference valid products and orders with cascade delete",
+      "type": "non_functional",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Foreign key constraints active",
+        "Indexes on product_id and order_id"
+      ],
+      "implemented_files": [
+        "database/schema.sql",
+        "backend/models/product.py"
+      ],
+      "related_apis": [
+        "/api/orders"
+      ],
+      "related_models": [
+        "Product",
+        "Order",
+        "OrderItem"
+      ],
+      "tests": [
+        "test_list_products"
+      ],
+      "status": "SATISFIED"
+    }
+  ]
+}

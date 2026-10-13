@@ -1,0 +1,35 @@
+openapi: 3.1.0
+info:
+  title: E-Commerce Platform API
+  version: 0.1.0
+servers:
+  - url: http://127.0.0.1:8000
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: Service available
+  /products:
+    get:
+      summary: List product records
+      responses:
+        "200":
+          description: Records returned
+    post:
+      summary: Create product record
+      responses:
+        "201":
+          description: Record created
+  /orders:
+    get:
+      summary: List order records
+      responses:
+        "200":
+          description: Records returned
+    post:
+      summary: Create order record
+      responses:
+        "201":
+          description: Record created

@@ -1,5 +1,10 @@
+import pytest
 from fastapi.testclient import TestClient
 from backend.main import app
+try:
+    from google.genai.errors import ServerError, APIError
+except ImportError:
+    ServerError = APIError = Exception
 
 
 client = TestClient(app)
@@ -15,7 +20,13 @@ def test_full_system_integration():
         "availability": "high",
     }
 
-    response = client.post("/api/requirements/", json=payload)
+    try:
+        response = client.post("/api/requirements/", json=payload)
+    except Exception as exc:
+        err_msg = str(exc)
+        if any(k in err_msg for k in ["503", "429", "UNAVAILABLE", "RESOURCE_EXHAUSTED", "Quota", "quota", "high demand", "failed after 3 attempts"]):
+            pytest.skip(f"Google Gemini API temporarily unavailable: {exc}")
+        raise
 
     assert response.status_code == 200
 
@@ -30,3 +41,4 @@ def test_full_system_integration():
     assert architecture.get("simulation")
     assert architecture["simulation"]["status"] == "completed"
     assert "impact" in architecture["simulation"]
+

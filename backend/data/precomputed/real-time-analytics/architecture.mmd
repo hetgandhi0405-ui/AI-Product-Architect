@@ -1,0 +1,30 @@
+flowchart TD
+  subgraph Event Producers
+    APP["Web & Mobile Apps"]
+    SRV["Backend Microservices"]
+    IOT["Edge Sensor Gateways"]
+  end
+
+  subgraph Ingestion & Caching (Redis Justified)
+    LB["High-Throughput NLB"]
+    API["Real-Time Analytics Dashboard Ingestion Gateway"]
+    REDIS_STREAM[("Redis 7 Ingestion Buffer & Aggregate Cache")]
+  end
+
+  subgraph Worker & Aggregation
+    AGGREGATOR["Stream Sliding-Window Aggregator Worker"]
+  end
+
+  subgraph Permanent Archival
+    PG[("PostgreSQL 15 Columnar/Timeseries Archival")]
+    DASH["Live Stream Analytics Dashboard"]
+  end
+
+  APP --> LB --> API
+  SRV --> LB --> API
+  IOT --> LB --> API
+  API --> REDIS_STREAM
+  REDIS_STREAM --> AGGREGATOR
+  AGGREGATOR --> REDIS_STREAM
+  AGGREGATOR --> PG
+  DASH --> REDIS_STREAM

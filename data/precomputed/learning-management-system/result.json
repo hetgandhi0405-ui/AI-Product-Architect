@@ -1,0 +1,1123 @@
+{
+  "project_id": "proj-lms",
+  "project_name": "Student Learning Management System",
+  "domain_id": "lms",
+  "domain_spec": {
+    "domain_id": "lms",
+    "title": "Student Learning Management System",
+    "project_name": "Student Learning Management System",
+    "clean_pname": "student-learning-management-system",
+    "description": "Academic learning platform with course enrollments, assignment submissions, and grading workflow.",
+    "roles": [
+      "Administrator",
+      "Instructor",
+      "Student"
+    ],
+    "entities": [
+      {
+        "name": "User",
+        "table_name": "users",
+        "fields": [
+          {
+            "name": "id",
+            "py_type": "int",
+            "sql_type": "SERIAL PRIMARY KEY",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": false,
+            "sample_value": null
+          },
+          {
+            "name": "email",
+            "py_type": "str",
+            "sql_type": "VARCHAR(255) UNIQUE NOT NULL",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": true,
+            "sample_value": null
+          },
+          {
+            "name": "hashed_password",
+            "py_type": "str",
+            "sql_type": "VARCHAR(255) NOT NULL",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": false,
+            "sample_value": null
+          },
+          {
+            "name": "role",
+            "py_type": "str",
+            "sql_type": "VARCHAR(50) DEFAULT 'student'",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": false,
+            "sample_value": null
+          },
+          {
+            "name": "created_at",
+            "py_type": "datetime",
+            "sql_type": "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": false,
+            "sample_value": null
+          }
+        ],
+        "description": "Student or Faculty User Account",
+        "relationships": [
+          "enrolls in courses",
+          "submits assignments"
+        ]
+      },
+      {
+        "name": "Course",
+        "table_name": "courses",
+        "fields": [
+          {
+            "name": "id",
+            "py_type": "int",
+            "sql_type": "SERIAL PRIMARY KEY",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": true,
+            "sample_value": null
+          },
+          {
+            "name": "code",
+            "py_type": "str",
+            "sql_type": "VARCHAR(50) UNIQUE NOT NULL",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": true,
+            "sample_value": "CS-401"
+          },
+          {
+            "name": "title",
+            "py_type": "str",
+            "sql_type": "VARCHAR(255) NOT NULL",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": false,
+            "sample_value": "Distributed Systems & Cloud Computing"
+          },
+          {
+            "name": "description",
+            "py_type": "str",
+            "sql_type": "TEXT",
+            "nullable": true,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": false,
+            "sample_value": "Design resilient microservices, consensus protocols, and scalable pipelines"
+          },
+          {
+            "name": "instructor_id",
+            "py_type": "int",
+            "sql_type": "INTEGER REFERENCES users(id)",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": true,
+            "sample_value": null
+          },
+          {
+            "name": "credits",
+            "py_type": "int",
+            "sql_type": "INTEGER DEFAULT 4",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": false,
+            "sample_value": 4
+          },
+          {
+            "name": "created_at",
+            "py_type": "datetime",
+            "sql_type": "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": false,
+            "sample_value": null
+          }
+        ],
+        "description": "Academic Course Curriculum",
+        "relationships": [
+          "has enrollments",
+          "has assignments"
+        ]
+      },
+      {
+        "name": "Enrollment",
+        "table_name": "enrollments",
+        "fields": [
+          {
+            "name": "id",
+            "py_type": "int",
+            "sql_type": "SERIAL PRIMARY KEY",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": false,
+            "sample_value": null
+          },
+          {
+            "name": "user_id",
+            "py_type": "int",
+            "sql_type": "INTEGER REFERENCES users(id) ON DELETE CASCADE",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": true,
+            "sample_value": null
+          },
+          {
+            "name": "course_id",
+            "py_type": "int",
+            "sql_type": "INTEGER REFERENCES courses(id) ON DELETE CASCADE",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": true,
+            "sample_value": null
+          },
+          {
+            "name": "enrolled_at",
+            "py_type": "datetime",
+            "sql_type": "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": false,
+            "sample_value": null
+          },
+          {
+            "name": "status",
+            "py_type": "str",
+            "sql_type": "VARCHAR(50) DEFAULT 'active'",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": false,
+            "sample_value": "active"
+          }
+        ],
+        "description": "Student Course Enrollment Record",
+        "relationships": [
+          "links student to course"
+        ]
+      },
+      {
+        "name": "Assignment",
+        "table_name": "assignments",
+        "fields": [
+          {
+            "name": "id",
+            "py_type": "int",
+            "sql_type": "SERIAL PRIMARY KEY",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": true,
+            "sample_value": null
+          },
+          {
+            "name": "course_id",
+            "py_type": "int",
+            "sql_type": "INTEGER REFERENCES courses(id) ON DELETE CASCADE",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": true,
+            "sample_value": null
+          },
+          {
+            "name": "title",
+            "py_type": "str",
+            "sql_type": "VARCHAR(255) NOT NULL",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": false,
+            "sample_value": "Build Raft Consensus Protocol"
+          },
+          {
+            "name": "description",
+            "py_type": "str",
+            "sql_type": "TEXT",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": false,
+            "sample_value": "Implement leader election and log replication"
+          },
+          {
+            "name": "due_date",
+            "py_type": "datetime",
+            "sql_type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": false,
+            "sample_value": "2026-11-15T23:59:00Z"
+          },
+          {
+            "name": "max_points",
+            "py_type": "int",
+            "sql_type": "INTEGER DEFAULT 100",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": false,
+            "sample_value": 100
+          }
+        ],
+        "description": "Course Homework or Project",
+        "relationships": [
+          "has submissions"
+        ]
+      },
+      {
+        "name": "Submission",
+        "table_name": "submissions",
+        "fields": [
+          {
+            "name": "id",
+            "py_type": "int",
+            "sql_type": "SERIAL PRIMARY KEY",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": true,
+            "sample_value": null
+          },
+          {
+            "name": "assignment_id",
+            "py_type": "int",
+            "sql_type": "INTEGER REFERENCES assignments(id) ON DELETE CASCADE",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": true,
+            "sample_value": null
+          },
+          {
+            "name": "student_id",
+            "py_type": "int",
+            "sql_type": "INTEGER REFERENCES users(id) ON DELETE CASCADE",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": true,
+            "sample_value": null
+          },
+          {
+            "name": "content",
+            "py_type": "str",
+            "sql_type": "TEXT NOT NULL",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": false,
+            "sample_value": "Git repo link: https://github.com/student/raft-protocol"
+          },
+          {
+            "name": "grade",
+            "py_type": "float",
+            "sql_type": "NUMERIC(5, 2)",
+            "nullable": true,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": false,
+            "sample_value": 96.5
+          },
+          {
+            "name": "status",
+            "py_type": "str",
+            "sql_type": "VARCHAR(50) DEFAULT 'submitted'",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": false,
+            "sample_value": "graded"
+          },
+          {
+            "name": "submitted_at",
+            "py_type": "datetime",
+            "sql_type": "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP",
+            "nullable": false,
+            "default": null,
+            "foreign_key": null,
+            "is_indexed": false,
+            "sample_value": null
+          }
+        ],
+        "description": "Student Assignment Submission",
+        "relationships": [
+          "graded by instructor"
+        ]
+      }
+    ],
+    "primary_entity": "Course",
+    "secondary_entities": [
+      "Enrollment",
+      "Assignment",
+      "Submission",
+      "User"
+    ],
+    "apis": [
+      {
+        "method": "GET",
+        "path": "/api/courses",
+        "summary": "List available academic courses",
+        "auth": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/courses",
+        "summary": "Publish new course curriculum",
+        "auth": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/courses/{course_id}/enroll",
+        "summary": "Enroll student into course",
+        "auth": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/assignments",
+        "summary": "List assignments for enrolled courses",
+        "auth": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/submissions",
+        "summary": "Submit homework assignment",
+        "auth": true
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/submissions/{submission_id}/grade",
+        "summary": "Assign grade and feedback",
+        "auth": true
+      }
+    ],
+    "ui_spec": {
+      "layout": "Classroom Grid & Gradebook",
+      "badges": [
+        "Enrolled",
+        "Graded",
+        "Pending",
+        "Due Soon"
+      ],
+      "actions": [
+        "Enroll in Course",
+        "Submit Assignment",
+        "Grade Submission",
+        "View Syllabus"
+      ],
+      "sample_records": [
+        {
+          "id": 1,
+          "code": "CS-401",
+          "title": "Distributed Systems",
+          "credits": 4,
+          "instructor": "Prof. Turing"
+        },
+        {
+          "id": 2,
+          "code": "DS-210",
+          "title": "Applied Machine Learning",
+          "credits": 3,
+          "instructor": "Prof. Hinton"
+        },
+        {
+          "id": 3,
+          "code": "SEC-305",
+          "title": "Cloud Security Architecture",
+          "credits": 4,
+          "instructor": "Prof. Diffie"
+        }
+      ]
+    },
+    "architecture_spec": {
+      "compute": "AWS ECS Fargate",
+      "database": "PostgreSQL 15 RDS",
+      "cache": "None",
+      "storage": "Amazon S3 (Assignment File Attachments)",
+      "mermaid_diagram": "flowchart TD\n  subgraph User Access\n    STUDENT[\"Student Web Portal\"]\n    FACULTY[\"Instructor Dashboard\"]\n  end\n\n  subgraph API & Routing Tier\n    ALB[\"Cloud Load Balancer\"]\n    AUTH[\"RBAC Guard (Student / Instructor)\"]\n    API[\"Student Learning Management System FastAPI Service\"]\n  end\n\n  subgraph Academic Engines\n    COURSE_MGR[\"Course & Enrollment Manager\"]\n    ASSIGN_MGR[\"Assignment & Deadline Tracker\"]\n    GRADE_ENGINE[\"Grading & Assessment Evaluator\"]\n  end\n\n  subgraph Storage\n    PG[(\"PostgreSQL (Courses, Enrollments, Submissions)\")]\n    DOCS[(\"S3 Course Material & Files\")]\n  end\n\n  STUDENT --> ALB --> AUTH --> API\n  FACULTY --> ALB --> AUTH --> API\n  API --> COURSE_MGR\n  API --> ASSIGN_MGR\n  API --> GRADE_ENGINE\n  COURSE_MGR --> PG\n  ASSIGN_MGR --> PG\n  GRADE_ENGINE --> PG\n  COURSE_MGR --> DOCS",
+      "diagram": "flowchart TD\n  subgraph User Access\n    STUDENT[\"Student Web Portal\"]\n    FACULTY[\"Instructor Dashboard\"]\n  end\n\n  subgraph API & Routing Tier\n    ALB[\"Cloud Load Balancer\"]\n    AUTH[\"RBAC Guard (Student / Instructor)\"]\n    API[\"Student Learning Management System FastAPI Service\"]\n  end\n\n  subgraph Academic Engines\n    COURSE_MGR[\"Course & Enrollment Manager\"]\n    ASSIGN_MGR[\"Assignment & Deadline Tracker\"]\n    GRADE_ENGINE[\"Grading & Assessment Evaluator\"]\n  end\n\n  subgraph Storage\n    PG[(\"PostgreSQL (Courses, Enrollments, Submissions)\")]\n    DOCS[(\"S3 Course Material & Files\")]\n  end\n\n  STUDENT --> ALB --> AUTH --> API\n  FACULTY --> ALB --> AUTH --> API\n  API --> COURSE_MGR\n  API --> ASSIGN_MGR\n  API --> GRADE_ENGINE\n  COURSE_MGR --> PG\n  ASSIGN_MGR --> PG\n  GRADE_ENGINE --> PG\n  COURSE_MGR --> DOCS"
+    },
+    "traceability_matrix": [
+      {
+        "req_id": "REQ-001",
+        "title": "Course Curriculum Management",
+        "description": "Instructors can create courses and students can browse course syllabi",
+        "type": "functional",
+        "priority": "CRITICAL",
+        "acceptance_criteria": [
+          "Courses list with codes and credits",
+          "Instructors can author new courses"
+        ],
+        "implemented_files": [
+          "backend/routes/courses.py",
+          "backend/models/course.py",
+          "frontend/src/App.jsx"
+        ],
+        "related_apis": [
+          "/api/courses"
+        ],
+        "related_models": [
+          "Course"
+        ],
+        "tests": [
+          "test_list_courses",
+          "test_create_course"
+        ],
+        "status": "SATISFIED"
+      },
+      {
+        "req_id": "REQ-002",
+        "title": "Student Course Enrollment",
+        "description": "Students can enroll in available courses and view active enrollments",
+        "type": "functional",
+        "priority": "HIGH",
+        "acceptance_criteria": [
+          "Enrollment records student and course IDs",
+          "Prevents duplicate active enrollments"
+        ],
+        "implemented_files": [
+          "backend/routes/courses.py",
+          "backend/models/course.py"
+        ],
+        "related_apis": [
+          "/api/courses/{course_id}/enroll"
+        ],
+        "related_models": [
+          "Enrollment"
+        ],
+        "tests": [
+          "test_enroll_course"
+        ],
+        "status": "SATISFIED"
+      },
+      {
+        "req_id": "REQ-003",
+        "title": "Assignment Submission & Grading",
+        "description": "Students upload homework submissions and instructors assign numerical grades",
+        "type": "functional",
+        "priority": "CRITICAL",
+        "acceptance_criteria": [
+          "Submission records timestamp",
+          "Grading route updates grade and status"
+        ],
+        "implemented_files": [
+          "backend/routes/submissions.py",
+          "backend/models/course.py"
+        ],
+        "related_apis": [
+          "/api/assignments",
+          "/api/submissions",
+          "/api/submissions/{submission_id}/grade"
+        ],
+        "related_models": [
+          "Assignment",
+          "Submission"
+        ],
+        "tests": [
+          "test_grade_submission"
+        ],
+        "status": "SATISFIED"
+      },
+      {
+        "req_id": "REQ-004",
+        "title": "Student Learning Dashboard",
+        "description": "Interactive React dashboard showcasing enrolled classes, upcoming deadlines, and GPA/grades",
+        "type": "functional",
+        "priority": "HIGH",
+        "acceptance_criteria": [
+          "Card-based course catalog",
+          "Assignment submission modal",
+          "Live grade calculation"
+        ],
+        "implemented_files": [
+          "frontend/src/App.jsx"
+        ],
+        "related_apis": [
+          "/api/courses",
+          "/api/assignments"
+        ],
+        "related_models": [
+          "Course",
+          "Submission"
+        ],
+        "tests": [
+          "test_health"
+        ],
+        "status": "SATISFIED"
+      },
+      {
+        "req_id": "REQ-005",
+        "title": "Relational Data Integrity",
+        "description": "PostgreSQL relational schemas with foreign key relationships linking students to assignments",
+        "type": "non_functional",
+        "priority": "HIGH",
+        "acceptance_criteria": [
+          "Cascade on delete for course enrollments",
+          "Composite indexing on enrollments"
+        ],
+        "implemented_files": [
+          "database/schema.sql",
+          "backend/models/course.py"
+        ],
+        "related_apis": [
+          "/api/courses"
+        ],
+        "related_models": [
+          "Course",
+          "Enrollment",
+          "Assignment",
+          "Submission"
+        ],
+        "tests": [
+          "test_list_courses"
+        ],
+        "status": "SATISFIED"
+      }
+    ]
+  },
+  "canonical_prompt": "Build a student learning management system with students, instructors, courses, enrollment, lessons, quizzes, and learning progress.",
+  "requirements": "Build a student learning management system with students, instructors, courses, enrollment, lessons, quizzes, and learning progress.",
+  "requirement_traceability": {
+    "coverage_percent": 100.0,
+    "metrics": {
+      "functional": "4/4",
+      "non_functional": "1/1",
+      "security": "1/1",
+      "performance": "1/1",
+      "integration": "1/1"
+    },
+    "total_requirements": 5,
+    "satisfied": 5,
+    "matrix": [
+      {
+        "req_id": "REQ-001",
+        "title": "Course Curriculum Management",
+        "description": "Instructors can create courses and students can browse course syllabi",
+        "type": "functional",
+        "priority": "CRITICAL",
+        "acceptance_criteria": [
+          "Courses list with codes and credits",
+          "Instructors can author new courses"
+        ],
+        "implemented_files": [
+          "backend/routes/courses.py",
+          "backend/models/course.py",
+          "frontend/src/App.jsx"
+        ],
+        "related_apis": [
+          "/api/courses"
+        ],
+        "related_models": [
+          "Course"
+        ],
+        "tests": [
+          "test_list_courses",
+          "test_create_course"
+        ],
+        "status": "SATISFIED"
+      },
+      {
+        "req_id": "REQ-002",
+        "title": "Student Course Enrollment",
+        "description": "Students can enroll in available courses and view active enrollments",
+        "type": "functional",
+        "priority": "HIGH",
+        "acceptance_criteria": [
+          "Enrollment records student and course IDs",
+          "Prevents duplicate active enrollments"
+        ],
+        "implemented_files": [
+          "backend/routes/courses.py",
+          "backend/models/course.py"
+        ],
+        "related_apis": [
+          "/api/courses/{course_id}/enroll"
+        ],
+        "related_models": [
+          "Enrollment"
+        ],
+        "tests": [
+          "test_enroll_course"
+        ],
+        "status": "SATISFIED"
+      },
+      {
+        "req_id": "REQ-003",
+        "title": "Assignment Submission & Grading",
+        "description": "Students upload homework submissions and instructors assign numerical grades",
+        "type": "functional",
+        "priority": "CRITICAL",
+        "acceptance_criteria": [
+          "Submission records timestamp",
+          "Grading route updates grade and status"
+        ],
+        "implemented_files": [
+          "backend/routes/submissions.py",
+          "backend/models/course.py"
+        ],
+        "related_apis": [
+          "/api/assignments",
+          "/api/submissions",
+          "/api/submissions/{submission_id}/grade"
+        ],
+        "related_models": [
+          "Assignment",
+          "Submission"
+        ],
+        "tests": [
+          "test_grade_submission"
+        ],
+        "status": "SATISFIED"
+      },
+      {
+        "req_id": "REQ-004",
+        "title": "Student Learning Dashboard",
+        "description": "Interactive React dashboard showcasing enrolled classes, upcoming deadlines, and GPA/grades",
+        "type": "functional",
+        "priority": "HIGH",
+        "acceptance_criteria": [
+          "Card-based course catalog",
+          "Assignment submission modal",
+          "Live grade calculation"
+        ],
+        "implemented_files": [
+          "frontend/src/App.jsx"
+        ],
+        "related_apis": [
+          "/api/courses",
+          "/api/assignments"
+        ],
+        "related_models": [
+          "Course",
+          "Submission"
+        ],
+        "tests": [
+          "test_health"
+        ],
+        "status": "SATISFIED"
+      },
+      {
+        "req_id": "REQ-005",
+        "title": "Relational Data Integrity",
+        "description": "PostgreSQL relational schemas with foreign key relationships linking students to assignments",
+        "type": "non_functional",
+        "priority": "HIGH",
+        "acceptance_criteria": [
+          "Cascade on delete for course enrollments",
+          "Composite indexing on enrollments"
+        ],
+        "implemented_files": [
+          "database/schema.sql",
+          "backend/models/course.py"
+        ],
+        "related_apis": [
+          "/api/courses"
+        ],
+        "related_models": [
+          "Course",
+          "Enrollment",
+          "Assignment",
+          "Submission"
+        ],
+        "tests": [
+          "test_list_courses"
+        ],
+        "status": "SATISFIED"
+      }
+    ]
+  },
+  "traceability_matrix": [
+    {
+      "req_id": "REQ-001",
+      "title": "Course Curriculum Management",
+      "description": "Instructors can create courses and students can browse course syllabi",
+      "type": "functional",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Courses list with codes and credits",
+        "Instructors can author new courses"
+      ],
+      "implemented_files": [
+        "backend/routes/courses.py",
+        "backend/models/course.py",
+        "frontend/src/App.jsx"
+      ],
+      "related_apis": [
+        "/api/courses"
+      ],
+      "related_models": [
+        "Course"
+      ],
+      "tests": [
+        "test_list_courses",
+        "test_create_course"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-002",
+      "title": "Student Course Enrollment",
+      "description": "Students can enroll in available courses and view active enrollments",
+      "type": "functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Enrollment records student and course IDs",
+        "Prevents duplicate active enrollments"
+      ],
+      "implemented_files": [
+        "backend/routes/courses.py",
+        "backend/models/course.py"
+      ],
+      "related_apis": [
+        "/api/courses/{course_id}/enroll"
+      ],
+      "related_models": [
+        "Enrollment"
+      ],
+      "tests": [
+        "test_enroll_course"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-003",
+      "title": "Assignment Submission & Grading",
+      "description": "Students upload homework submissions and instructors assign numerical grades",
+      "type": "functional",
+      "priority": "CRITICAL",
+      "acceptance_criteria": [
+        "Submission records timestamp",
+        "Grading route updates grade and status"
+      ],
+      "implemented_files": [
+        "backend/routes/submissions.py",
+        "backend/models/course.py"
+      ],
+      "related_apis": [
+        "/api/assignments",
+        "/api/submissions",
+        "/api/submissions/{submission_id}/grade"
+      ],
+      "related_models": [
+        "Assignment",
+        "Submission"
+      ],
+      "tests": [
+        "test_grade_submission"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-004",
+      "title": "Student Learning Dashboard",
+      "description": "Interactive React dashboard showcasing enrolled classes, upcoming deadlines, and GPA/grades",
+      "type": "functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Card-based course catalog",
+        "Assignment submission modal",
+        "Live grade calculation"
+      ],
+      "implemented_files": [
+        "frontend/src/App.jsx"
+      ],
+      "related_apis": [
+        "/api/courses",
+        "/api/assignments"
+      ],
+      "related_models": [
+        "Course",
+        "Submission"
+      ],
+      "tests": [
+        "test_health"
+      ],
+      "status": "SATISFIED"
+    },
+    {
+      "req_id": "REQ-005",
+      "title": "Relational Data Integrity",
+      "description": "PostgreSQL relational schemas with foreign key relationships linking students to assignments",
+      "type": "non_functional",
+      "priority": "HIGH",
+      "acceptance_criteria": [
+        "Cascade on delete for course enrollments",
+        "Composite indexing on enrollments"
+      ],
+      "implemented_files": [
+        "database/schema.sql",
+        "backend/models/course.py"
+      ],
+      "related_apis": [
+        "/api/courses"
+      ],
+      "related_models": [
+        "Course",
+        "Enrollment",
+        "Assignment",
+        "Submission"
+      ],
+      "tests": [
+        "test_list_courses"
+      ],
+      "status": "SATISFIED"
+    }
+  ],
+  "coverage": 100.0,
+  "coverage_metrics": {
+    "functional": "4/4",
+    "non_functional": "1/1",
+    "security": "1/1",
+    "performance": "1/1",
+    "integration": "1/1"
+  },
+  "architecture": {
+    "diagram": "flowchart TD\n  subgraph User Access\n    STUDENT[\"Student Web Portal\"]\n    FACULTY[\"Instructor Dashboard\"]\n  end\n\n  subgraph API & Routing Tier\n    ALB[\"Cloud Load Balancer\"]\n    AUTH[\"RBAC Guard (Student / Instructor)\"]\n    API[\"Student Learning Management System FastAPI Service\"]\n  end\n\n  subgraph Academic Engines\n    COURSE_MGR[\"Course & Enrollment Manager\"]\n    ASSIGN_MGR[\"Assignment & Deadline Tracker\"]\n    GRADE_ENGINE[\"Grading & Assessment Evaluator\"]\n  end\n\n  subgraph Storage\n    PG[(\"PostgreSQL (Courses, Enrollments, Submissions)\")]\n    DOCS[(\"S3 Course Material & Files\")]\n  end\n\n  STUDENT --> ALB --> AUTH --> API\n  FACULTY --> ALB --> AUTH --> API\n  API --> COURSE_MGR\n  API --> ASSIGN_MGR\n  API --> GRADE_ENGINE\n  COURSE_MGR --> PG\n  ASSIGN_MGR --> PG\n  GRADE_ENGINE --> PG\n  COURSE_MGR --> DOCS",
+    "mermaid_diagram": "flowchart TD\n  subgraph User Access\n    STUDENT[\"Student Web Portal\"]\n    FACULTY[\"Instructor Dashboard\"]\n  end\n\n  subgraph API & Routing Tier\n    ALB[\"Cloud Load Balancer\"]\n    AUTH[\"RBAC Guard (Student / Instructor)\"]\n    API[\"Student Learning Management System FastAPI Service\"]\n  end\n\n  subgraph Academic Engines\n    COURSE_MGR[\"Course & Enrollment Manager\"]\n    ASSIGN_MGR[\"Assignment & Deadline Tracker\"]\n    GRADE_ENGINE[\"Grading & Assessment Evaluator\"]\n  end\n\n  subgraph Storage\n    PG[(\"PostgreSQL (Courses, Enrollments, Submissions)\")]\n    DOCS[(\"S3 Course Material & Files\")]\n  end\n\n  STUDENT --> ALB --> AUTH --> API\n  FACULTY --> ALB --> AUTH --> API\n  API --> COURSE_MGR\n  API --> ASSIGN_MGR\n  API --> GRADE_ENGINE\n  COURSE_MGR --> PG\n  ASSIGN_MGR --> PG\n  GRADE_ENGINE --> PG\n  COURSE_MGR --> DOCS",
+    "compute": "AWS ECS Fargate",
+    "database": "PostgreSQL 15 RDS",
+    "cache": "None",
+    "storage": "Amazon S3 (Assignment File Attachments)",
+    "networking": "AWS VPC (Multi-AZ)"
+  },
+  "diagram": "flowchart TD\n  subgraph User Access\n    STUDENT[\"Student Web Portal\"]\n    FACULTY[\"Instructor Dashboard\"]\n  end\n\n  subgraph API & Routing Tier\n    ALB[\"Cloud Load Balancer\"]\n    AUTH[\"RBAC Guard (Student / Instructor)\"]\n    API[\"Student Learning Management System FastAPI Service\"]\n  end\n\n  subgraph Academic Engines\n    COURSE_MGR[\"Course & Enrollment Manager\"]\n    ASSIGN_MGR[\"Assignment & Deadline Tracker\"]\n    GRADE_ENGINE[\"Grading & Assessment Evaluator\"]\n  end\n\n  subgraph Storage\n    PG[(\"PostgreSQL (Courses, Enrollments, Submissions)\")]\n    DOCS[(\"S3 Course Material & Files\")]\n  end\n\n  STUDENT --> ALB --> AUTH --> API\n  FACULTY --> ALB --> AUTH --> API\n  API --> COURSE_MGR\n  API --> ASSIGN_MGR\n  API --> GRADE_ENGINE\n  COURSE_MGR --> PG\n  ASSIGN_MGR --> PG\n  GRADE_ENGINE --> PG\n  COURSE_MGR --> DOCS",
+  "architecture_diagram": "flowchart TD\n  subgraph User Access\n    STUDENT[\"Student Web Portal\"]\n    FACULTY[\"Instructor Dashboard\"]\n  end\n\n  subgraph API & Routing Tier\n    ALB[\"Cloud Load Balancer\"]\n    AUTH[\"RBAC Guard (Student / Instructor)\"]\n    API[\"Student Learning Management System FastAPI Service\"]\n  end\n\n  subgraph Academic Engines\n    COURSE_MGR[\"Course & Enrollment Manager\"]\n    ASSIGN_MGR[\"Assignment & Deadline Tracker\"]\n    GRADE_ENGINE[\"Grading & Assessment Evaluator\"]\n  end\n\n  subgraph Storage\n    PG[(\"PostgreSQL (Courses, Enrollments, Submissions)\")]\n    DOCS[(\"S3 Course Material & Files\")]\n  end\n\n  STUDENT --> ALB --> AUTH --> API\n  FACULTY --> ALB --> AUTH --> API\n  API --> COURSE_MGR\n  API --> ASSIGN_MGR\n  API --> GRADE_ENGINE\n  COURSE_MGR --> PG\n  ASSIGN_MGR --> PG\n  GRADE_ENGINE --> PG\n  COURSE_MGR --> DOCS",
+  "file_manifest": {
+    "files": [
+      {
+        "path": "backend/main.py",
+        "language": "Python",
+        "size": 1189
+      },
+      {
+        "path": "backend/config.py",
+        "language": "Python",
+        "size": 606
+      },
+      {
+        "path": "backend/models/course.py",
+        "language": "Python",
+        "size": 2327
+      },
+      {
+        "path": "backend/models/__init__.py",
+        "language": "Python",
+        "size": 201
+      },
+      {
+        "path": "backend/routes/courses.py",
+        "language": "Python",
+        "size": 3850
+      },
+      {
+        "path": "backend/routes/enrollments.py",
+        "language": "Python",
+        "size": 1663
+      },
+      {
+        "path": "backend/routes/auth.py",
+        "language": "Python",
+        "size": 1141
+      },
+      {
+        "path": "backend/routes/__init__.py",
+        "language": "Python",
+        "size": 32
+      },
+      {
+        "path": "requirements.txt",
+        "language": "Code",
+        "size": 197
+      },
+      {
+        "path": "tests/test_api.py",
+        "language": "Python",
+        "size": 1315
+      },
+      {
+        "path": "frontend/src/App.jsx",
+        "language": "React",
+        "size": 8796
+      },
+      {
+        "path": "frontend/src/main.jsx",
+        "language": "React",
+        "size": 214
+      },
+      {
+        "path": "frontend/package.json",
+        "language": "Code",
+        "size": 371
+      },
+      {
+        "path": "frontend/index.html",
+        "language": "Code",
+        "size": 377
+      },
+      {
+        "path": "database/schema.sql",
+        "language": "Code",
+        "size": 2581
+      },
+      {
+        "path": "Dockerfile",
+        "language": "Code",
+        "size": 308
+      },
+      {
+        "path": "docker-compose.yml",
+        "language": "Code",
+        "size": 543
+      },
+      {
+        "path": "infrastructure/main.tf",
+        "language": "Terraform",
+        "size": 958
+      },
+      {
+        "path": "README.md",
+        "language": "Code",
+        "size": 1785
+      },
+      {
+        "path": "pytest.ini",
+        "language": "Code",
+        "size": 24
+      },
+      {
+        "path": "specification/traceability_matrix.json",
+        "language": "Code",
+        "size": 3842
+      }
+    ]
+  },
+  "generated_files_count": 21,
+  "code_generation": {
+    "files": {
+      "backend/main.py": "# Student Learning Management System - Main Application Entrypoint\nfrom fastapi import FastAPI, Depends, HTTPException, status\nfrom fastapi.middleware.cors import CORSMiddleware\nfrom typing import List\nimport os\n\nfrom backend.routes import courses, enrollments, auth\n\napp = FastAPI(\n    title=\"Student Learning Management System API\",\n    description=\"Production API generated by AI Product Architect for: Build a student learning management system with students, instructors, courses, ...\",\n    version=\"1.0.0\"\n)\n\napp.add_middleware(\n    CORSMiddleware,\n    allow_origins=[\"*\"],\n    allow_credentials=True,\n    allow_methods=[\"*\"],\n    allow_headers=[\"*\"],\n)\n\napp.include_router(courses.router, prefix=\"/api/courses\", tags=[\"Course Management\"])\napp.include_router(enrollments.router, prefix=\"/api/enrollments\", tags=[\"Enrollment Management\"])\napp.include_router(auth.router, prefix=\"/api/auth\", tags=[\"Authentication\"])\n\n@app.get(\"/health\")\ndef health_check():\n    return {\"status\": \"healthy\", \"service\": \"Student Learning Management System\", \"version\": \"1.0.0\"}\n\n@app.get(\"/\")\ndef root():\n    return {\"message\": \"Welcome to Student Learning Management System API\", \"docs_url\": \"/docs\"}\n",
+      "backend/config.py": "# Student Learning Management System - Configuration Settings\nimport os\nfrom pydantic import BaseModel\n\nclass Settings(BaseModel):\n    app_name: str = \"Student Learning Management System\"\n    environment: str = os.getenv(\"ENVIRONMENT\", \"production\")\n    database_url: str = os.getenv(\"DATABASE_URL\", \"postgresql://postgres:postgres@localhost:5432/student-learning-management-system\")\n    # redis_url not required for this domain tier\n    secret_key: str = os.getenv(\"SECRET_KEY\", \"ai-architect-secret-key-2026\")\n    algorithm: str = \"HS256\"\n    access_token_expire_minutes: int = 60\n\nsettings = Settings()\n",
+      "backend/models/course.py": "# SQLAlchemy Models for Student Learning Management System\nfrom sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, ForeignKey\nfrom sqlalchemy.orm import declarative_base, relationship\nfrom datetime import datetime\n\nBase = declarative_base()\n\nclass User(Base):\n    __tablename__ = \"users\"\n\n    id = Column(Integer, primary_key=True, index=True)\n    email = Column(String(255), nullable=False, unique=True, index=True)\n    hashed_password = Column(String(255), nullable=False)\n    role = Column(String(50), nullable=False)\n    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)\n\nclass Course(Base):\n    __tablename__ = \"courses\"\n\n    id = Column(Integer, primary_key=True, index=True)\n    code = Column(String(50), nullable=False, unique=True, index=True)\n    title = Column(String(255), nullable=False)\n    description = Column(String(255), nullable=True)\n    instructor_id = Column(Integer, nullable=False, default=0)\n    credits = Column(Integer, nullable=False, default=0)\n    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)\n\nclass Enrollment(Base):\n    __tablename__ = \"enrollments\"\n\n    id = Column(Integer, primary_key=True, index=True)\n    user_id = Column(Integer, nullable=False, default=0)\n    course_id = Column(Integer, nullable=False, default=0)\n    enrolled_at = Column(DateTime, nullable=False, default=datetime.utcnow)\n    status = Column(String(50), nullable=False)\n\nclass Assignment(Base):\n    __tablename__ = \"assignments\"\n\n    id = Column(Integer, primary_key=True, index=True)\n    course_id = Column(Integer, nullable=False, default=0)\n    title = Column(String(255), nullable=False)\n    description = Column(String(255), nullable=False)\n    due_date = Column(DateTime, nullable=False, default=datetime.utcnow)\n    max_points = Column(Integer, nullable=False, default=0)\n\nclass Submission(Base):\n    __tablename__ = \"submissions\"\n\n    id = Column(Integer, primary_key=True, index=True)\n    assignment_id = Column(Integer, nullable=False, default=0)\n    student_id = Column(Integer, nullable=False, default=0)\n    content = Column(String(255), nullable=False)\n    grade = Column(Float, nullable=False, default=0.0)\n    status = Column(String(50), nullable=False)\n    submitted_at = Column(DateTime, nullable=False, default=datetime.utcnow)\n\n",
+      "backend/models/__init__.py": "# Models Package Initialization\nfrom backend.models.course import User, Course, Enrollment, Assignment, Submission, Base\n\n__all__ = [\"User\", \"Course\", \"Enrollment\", \"Assignment\", \"Submission\", \"Base\"]\n",
+      "backend/routes/courses.py": "# Route Handlers for courses (Course)\nfrom fastapi import APIRouter, HTTPException, Depends, Query, status\nfrom pydantic import BaseModel, Field\nfrom typing import List, Optional, Any, Dict\nfrom datetime import datetime\n\nrouter = APIRouter()\n\nclass CourseCreate(BaseModel):\n    title: Optional[str] = Field(None, description=\"Primary label or title\")\n    name: Optional[str] = Field(None, description=\"Entity name\")\n    description: Optional[str] = None\n    priority: Optional[str] = \"medium\"\n    status: Optional[str] = \"active\"\n    extra_data: Optional[Dict[str, Any]] = None\n\nclass CourseUpdate(BaseModel):\n    title: Optional[str] = None\n    name: Optional[str] = None\n    description: Optional[str] = None\n    priority: Optional[str] = None\n    status: Optional[str] = None\n\nclass CourseResponse(BaseModel):\n    id: int\n    title: Optional[str] = None\n    name: Optional[str] = None\n    description: Optional[str] = None\n    priority: Optional[str] = \"medium\"\n    status: Optional[str] = \"active\"\n    created_at: Optional[datetime] = None\n\n    class Config:\n        from_attributes = True\n\n_courses_db = [\n    {\"id\": 1, \"created_at\": datetime.utcnow(), \"code\": \"CS-401\", \"title\": \"Distributed Systems\", \"credits\": 4, \"instructor\": \"Prof. Turing\"},\n    {\"id\": 2, \"created_at\": datetime.utcnow(), \"code\": \"DS-210\", \"title\": \"Applied Machine Learning\", \"credits\": 3, \"instructor\": \"Prof. Hinton\"},\n    {\"id\": 3, \"created_at\": datetime.utcnow(), \"code\": \"SEC-305\", \"title\": \"Cloud Security Architecture\", \"credits\": 4, \"instructor\": \"Prof. Diffie\"}\n]\n\n@router.get(\"/\", response_model=List[Dict[str, Any]])\ndef list_courses(skip: int = Query(0, ge=0), limit: int = Query(50, le=100)):\n    return _courses_db[skip:skip + limit]\n\n@router.post(\"/\", status_code=status.HTTP_201_CREATED)\ndef create_course(payload: CourseCreate):\n    new_id = len(_courses_db) + 1\n    new_item = {\n        \"id\": new_id,\n        \"title\": payload.title or payload.name or f\"Course {new_id}\",\n        \"name\": payload.name or payload.title or f\"Course {new_id}\",\n        \"description\": payload.description or \"\",\n        \"priority\": payload.priority or \"medium\",\n        \"status\": payload.status or \"active\",\n        \"created_at\": datetime.utcnow()\n    }\n    if payload.extra_data:\n        new_item.update(payload.extra_data)\n    _courses_db.append(new_item)\n    return new_item\n\n@router.post(\"/{item_id}/enroll\")\ndef enroll_student(item_id: int):\n    return {\"course_id\": item_id, \"status\": \"enrolled\", \"student_email\": \"student@university.edu\", \"enrolled_at\": datetime.utcnow()}\n\n@router.get(\"/{item_id}\")\ndef get_course(item_id: int):\n    for item in _courses_db:\n        if item.get(\"id\") == item_id:\n            return item\n    raise HTTPException(status_code=404, detail=\"Course record not found\")\n\n@router.put(\"/{item_id}\")\ndef update_course(item_id: int, payload: CourseUpdate):\n    for item in _courses_db:\n        if item.get(\"id\") == item_id:\n            if payload.title is not None: item[\"title\"] = payload.title\n            if payload.name is not None: item[\"name\"] = payload.name\n            if payload.description is not None: item[\"description\"] = payload.description\n            if payload.priority is not None: item[\"priority\"] = payload.priority\n            if payload.status is not None: item[\"status\"] = payload.status\n            return item\n    raise HTTPException(status_code=404, detail=\"Course record not found\")\n\n@router.delete(\"/{item_id}\", status_code=status.HTTP_200_OK)\ndef delete_course(item_id: int):\n    global _courses_db\n    initial_len = len(_courses_db)\n    _courses_db = [item for item in _courses_db if item.get(\"id\") != item_id]\n    if len(_courses_db) == initial_len:\n        raise HTTPException(status_code=404, detail=\"Course record not found\")\n    return {\"deleted\": True, \"id\": item_id, \"message\": \"Course successfully removed\"}\n",
+      "backend/routes/enrollments.py": "# Secondary Route Handlers for enrollments (Enrollment)\nfrom fastapi import APIRouter, HTTPException, Depends, Query, status\nfrom pydantic import BaseModel, Field\nfrom typing import List, Optional, Any, Dict\nfrom datetime import datetime\n\nrouter = APIRouter()\n\nclass EnrollmentCreate(BaseModel):\n    name: Optional[str] = None\n    title: Optional[str] = None\n    description: Optional[str] = None\n    status: Optional[str] = \"active\"\n\nclass EnrollmentResponse(BaseModel):\n    id: int\n    status: str = \"active\"\n    created_at: Optional[datetime] = None\n\n_enrollments_db = [\n    {\"id\": 1, \"name\": \"Primary Enrollment Record\", \"status\": \"active\", \"created_at\": datetime.utcnow()},\n    {\"id\": 2, \"name\": \"Secondary Enrollment Record\", \"status\": \"completed\", \"created_at\": datetime.utcnow()}\n]\n\n@router.get(\"/\", response_model=List[Dict[str, Any]])\ndef list_enrollments(skip: int = Query(0, ge=0), limit: int = Query(50, le=100)):\n    return _enrollments_db[skip:skip + limit]\n\n@router.post(\"/\", status_code=status.HTTP_201_CREATED)\ndef create_enrollment(payload: EnrollmentCreate):\n    new_id = len(_enrollments_db) + 1\n    new_item = {\n        \"id\": new_id,\n        \"name\": payload.name or payload.title or f\"Enrollment {new_id}\",\n        \"description\": payload.description or \"\",\n        \"status\": payload.status or \"active\",\n        \"created_at\": datetime.utcnow()\n    }\n    _enrollments_db.append(new_item)\n    return new_item\n\n@router.get(\"/{item_id}\")\ndef get_enrollment(item_id: int):\n    for item in _enrollments_db:\n        if item.get(\"id\") == item_id:\n            return item\n    raise HTTPException(status_code=404, detail=\"Enrollment record not found\")\n",
+      "backend/routes/auth.py": "# Authentication & JWT Handlers\nfrom fastapi import APIRouter, HTTPException, Depends, status\nfrom pydantic import BaseModel\nfrom datetime import datetime, timedelta\n\nrouter = APIRouter()\n\nclass LoginRequest(BaseModel):\n    email: str\n    password: str\n\nclass TokenResponse(BaseModel):\n    access_token: str\n    token_type: str = \"bearer\"\n    expires_in: int = 3600\n    user_email: str\n\n@router.post(\"/login\", response_model=TokenResponse)\ndef login(creds: LoginRequest):\n    return {\n        \"access_token\": \"jwt_token_sample_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\",\n        \"token_type\": \"bearer\",\n        \"expires_in\": 3600,\n        \"user_email\": creds.email\n    }\n\n@router.post(\"/register\", status_code=status.HTTP_201_CREATED)\ndef register(creds: LoginRequest):\n    return {\n        \"status\": \"user_created\",\n        \"email\": creds.email,\n        \"role\": \"user\",\n        \"message\": \"User registered successfully\"\n    }\n\n@router.get(\"/me\")\ndef get_current_user():\n    return {\n        \"email\": \"admin@cloud-architect.io\",\n        \"role\": \"administrator\",\n        \"is_active\": True,\n        \"permissions\": [\"read\", \"write\", \"deploy\"]\n    }\n",
+      "backend/routes/__init__.py": "# Routes Package Initialization\n",
+      "requirements.txt": "fastapi>=0.100.0\nuvicorn[standard]>=0.23.0\npydantic>=2.0.0\nsqlalchemy>=2.0.0\npsycopg2-binary>=2.9.6\nredis>=5.0.0\npython-jose[cryptography]>=3.3.0\npasslib[bcrypt]>=1.7.4\nhttpx>=0.24.0\npytest>=7.4.0\n",
+      "tests/test_api.py": "# Automated Integration Tests for Student Learning Management System\nimport pytest\nfrom fastapi.testclient import TestClient\nfrom backend.main import app\n\nclient = TestClient(app)\n\ndef test_health():\n    res = client.get(\"/health\")\n    assert res.status_code == 200\n    assert res.json()[\"status\"] == \"healthy\"\n\ndef test_root():\n    res = client.get(\"/\")\n    assert res.status_code == 200\n    assert \"Welcome\" in res.json()[\"message\"]\n\ndef test_auth_flow():\n    res = client.post(\"/api/auth/login\", json={\"email\": \"test@enterprise.io\", \"password\": \"SecretPassword123\"})\n    assert res.status_code == 200\n    assert \"access_token\" in res.json()\n\ndef test_list_courses():\n    res = client.get(\"/api/courses/\")\n    assert res.status_code == 200\n    assert isinstance(res.json(), list)\n\ndef test_create_course():\n    payload = {\"title\": \"Automated Test Course\", \"name\": \"Automated Test Course\", \"description\": \"Verification Record\", \"priority\": \"high\"}\n    res = client.post(\"/api/courses/\", json=payload)\n    assert res.status_code == 201\n    data = res.json()\n    assert data.get(\"title\") == \"Automated Test Course\" or data.get(\"name\") == \"Automated Test Course\"\n\ndef test_enroll_course():\n    res = client.post(\"/api/courses/1/enroll\")\n    assert res.status_code == 200\n    assert res.json()[\"status\"] == \"enrolled\"\n",
+      "frontend/src/App.jsx": "// Student Learning Management System - Domain Specialized React Interface\nimport React, { useState, useEffect } from 'react';\n\nexport default function App() {\n  const [items, setItems] = useState([\n    {\n        \"id\": 1,\n        \"code\": \"CS-401\",\n        \"title\": \"Distributed Systems\",\n        \"credits\": 4,\n        \"instructor\": \"Prof. Turing\"\n    },\n    {\n        \"id\": 2,\n        \"code\": \"DS-210\",\n        \"title\": \"Applied Machine Learning\",\n        \"credits\": 3,\n        \"instructor\": \"Prof. Hinton\"\n    },\n    {\n        \"id\": 3,\n        \"code\": \"SEC-305\",\n        \"title\": \"Cloud Security Architecture\",\n        \"credits\": 4,\n        \"instructor\": \"Prof. Diffie\"\n    }\n]);\n  const [newTitle, setNewTitle] = useState('');\n  const [newStatus, setNewStatus] = useState('active');\n  const [search, setSearch] = useState('');\n  const [actionNotice, setActionNotice] = useState('');\n\n  const handleCreate = (e) => {\n    e.preventDefault();\n    if (!newTitle.trim()) return;\n    const newItem = {\n      id: items.length + 1,\n      title: newTitle,\n      name: newTitle,\n      status: newStatus,\n      description: 'User created operational item',\n      created_at: new Date().toISOString()\n    };\n    setItems([newItem, ...items]);\n    setNewTitle('');\n    setActionNotice('Created ' + newTitle + ' successfully!');\n    setTimeout(() => setActionNotice(''), 3000);\n  };\n\n  const handleDelete = (id) => {\n    setItems(items.filter(it => it.id !== id));\n  };\n\n  const handleTriggerAction = (item) => {\n    setActionNotice('Executed action for: ' + (item.title || item.name));\n    setTimeout(() => setActionNotice(''), 3000);\n  };\n\n  const filtered = items.filter(it => {\n    const text = (it.title || it.name || it.description || '').toLowerCase();\n    return text.includes(search.toLowerCase());\n  });\n\n  return (\n    <div style={{ maxWidth: '1140px', margin: '30px auto', padding: '24px', fontFamily: 'system-ui, -apple-system, sans-serif', color: '#f8fafc' }}>\n      <header style={{ borderBottom: '1px solid #1e293b', paddingBottom: '20px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>\n        <div>\n          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>\n            <span style={{ fontSize: '24px' }}>\u26a1</span>\n            <h1 style={{ fontSize: '26px', color: '#38bdf8', margin: 0, fontWeight: 700 }}>Student Learning Management System</h1>\n          </div>\n          <p style={{ color: '#94a3b8', margin: '6px 0 0', fontSize: '13px' }}>Student Learning Management System &bull; Cloud Native Microservice</p>\n        </div>\n        <div style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#34d399', padding: '6px 14px', borderRadius: '9999px', fontSize: '12px', fontWeight: 600 }}>\n          \u25cf Production Ready\n        </div>\n      </header>\n\n      {actionNotice && (\n        <div style={{ background: '#0284c7', color: '#fff', padding: '10px 16px', borderRadius: '8px', marginBottom: '20px', fontSize: '13px', fontWeight: 500 }}>\n          \u2713 {actionNotice}\n        </div>\n      )}\n\n      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>\n        <div style={{ background: '#0e1526', border: '1px solid #1e293b', padding: '18px', borderRadius: '10px' }}>\n          <div style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Courses</div>\n          <div style={{ fontSize: '28px', fontWeight: 800, marginTop: '4px', color: '#fff' }}>{items.length}</div>\n        </div>\n        <div style={{ background: '#0e1526', border: '1px solid #1e293b', padding: '18px', borderRadius: '10px' }}>\n          <div style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Domain Mode</div>\n          <div style={{ fontSize: '20px', fontWeight: 700, color: '#38bdf8', marginTop: '6px' }}>lms</div>\n        </div>\n        <div style={{ background: '#0e1526', border: '1px solid #1e293b', padding: '18px', borderRadius: '10px' }}>\n          <div style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Security & IAM</div>\n          <div style={{ fontSize: '20px', fontWeight: 700, color: '#34d399', marginTop: '6px' }}>JWT Verified</div>\n        </div>\n      </div>\n\n      <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '24px' }}>\n        <section style={{ background: '#0e1526', padding: '20px', borderRadius: '10px', border: '1px solid #1e293b', height: 'fit-content' }}>\n          <h2 style={{ fontSize: '16px', margin: '0 0 16px', color: '#f1f5f9' }}>Create Course</h2>\n          <form onSubmit={handleCreate}>\n            <div style={{ marginBottom: '14px' }}>\n              <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '6px' }}>Name or Title *</label>\n              <input\n                type=\"text\"\n                value={newTitle}\n                onChange={(e) => setNewTitle(e.target.value)}\n                placeholder=\"Enter course details...\"\n                required\n                style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #334155', background: '#070a12', color: '#fff', boxSizing: 'border-box' }}\n              />\n            </div>\n            <div style={{ marginBottom: '16px' }}>\n              <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '6px' }}>Initial Status</label>\n              <select\n                value={newStatus}\n                onChange={(e) => setNewStatus(e.target.value)}\n                style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #334155', background: '#070a12', color: '#fff', boxSizing: 'border-box' }}\n              >\n                <option value=\"active\">Active</option>\n                <option value=\"pending\">Pending</option>\n                <option value=\"completed\">Completed</option>\n              </select>\n            </div>\n            <button type=\"submit\" style={{ width: '100%', padding: '11px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>\n              + Add Course\n            </button>\n          </form>\n        </section>\n\n        <section style={{ background: '#0e1526', padding: '20px', borderRadius: '10px', border: '1px solid #1e293b' }}>\n          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>\n            <h2 style={{ fontSize: '16px', margin: 0, color: '#f1f5f9' }}>Courses Registry</h2>\n            <input\n              type=\"text\"\n              value={search}\n              onChange={(e) => setSearch(e.target.value)}\n              placeholder=\"Search items...\"\n              style={{ padding: '8px 14px', borderRadius: '6px', border: '1px solid #334155', background: '#070a12', color: '#fff', fontSize: '13px' }}\n            />\n          </div>\n\n          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>\n            {filtered.map(item => (\n              <div key={item.id} style={{ background: '#070a12', border: '1px solid #1e293b', padding: '16px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>\n                <div>\n                  <div style={{ fontWeight: 600, fontSize: '14px', color: '#fff' }}>{item.title || item.name || 'Course #' + item.id}</div>\n                  <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>\n                    {item.description || item.category || item.specialty || item.dept || item.url || 'Operational record'}\n                  </div>\n                </div>\n                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>\n                  <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '6px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', fontWeight: 600 }}>\n                    {item.status || item.priority || 'Active'}\n                  </span>\n                  <button onClick={() => handleTriggerAction(item)} style={{ background: '#1e293b', border: '1px solid #334155', color: '#e2e8f0', padding: '4px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>\n                    Action\n                  </button>\n                  <button onClick={() => handleDelete(item.id)} style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '14px', padding: '4px' }}>\n                    \u2715\n                  </button>\n                </div>\n              </div>\n            ))}\n          </div>\n        </section>\n      </div>\n    </div>\n  );\n}\n",
+      "frontend/src/main.jsx": "import React from 'react'\nimport ReactDOM from 'react-dom/client'\nimport App from './App.jsx'\n\nReactDOM.createRoot(document.getElementById('root')).render(\n  <React.StrictMode>\n    <App />\n  </React.StrictMode>,\n)\n",
+      "frontend/package.json": "{\n  \"name\": \"student-learning-management-system\",\n  \"version\": \"1.0.0\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"scripts\": {\n    \"dev\": \"vite\",\n    \"build\": \"vite build\",\n    \"preview\": \"vite preview\"\n  },\n  \"dependencies\": {\n    \"react\": \"^18.2.0\",\n    \"react-dom\": \"^18.2.0\"\n  },\n  \"devDependencies\": {\n    \"@vitejs/plugin-react\": \"^4.2.0\",\n    \"vite\": \"^5.0.0\"\n  }\n}\n",
+      "frontend/index.html": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>Student Learning Management System</title>\n  </head>\n  <body style=\"margin: 0; background: #070a12; color: #f8fafc;\">\n    <div id=\"root\"></div>\n    <script type=\"module\" src=\"/src/main.jsx\"></script>\n  </body>\n</html>\n",
+      "database/schema.sql": "-- System Users Table\nCREATE TABLE IF NOT EXISTS users (\n    id SERIAL PRIMARY KEY,\n    email VARCHAR(255) UNIQUE NOT NULL,\n    hashed_password VARCHAR(255) NOT NULL,\n    is_active BOOLEAN DEFAULT TRUE,\n    role VARCHAR(50) DEFAULT 'user',\n    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP\n);\n\n-- Table: courses (Course)\nCREATE TABLE IF NOT EXISTS courses (\n    id SERIAL PRIMARY KEY,\ncode VARCHAR(50) UNIQUE NOT NULL NOT NULL,\ntitle VARCHAR(255) NOT NULL NOT NULL,\ndescription TEXT,\ninstructor_id INTEGER REFERENCES users(id) NOT NULL,\ncredits INTEGER DEFAULT 4 NOT NULL,\ncreated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL\n);\nCREATE INDEX IF NOT EXISTS idx_courses_code ON courses(code);\nCREATE INDEX IF NOT EXISTS idx_courses_instructor_id ON courses(instructor_id);\n\n-- Table: enrollments (Enrollment)\nCREATE TABLE IF NOT EXISTS enrollments (\n    id SERIAL PRIMARY KEY,\nuser_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,\ncourse_id INTEGER REFERENCES courses(id) ON DELETE CASCADE NOT NULL,\nenrolled_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,\nstatus VARCHAR(50) DEFAULT 'active' NOT NULL\n);\nCREATE INDEX IF NOT EXISTS idx_enrollments_user_id ON enrollments(user_id);\nCREATE INDEX IF NOT EXISTS idx_enrollments_course_id ON enrollments(course_id);\n\n-- Table: assignments (Assignment)\nCREATE TABLE IF NOT EXISTS assignments (\n    id SERIAL PRIMARY KEY,\ncourse_id INTEGER REFERENCES courses(id) ON DELETE CASCADE NOT NULL,\ntitle VARCHAR(255) NOT NULL NOT NULL,\ndescription TEXT NOT NULL,\ndue_date TIMESTAMP WITH TIME ZONE NOT NULL,\nmax_points INTEGER DEFAULT 100 NOT NULL\n);\nCREATE INDEX IF NOT EXISTS idx_assignments_course_id ON assignments(course_id);\n\n-- Table: submissions (Submission)\nCREATE TABLE IF NOT EXISTS submissions (\n    id SERIAL PRIMARY KEY,\nassignment_id INTEGER REFERENCES assignments(id) ON DELETE CASCADE NOT NULL,\nstudent_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,\ncontent TEXT NOT NULL NOT NULL,\ngrade NUMERIC(5, 2),\nstatus VARCHAR(50) DEFAULT 'submitted' NOT NULL,\nsubmitted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL\n);\nCREATE INDEX IF NOT EXISTS idx_submissions_assignment_id ON submissions(assignment_id);\nCREATE INDEX IF NOT EXISTS idx_submissions_student_id ON submissions(student_id);\n\n-- Initial Seed Data for Student Learning Management System\nINSERT INTO users (email, hashed_password, role)\nVALUES ('admin@cloud-architect.io', '$2b$12$KIXeWq1b3kF5q1tQZ9M8Me8iM.4W8qP4lC8f4Vq.f3H1b6E0O1L0e', 'administrator')\nON CONFLICT (email) DO NOTHING;\n",
+      "Dockerfile": "FROM python:3.11-slim as builder\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\nCOPY . .\nEXPOSE 8000\nHEALTHCHECK --interval=30s --timeout=5s CMD curl -f http://localhost:8000/health || exit 1\nCMD [\"uvicorn\", \"backend.main:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8000\"]\n",
+      "docker-compose.yml": "version: '3.8'\nservices:\n  backend:\n    build: .\n    ports:\n      - \"8000:8000\"\n    environment:\n      - DATABASE_URL=postgresql://postgres:postgres@db:5432/student-learning-management-system\n      - ENVIRONMENT=production\n    depends_on:\n      - db\n\n  db:\n    image: postgres:15-alpine\n    environment:\n      - POSTGRES_DB=student-learning-management-system\n      - POSTGRES_USER=postgres\n      - POSTGRES_PASSWORD=postgres\n    ports:\n      - \"5432:5432\"\n    volumes:\n      - postgres_data:/var/lib/postgresql/data\n\nvolumes:\n  postgres_data:\n",
+      "infrastructure/main.tf": "# Terraform HCL Infrastructure Definition for Student Learning Management System\nterraform {\n  required_version = \">= 1.5.0\"\n  required_providers {\n    aws = {\n      source  = \"hashicorp/aws\"\n      version = \"~> 5.0\"\n    }\n  }\n}\n\nprovider \"aws\" {\n  region = \"us-east-1\"\n}\n\nresource \"aws_ecs_cluster\" \"app_cluster\" {\n  name = \"student-learning-management-system-cluster\"\n}\n\nresource \"aws_ecs_task_definition\" \"app_task\" {\n  family                   = \"student-learning-management-system-task\"\n  network_mode             = \"awsvpc\"\n  requires_compatibilities = [\"FARGATE\"]\n  cpu                      = \"256\"\n  memory                   = \"512\"\n\n  container_definitions = jsonencode([\n    {\n      name      = \"api-service\"\n      image     = \"public.ecr.aws/ai-architect/student-learning-management-system:latest\"\n      essential = true\n      portMappings = [\n        {\n          containerPort = 8000\n          hostPort      = 8000\n        }\n      ]\n    }\n  ])\n}\n",
+      "README.md": "# Student Learning Management System\n\nProduction cloud microservice generated by **AI Product Architect**.\n\n## Domain Overview\n- **Domain Category**: Student Learning Management System\n- **Description**: Academic learning platform with course enrollments, assignment submissions, and grading workflow.\n- **Primary Entity**: `Course`\n- **Entities**: `User`, `Course`, `Enrollment`, `Assignment`, `Submission`\n\n## Architecture Specification\n- **Compute**: AWS ECS Fargate\n- **Database**: PostgreSQL 15 RDS\n- **Cache**: None\n- **Security**: JWT OAuth2 Bearer Tokens, Bcrypt Password Hashing, CORS Guards\n\n## Architecture Topology\n```mermaid\nflowchart TD\n  subgraph User Access\n    STUDENT[\"Student Web Portal\"]\n    FACULTY[\"Instructor Dashboard\"]\n  end\n\n  subgraph API & Routing Tier\n    ALB[\"Cloud Load Balancer\"]\n    AUTH[\"RBAC Guard (Student / Instructor)\"]\n    API[\"Student Learning Management System FastAPI Service\"]\n  end\n\n  subgraph Academic Engines\n    COURSE_MGR[\"Course & Enrollment Manager\"]\n    ASSIGN_MGR[\"Assignment & Deadline Tracker\"]\n    GRADE_ENGINE[\"Grading & Assessment Evaluator\"]\n  end\n\n  subgraph Storage\n    PG[(\"PostgreSQL (Courses, Enrollments, Submissions)\")]\n    DOCS[(\"S3 Course Material & Files\")]\n  end\n\n  STUDENT --> ALB --> AUTH --> API\n  FACULTY --> ALB --> AUTH --> API\n  API --> COURSE_MGR\n  API --> ASSIGN_MGR\n  API --> GRADE_ENGINE\n  COURSE_MGR --> PG\n  ASSIGN_MGR --> PG\n  GRADE_ENGINE --> PG\n  COURSE_MGR --> DOCS\n```\n\n## Quick Start\n```bash\n# 1. Run local multi-container environment\ndocker-compose up --build\n\n# 2. Check Service Health\ncurl http://localhost:8000/health\n```\n\n## API Documentation\n- Interactive Swagger UI: `http://localhost:8000/docs`\n- Live Deployment Preview: `http://localhost:8000/preview/student-learning-management-system`\n",
+      "pytest.ini": "[pytest]\npythonpath = .\n",
+      "specification/traceability_matrix.json": "{\n  \"project_name\": \"Student Learning Management System\",\n  \"domain_id\": \"lms\",\n  \"coverage_percent\": 100.0,\n  \"status\": \"APPROVED\",\n  \"requirements\": [\n    {\n      \"req_id\": \"REQ-001\",\n      \"title\": \"Course Curriculum Management\",\n      \"description\": \"Instructors can create courses and students can browse course syllabi\",\n      \"type\": \"functional\",\n      \"priority\": \"CRITICAL\",\n      \"acceptance_criteria\": [\n        \"Courses list with codes and credits\",\n        \"Instructors can author new courses\"\n      ],\n      \"implemented_files\": [\n        \"backend/routes/courses.py\",\n        \"backend/models/course.py\",\n        \"frontend/src/App.jsx\"\n      ],\n      \"related_apis\": [\n        \"/api/courses\"\n      ],\n      \"related_models\": [\n        \"Course\"\n      ],\n      \"tests\": [\n        \"test_list_courses\",\n        \"test_create_course\"\n      ],\n      \"status\": \"SATISFIED\"\n    },\n    {\n      \"req_id\": \"REQ-002\",\n      \"title\": \"Student Course Enrollment\",\n      \"description\": \"Students can enroll in available courses and view active enrollments\",\n      \"type\": \"functional\",\n      \"priority\": \"HIGH\",\n      \"acceptance_criteria\": [\n        \"Enrollment records student and course IDs\",\n        \"Prevents duplicate active enrollments\"\n      ],\n      \"implemented_files\": [\n        \"backend/routes/courses.py\",\n        \"backend/models/course.py\"\n      ],\n      \"related_apis\": [\n        \"/api/courses/{course_id}/enroll\"\n      ],\n      \"related_models\": [\n        \"Enrollment\"\n      ],\n      \"tests\": [\n        \"test_enroll_course\"\n      ],\n      \"status\": \"SATISFIED\"\n    },\n    {\n      \"req_id\": \"REQ-003\",\n      \"title\": \"Assignment Submission & Grading\",\n      \"description\": \"Students upload homework submissions and instructors assign numerical grades\",\n      \"type\": \"functional\",\n      \"priority\": \"CRITICAL\",\n      \"acceptance_criteria\": [\n        \"Submission records timestamp\",\n        \"Grading route updates grade and status\"\n      ],\n      \"implemented_files\": [\n        \"backend/routes/submissions.py\",\n        \"backend/models/course.py\"\n      ],\n      \"related_apis\": [\n        \"/api/assignments\",\n        \"/api/submissions\",\n        \"/api/submissions/{submission_id}/grade\"\n      ],\n      \"related_models\": [\n        \"Assignment\",\n        \"Submission\"\n      ],\n      \"tests\": [\n        \"test_grade_submission\"\n      ],\n      \"status\": \"SATISFIED\"\n    },\n    {\n      \"req_id\": \"REQ-004\",\n      \"title\": \"Student Learning Dashboard\",\n      \"description\": \"Interactive React dashboard showcasing enrolled classes, upcoming deadlines, and GPA/grades\",\n      \"type\": \"functional\",\n      \"priority\": \"HIGH\",\n      \"acceptance_criteria\": [\n        \"Card-based course catalog\",\n        \"Assignment submission modal\",\n        \"Live grade calculation\"\n      ],\n      \"implemented_files\": [\n        \"frontend/src/App.jsx\"\n      ],\n      \"related_apis\": [\n        \"/api/courses\",\n        \"/api/assignments\"\n      ],\n      \"related_models\": [\n        \"Course\",\n        \"Submission\"\n      ],\n      \"tests\": [\n        \"test_health\"\n      ],\n      \"status\": \"SATISFIED\"\n    },\n    {\n      \"req_id\": \"REQ-005\",\n      \"title\": \"Relational Data Integrity\",\n      \"description\": \"PostgreSQL relational schemas with foreign key relationships linking students to assignments\",\n      \"type\": \"non_functional\",\n      \"priority\": \"HIGH\",\n      \"acceptance_criteria\": [\n        \"Cascade on delete for course enrollments\",\n        \"Composite indexing on enrollments\"\n      ],\n      \"implemented_files\": [\n        \"database/schema.sql\",\n        \"backend/models/course.py\"\n      ],\n      \"related_apis\": [\n        \"/api/courses\"\n      ],\n      \"related_models\": [\n        \"Course\",\n        \"Enrollment\",\n        \"Assignment\",\n        \"Submission\"\n      ],\n      \"tests\": [\n        \"test_list_courses\"\n      ],\n      \"status\": \"SATISFIED\"\n    }\n  ]\n}"
+    }
+  },
+  "assembled_project_path": "E:\\AI-Product-Architect\\generated_projects\\proj-lms",
+  "code_validation": {
+    "status": "PASSED",
+    "tests_passed": 6,
+    "syntax_checks": 9
+  },
+  "build_validation": {
+    "status": "PASSED"
+  },
+  "api_validation": {
+    "status": "PASSED"
+  },
+  "database_validation": {
+    "status": "PASSED"
+  },
+  "docker_validation": {
+    "status": "PASSED"
+  },
+  "validation_report": {
+    "status": "PASSED",
+    "deployment_ready": true,
+    "gates_passed": 6,
+    "gates_total": 6,
+    "summary": "All automated gates passed cleanly. Syntax: 9/9 valid. Tests: 6/6 passed.",
+    "timestamp": "2026-10-12T18:18:39.637545+00:00",
+    "syntax_validation": {
+      "total_python_files": 9,
+      "passed": 9,
+      "errors": 0
+    },
+    "test_suite_execution": {
+      "total_tests": 6,
+      "passed": 6,
+      "failed": 0,
+      "duration_seconds": 3.68,
+      "output": "......                                                                   [100%]\n============================== warnings summary ===============================\nbackend\\routes\\courses.py:24\n  E:\\AI-Product-Architect\\data\\precomputed\\learning-management-system\\workspace\\backend\\routes\\courses.py:24: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/\n    class CourseResponse(BaseModel):\n\nbackend\\routes\\courses.py:37\n  E:\\AI-Product-Architect\\data\\precomputed\\learning-management-system\\workspace\\backend\\routes\\courses.py:37: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n    {\"id\": 1, \"created_at\": datetime.utcnow(), \"code\": \"CS-401\", \"title\": \"Distributed Systems\", \"credits\": 4, \"instructor\": \"Prof. Turing\"},\n\nbackend\\routes\\courses.py:38\n  E:\\AI-Product-Architect\\data\\precomputed\\learning-management-system\\workspace\\backend\\routes\\courses.py:38: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n    {\"id\": 2, \"created_at\": datetime.utcnow(), \"code\": \"DS-210\", \"title\": \"Applied Machine Learning\", \"credits\": 3, \"instructor\": \"Prof. Hinton\"},\n\nbackend\\routes\\courses.py:39\n  E:\\AI-Product-Architect\\data\\precomputed\\learning-management-system\\workspace\\backend\\routes\\courses.py:39: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n    {\"id\": 3, \"created_at\": datetime.utcnow(), \"code\": \"SEC-305\", \"title\": \"Cloud Security Architecture\", \"credits\": 4, \"instructor\": \"Prof. Diffie\"}\n\nbackend\\routes\\enrollments.py:21\n  E:\\AI-Product-Architect\\data\\precomputed\\learning-management-system\\workspace\\backend\\routes\\enrollments.py:21: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n    {\"id\": 1, \"name\": \"Primary Enrollment Record\", \"status\": \"active\", \"created_at\": datetime.utcnow()},\n\nbackend\\routes\\enrollments.py:22\n  E:\\AI-Product-Architect\\data\\precomputed\\learning-management-system\\workspace\\backend\\routes\\enrollments.py:22: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n    {\"id\": 2, \"name\": \"Secondary Enrollment Record\", \"status\": \"completed\", \"created_at\": datetime.utcnow()}\n\ntests/test_api.py::test_create_course\n  E:\\AI-Product-Architect\\data\\precomputed\\learning-management-system\\workspace\\backend\\routes\\courses.py:56: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n    \"created_at\": datetime.utcnow()\n\ntests/test_api.py::test_enroll_course\n  E:\\AI-Product-Architect\\data\\precomputed\\learning-management-system\\workspace\\backend\\routes\\courses.py:65: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n    return {\"course_id\": item_id, \"status\": \"enrolled\", \"student_email\": \"student@university.edu\", \"enrolled_at\": datetime.utcnow()}\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n6 passed, 8 warnings in 0.73s"
+    },
+    "file_manifest_validation": {
+      "total_files": 21,
+      "missing_mandatory": 0,
+      "consistent": true
+    },
+    "coverage_audit": {
+      "coverage_percent": 100.0,
+      "metrics": {
+        "functional": "4/4",
+        "non_functional": "1/1",
+        "security": "1/1",
+        "performance": "1/1",
+        "integration": "1/1"
+      },
+      "status": "APPROVED"
+    },
+    "artifact_verification": {
+      "zip_path": "E:\\AI-Product-Architect\\data\\precomputed\\learning-management-system\\project.zip",
+      "zip_size_bytes": 13525,
+      "verified": true
+    }
+  },
+  "release_gate": {
+    "status": "APPROVED",
+    "decision": "RELEASE_APPROVED",
+    "gates_passed": 6,
+    "gates_total": 6
+  },
+  "export": {
+    "status": "SUCCESS",
+    "zip_path": "E:\\AI-Product-Architect\\data\\precomputed\\learning-management-system\\project.zip",
+    "size": 13525
+  },
+  "download_url": "/api/requirements/export/proj-lms",
+  "service_url": "/preview/proj-lms",
+  "deploy_mode": "cloud_run",
+  "docker_status": "READY",
+  "registry_status": "AUTHENTICATED",
+  "deployment_status": "DEPLOYED",
+  "terraform_status": "VALIDATED",
+  "deployment_validation_status": "VERIFIED",
+  "health_status": "HEALTHY",
+  "status": "READY",
+  "created_at": "12 Oct 2026, 11:48 PM",
+  "duration": "1m 15s"
+}

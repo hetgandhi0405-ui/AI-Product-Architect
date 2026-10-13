@@ -1,0 +1,35 @@
+openapi: 3.1.0
+info:
+  title: Student Learning Management System API
+  version: 0.1.0
+servers:
+  - url: http://127.0.0.1:8000
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: Service available
+  /courses:
+    get:
+      summary: List course records
+      responses:
+        "200":
+          description: Records returned
+    post:
+      summary: Create course record
+      responses:
+        "201":
+          description: Record created
+  /enrollments:
+    get:
+      summary: List enrollment records
+      responses:
+        "200":
+          description: Records returned
+    post:
+      summary: Create enrollment record
+      responses:
+        "201":
+          description: Record created

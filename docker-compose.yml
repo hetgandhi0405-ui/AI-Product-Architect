@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  ai-product-architect:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ai-product-architect:latest
+    container_name: ai-product-architect
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/app
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+    volumes:
+      - ./data:/app/data
+      - ./generated_projects:/app/generated_projects
+    restart: unless-stopped

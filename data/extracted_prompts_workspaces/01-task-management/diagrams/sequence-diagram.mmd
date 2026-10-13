@@ -1,0 +1,11 @@
+sequenceDiagram
+  actor User
+  participant UI as Browser UI
+  participant API as FastAPI
+  participant Store as In-memory store
+  User->>UI: Submit Task Management Platform action
+  UI->>API: HTTP request
+  API->>API: Validate request
+  API->>Store: Apply domain operation
+  Store-->>API: Result
+  API-->>UI: JSON response

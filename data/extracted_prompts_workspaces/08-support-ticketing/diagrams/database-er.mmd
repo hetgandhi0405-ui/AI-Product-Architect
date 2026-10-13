@@ -1,0 +1,12 @@
+erDiagram
+  TICKET ||--o{ COMMENT : "domain relationship to be finalized"
+  TICKET {
+    int id PK
+    string name
+    string description
+  }
+  COMMENT {
+    int id PK
+    string name
+    string description
+  }

@@ -1,0 +1,14 @@
+{
+  "project_id": "05-personal-finance",
+  "project_name": "Personal Finance Tracker",
+  "artifact_status": "GENERATED",
+  "validation_status": "NOT_RUN_IN_TARGET_ENVIRONMENT",
+  "tests_included": true,
+  "tests_executed": false,
+  "frontend_api_references": false,
+  "frontend_mode": "standalone browser-session demo",
+  "deployment_executed": false,
+  "cloud_architecture_diagram_included": true,
+  "cloud_architecture_render": "SVG",
+  "cloud_architecture_source": "Mermaid"
+}

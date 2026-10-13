@@ -1,0 +1,46 @@
+{
+  "project_id": "07-realtime-analytics",
+  "project_name": "Real-Time Analytics Dashboard",
+  "artifact_status": "GENERATED",
+  "validation_status": "NOT_RUN_IN_TARGET_ENVIRONMENT",
+  "frontend_api_references": false,
+  "frontend_mode": "standalone browser-session UI",
+  "cloud_architecture_files": [
+    "diagrams/cloud-architecture.svg",
+    "diagrams/cloud-architecture.mmd",
+    "docs/cloud-architecture.md"
+  ],
+  "files": [
+    ".dockerignore",
+    ".env.example",
+    "Dockerfile",
+    "README.md",
+    "backend/__init__.py",
+    "backend/main.py",
+    "backend/requirements.txt",
+    "diagrams/architecture.mmd",
+    "diagrams/cloud-architecture.mmd",
+    "diagrams/cloud-architecture.svg",
+    "diagrams/component-diagram.mmd",
+    "diagrams/database-er.mmd",
+    "diagrams/sequence-diagram.mmd",
+    "docker-compose.yml",
+    "docs/api-specification.yaml",
+    "docs/architecture.md",
+    "docs/cloud-architecture.md",
+    "docs/database-design.md",
+    "docs/deployment.md",
+    "docs/requirements.md",
+    "docs/security.md",
+    "docs/testing.md",
+    "docs/ui-ux-specification.md",
+    "frontend/index.html",
+    "tests/test_api.py"
+  ],
+  "limitations": [
+    "cloud diagram is conceptual, not deployed",
+    "frontend demo data is temporary",
+    "frontend not connected to backend",
+    "tests not run in target environment"
+  ]
+}

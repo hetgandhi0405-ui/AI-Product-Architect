@@ -1,0 +1,9 @@
+{
+  "diagram": "flowchart TD\n  subgraph Client App\n    WEB[\"Personal Finance Web Dashboard\"]\n    EXPORT[\"CSV Exporter Stream\"]\n  end\n\n  subgraph API & Services\n    ALB[\"Load Balancer\"]\n    API[\"Personal Finance Tracker Financial Core API\"]\n    BUDGET_ENG[\"Budget Tracking & Cap Engine\"]\n    CSV_GEN[\"CSV Streaming Serializer\"]\n  end\n\n  subgraph Storage\n    PG[(\"PostgreSQL (Transactions, Budgets, Categories)\")]\n  end\n\n  WEB --> ALB --> API\n  EXPORT --> ALB --> API\n  API --> BUDGET_ENG\n  API --> CSV_GEN\n  BUDGET_ENG --> PG\n  CSV_GEN --> PG",
+  "mermaid_diagram": "flowchart TD\n  subgraph Client App\n    WEB[\"Personal Finance Web Dashboard\"]\n    EXPORT[\"CSV Exporter Stream\"]\n  end\n\n  subgraph API & Services\n    ALB[\"Load Balancer\"]\n    API[\"Personal Finance Tracker Financial Core API\"]\n    BUDGET_ENG[\"Budget Tracking & Cap Engine\"]\n    CSV_GEN[\"CSV Streaming Serializer\"]\n  end\n\n  subgraph Storage\n    PG[(\"PostgreSQL (Transactions, Budgets, Categories)\")]\n  end\n\n  WEB --> ALB --> API\n  EXPORT --> ALB --> API\n  API --> BUDGET_ENG\n  API --> CSV_GEN\n  BUDGET_ENG --> PG\n  CSV_GEN --> PG",
+  "compute": "AWS ECS Fargate",
+  "database": "PostgreSQL 15 RDS with Numeric Precisions",
+  "cache": "None",
+  "storage": "S3 (Monthly Financial Statements)",
+  "networking": "AWS VPC (Multi-AZ)"
+}
