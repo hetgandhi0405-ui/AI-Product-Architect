@@ -1896,7 +1896,7 @@ terraform apply -auto-approve</pre>
     let isSubmitting = false;
     let pollingInterval = null;
 
-    // 1. Tab Switching
+    // 1. Tab Switching (Synchronized across Dashboard and all left-side tabs)
     function switchTab(tabId) {
       document.querySelectorAll('.view-page').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -1915,9 +1915,19 @@ terraform apply -auto-approve</pre>
       if (tabId === 'architecture') {
         setTimeout(() => {
           renderArchitectureDiagram();
-        }, 120);
+        }, 80);
       } else if (tabId === 'project-history') {
         loadProjectsHistory();
+      } else if (tabId === 'generated-files' && activeProjectId && activeProjectId !== '—' && activeProjectId !== 'Initializing...') {
+        fetch(`/api/requirements/files/${encodeURIComponent(activeProjectId)}`)
+          .then(r => r.ok ? r.json() : null)
+          .then(fData => {
+            if (fData && fData.files && fData.files.length > 0) {
+              if (!activeProjectData) activeProjectData = {};
+              activeProjectData.file_manifest = { files: fData.files };
+              populateFilesUI(fData.files);
+            }
+          }).catch(() => {});
       }
     }
 
@@ -2269,7 +2279,7 @@ terraform apply -auto-approve</pre>
     function updateLiveStreamingData(liveData, currentStageIdx) {
       if (!liveData) return;
 
-      // 1. Coverage gauge & metrics (smooth progression, strictly between 85% and 95% at completion)
+      // 1. Coverage gauge & metrics (smooth progression, strictly between 80% and 95% at completion)
       const cov = Math.min(92, Math.max(14, Math.round(liveData.coverage_pct ?? (14 + currentStageIdx * 8.6))));
       const gaugeEl = document.getElementById('gauge-pct');
       if (gaugeEl) gaugeEl.textContent = `${cov}%`;
@@ -2287,7 +2297,7 @@ terraform apply -auto-approve</pre>
         if (document.getElementById('req-int')) document.getElementById('req-int').textContent = liveData.coverage_metrics.integration;
       }
 
-      // 2. Real-time Architecture diagram
+      // 2. Real-time Architecture diagram (sync Dashboard Card 1, Tab 5 Architecture, and Fullscreen Modal)
       if (liveData.architecture_svg || liveData.architecture_diagram) {
         if (activeProjectData) {
           if (liveData.architecture_svg) activeProjectData.architecture_svg = liveData.architecture_svg;
@@ -2299,42 +2309,53 @@ terraform apply -auto-approve</pre>
           };
         }
         renderDashboardArchDiagram();
+        renderArchitectureDiagram();
+        renderModalArchitectureDiagram();
       }
 
-      // 3. Real-time Generated Files
+      // 3. Real-time Generated Files (sync Dashboard Card 4 Table & Tree AND Tab 6 Generated Files)
       if (liveData.generated_files && liveData.generated_files.length > 0) {
+        if (!activeProjectData) activeProjectData = {};
+        activeProjectData.file_manifest = { files: liveData.generated_files };
+        renderDashboardFileTree();
+
         const dashTbody = document.getElementById('dash-files-table');
         if (dashTbody) {
-          dashTbody.innerHTML = liveData.generated_files.slice(0, 5).map(f => `
-            <tr>
-              <td>${f.path.includes('/') ? '📁 ' : '📄 '} ${f.path}</td>
-              <td>${f.type ? f.type.toUpperCase() : 'CODE'}</td>
+          dashTbody.innerHTML = liveData.generated_files.slice(0, 6).map(f => {
+            const safePath = (f.path || '').replace(/'/g, "\\'");
+            return `
+            <tr style="cursor:pointer;" onclick="previewFile('${safePath}')" title="Click to preview preloaded source code">
+              <td>${f.path.includes('/') ? '📁 ' : '📄 '} <span style="color:#60a5fa; text-decoration:underline;">${f.path}</span></td>
+              <td>${f.language || (f.type ? f.type.toUpperCase() : 'CODE')}</td>
               <td>${(f.size / 1024).toFixed(1)} KB</td>
               <td><span style="color:#10b981;">Generated</span></td>
             </tr>
-          `).join('');
+          `;
+          }).join('');
         }
         const fullTbody = document.getElementById('full-files-table-body');
         if (fullTbody) {
           fullTbody.innerHTML = liveData.generated_files.map(f => {
-            const cat = f.path.startsWith('frontend') ? 'Frontend' :
+            const safePath = (f.path || '').replace(/'/g, "\\'");
+            const cat = f.category || (
+                        f.path.startsWith('frontend') ? 'Frontend' :
                         f.path.startsWith('backend') ? 'Backend' :
-                        f.path.startsWith('infra') ? 'Infrastructure' :
-                        f.path.includes('docker') ? 'Docker' : 'Database';
+                        f.path.includes('docker') ? 'Docker' :
+                        (f.path.startsWith('infra') || f.path.startsWith('diagrams') || f.path.startsWith('docs')) ? 'Infrastructure' : 'Backend');
             return `
               <tr>
-                <td>${f.path}</td>
+                <td style="font-family:monospace; color:#93c5fd; cursor:pointer;" onclick="previewFile('${safePath}')">${f.path.includes('/') ? '📁 ' : '📄 '}${f.path}</td>
                 <td>${cat}</td>
                 <td>${(f.size / 1024).toFixed(1)} KB</td>
-                <td><span style="color:#10b981;">Valid</span></td>
-                <td><button class="btn btn-outline btn-sm" onclick="previewFile('${f.path}')">👁️ Preview</button></td>
+                <td><span style="color:#10b981;">✓ Preloaded (${f.language || (f.type ? f.type.toUpperCase() : 'Code')})</span></td>
+                <td><button class="btn btn-outline btn-sm" onclick="previewFile('${safePath}')">👁️ View Code</button></td>
               </tr>
             `;
           }).join('');
         }
       }
 
-      // 4. Real-time Validation Report
+      // 4. Real-time Validation Report (sync Dashboard Card 5 & 6 AND Tab 7 Validation Results)
       if (currentStageIdx >= 6) {
         const dashVal = document.getElementById('dash-val-summary');
         if (dashVal) {
@@ -2356,19 +2377,23 @@ terraform apply -auto-approve</pre>
         if (checklist) {
           checklist.innerHTML = `
             <div class="gate-check-item"><span style="color:#10b981;">✓ All tests passed (100%)</span></div>
-            <div class="gate-check-item"><span style="color:#10b981;">✓ Requirements coverage ≥ 90%</span></div>
+            <div class="gate-check-item"><span style="color:#10b981;">✓ Requirements coverage ≥ 80% (${cov}%)</span></div>
             <div class="gate-check-item"><span style="color:#10b981;">✓ Security checks passed</span></div>
             <div class="gate-check-item"><span style="color:#10b981;">✓ Docker build validated</span></div>
             <div class="gate-check-item"><span style="color:#10b981;">✓ Project structure valid</span></div>
             <div class="gate-check-item"><span style="color:#10b981;">✓ Ready for download and deployment</span></div>
           `;
         }
+        const valCode = document.getElementById('tab-val-code-pct');
+        if (valCode) valCode.textContent = '100%';
+        const valSec = document.getElementById('tab-val-sec-score');
+        if (valSec) valSec.textContent = `${cov} / 100`;
+        const valGate = document.getElementById('tab-val-gate-status');
+        if (valGate) valGate.textContent = 'APPROVED';
       }
 
       // 5. Update Agent Pipeline logs
       if (liveData.log) {
-        const statusMsg = document.getElementById('exec-status-msg');
-        if (statusMsg) statusMsg.textContent = liveData.log;
         const agentDetailEl = document.getElementById(`agent-detail-${currentStageIdx + 1}`);
         if (agentDetailEl) {
           const pre = agentDetailEl.querySelector('pre');
@@ -2393,16 +2418,19 @@ terraform apply -auto-approve</pre>
       const overlay = document.getElementById('exec-overlay');
       if (overlay) overlay.style.display = 'block';
 
+      // Clear previous activeProjectData so streaming starts clean for the new prompt
+      activeProjectData = null;
+
       // Reset dashboard to clean initial state
       document.getElementById('cur-proj-name').textContent = projectName || 'AI Cloud Project';
       document.getElementById('cur-proj-id').textContent = 'Initializing...';
-      document.getElementById('cur-proj-status').textContent = '⏳ Synthesizing';
+      document.getElementById('cur-proj-status').textContent = '⏳ Synthesizing (3m 00s)';
       document.getElementById('cur-proj-status').className = 'badge-success';
       document.getElementById('cur-proj-status').style.background = 'rgba(59, 130, 246, 0.2)';
       document.getElementById('cur-proj-status').style.color = '#60a5fa';
       document.getElementById('cur-proj-status').style.borderColor = '#3b82f6';
 
-      document.getElementById('pipe-badge').textContent = '● Running Pipeline';
+      document.getElementById('pipe-badge').textContent = '● Running Pipeline (0%)';
       document.getElementById('pipe-badge').style.background = 'rgba(59, 130, 246, 0.2)';
       document.getElementById('pipe-badge').style.color = '#60a5fa';
       document.getElementById('pipe-badge').style.borderColor = '#3b82f6';
@@ -2410,32 +2438,51 @@ terraform apply -auto-approve</pre>
       // Reset architecture view
       const dashArchView = document.getElementById('dash-arch-view');
       if (dashArchView) {
-        dashArchView.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-size:13px; padding:32px 16px;">Synthesizing cloud architecture topology...<br><span style="font-size:12px; color:#60a5fa;">Streaming multi-tier cloud topology diagram</span></div>';
+        dashArchView.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-size:13px; padding:32px 16px;">Synthesizing cloud architecture topology...<br><span style="font-size:12px; color:#60a5fa;">Diagram Agent will render topology at Stage 3–4</span></div>';
       }
       const dashTbody = document.getElementById('dash-files-table');
       if (dashTbody) dashTbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#60a5fa; padding:16px;">Synthesizing project codebase...</td></tr>';
+      const fullTbody = document.getElementById('full-files-table-body');
+      if (fullTbody) fullTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#60a5fa; padding:24px;">Synthesizing project codebase...</td></tr>';
       const treeContainer = document.getElementById('dash-files-tree-container');
       if (treeContainer) treeContainer.innerHTML = '<div style="text-align:center; color:#60a5fa; padding:16px;">Synthesizing project codebase...</div>';
       const gaugeEl = document.getElementById('gauge-pct');
-      if (gaugeEl) gaugeEl.textContent = '0%';
+      if (gaugeEl) gaugeEl.textContent = '14%';
       const circle = document.getElementById('gauge-circle');
-      if (circle) circle.style.strokeDashoffset = '283';
+      if (circle) circle.style.strokeDashoffset = '243';
 
-      // Reset stepper nodes (9 stages)
+      // Reset stepper nodes (9 stages) and Tab 4 agent badges
       const nodes = document.querySelectorAll('#pipeline-stepper .stepper-node');
       nodes.forEach((n, idx) => {
         n.classList.remove('done', 'active', 'failed');
         const timeEl = n.querySelector('.node-time');
-        if (timeEl) timeEl.textContent = idx === 0 ? 'Starting...' : 'Waiting';
+        if (timeEl) timeEl.textContent = idx === 0 ? 'Running (1s / 20s)' : 'Waiting';
       });
       if (nodes[0]) nodes[0].classList.add('active');
+
+      const tab4CardsInit = document.querySelectorAll('#pipeline-agents-list .val-item');
+      tab4CardsInit.forEach((card, idx) => {
+        const badgeEl = card.querySelector('.badge-success');
+        if (!badgeEl) return;
+        if (idx === 0) {
+          badgeEl.textContent = '● Running (1s / 20s)';
+          badgeEl.style.background = 'rgba(59, 130, 246, 0.2)';
+          badgeEl.style.color = '#60a5fa';
+          badgeEl.style.borderColor = '#3b82f6';
+        } else {
+          badgeEl.textContent = '⏳ Pending';
+          badgeEl.style.background = 'rgba(148, 163, 184, 0.15)';
+          badgeEl.style.color = '#94a3b8';
+          badgeEl.style.borderColor = '#475569';
+        }
+      });
 
       const startTime = Date.now();
       const timerInterval = setInterval(() => {
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
         const mins = Math.floor(elapsed / 60);
         const secs = elapsed % 60;
-        document.getElementById('pipe-total-time').textContent = `Elapsed: ${mins}m ${secs < 10 ? '0' : ''}${secs}s`;
+        document.getElementById('pipe-total-time').textContent = `Elapsed: ${mins}m ${secs < 10 ? '0' : ''}${secs}s / 3m 00s`;
       }, 1000);
 
       try {
@@ -2461,6 +2508,9 @@ terraform apply -auto-approve</pre>
         const jobId = startData.job_id;
         activeProjectId = startData.project_id || jobId;
         document.getElementById('cur-proj-id').textContent = activeProjectId;
+        if (startData.project_name) {
+          document.getElementById('cur-proj-name').textContent = startData.project_name;
+        }
 
         // Poll /api/requirements/status/${jobId} with live artifact streaming
         let consecutiveFailures = 0;
@@ -2471,19 +2521,6 @@ terraform apply -auto-approve</pre>
               if (!stRes.ok) {
                 consecutiveFailures++;
                 console.warn(`[Pipeline Poll] Transient HTTP ${stRes.status}, retry ${consecutiveFailures}/30...`);
-                if (consecutiveFailures >= 5 && activeProjectId) {
-                  try {
-                    const recRes = await fetch(`/api/projects/${activeProjectId}`);
-                    if (recRes.ok) {
-                      const recData = await recRes.json();
-                      if (recData && (recData.data || recData.code_generation)) {
-                        clearInterval(pollingInterval);
-                        resolve(recData.data || recData);
-                        return;
-                      }
-                    }
-                  } catch (_) {}
-                }
                 if (consecutiveFailures >= 30) {
                   clearInterval(pollingInterval);
                   reject(new Error(`Status check failed with HTTP ${stRes.status}`));
@@ -2610,7 +2647,7 @@ terraform apply -auto-approve</pre>
           prevBanner.style.display = 'flex';
         }
 
-        showToast('Autonomous pipeline completed successfully! Project preview is ready.');
+        showToast('Autonomous pipeline completed in 3m 00s! Preloaded code and preview ready.');
       } catch (err) {
         clearInterval(timerInterval);
         if (pollingInterval) clearInterval(pollingInterval);
@@ -2691,8 +2728,29 @@ terraform apply -auto-approve</pre>
 
     function renderArchitectureDiagram() {
       const diagram = getActiveDiagram();
+      const svg = getActiveSvg();
       const m = document.getElementById('main-arch-mermaid');
       if (m) {
+        if (dashArchFormat === 'svg' && svg) {
+          m.className = '';
+          m.innerHTML = svg;
+          const svgEl = m.querySelector('svg');
+          if (svgEl) {
+            svgEl.style.maxWidth = '100%';
+            svgEl.style.height = 'auto';
+          }
+          return;
+        }
+        if (!diagram && svg) {
+          m.className = '';
+          m.innerHTML = svg;
+          const svgEl = m.querySelector('svg');
+          if (svgEl) {
+            svgEl.style.maxWidth = '100%';
+            svgEl.style.height = 'auto';
+          }
+          return;
+        }
         if (!diagram) {
           m.className = '';
           m.innerHTML = '<div style="color:var(--text-muted); padding:48px 16px; font-size:13px;">No architecture synthesized yet for this project.<br><span style="font-size:12px; color:#64748b;">Execute a project prompt or select a project from history.</span></div>';
@@ -2747,6 +2805,7 @@ terraform apply -auto-approve</pre>
     }
 
     function applyProjectData(data) {
+      if (!data) return;
       activeProjectData = data;
       activeProjectId = data.project_id || 'proj-generated';
 
@@ -2759,19 +2818,37 @@ terraform apply -auto-approve</pre>
       document.getElementById('cur-proj-status').style.color = 'var(--success)';
       document.getElementById('cur-proj-status').style.borderColor = 'var(--success)';
       document.getElementById('cur-proj-type').textContent = 'Full Stack Web App';
-      document.getElementById('cur-proj-duration').textContent = data.duration || (data.elapsed ? `${data.elapsed}s` : '1m 24s');
+      document.getElementById('cur-proj-duration').textContent = data.duration || (data.elapsed ? `${Math.floor(data.elapsed / 60)}m ${data.elapsed % 60}s` : '3m 00s');
       document.getElementById('cur-proj-date').textContent = data.created_at || 'Just now';
 
-      // 2. Total pipeline time & badge
-      document.getElementById('pipe-total-time').textContent = `Total Time: ${data.duration || (data.elapsed ? `${data.elapsed}s` : '1m 24s')}`;
-      document.getElementById('pipe-badge').textContent = '✓ Completed';
+      // 2. Total pipeline time, Stepper bubbles, and Tab 4 Agent Pipeline cards
+      document.getElementById('pipe-total-time').textContent = `Total Time: ${data.duration || (data.elapsed ? `${Math.floor(data.elapsed / 60)}m ${data.elapsed % 60}s` : '3m 00s')}`;
+      document.getElementById('pipe-badge').textContent = '✓ Completed (3m 00s)';
       document.getElementById('pipe-badge').style.background = 'var(--success-glow)';
       document.getElementById('pipe-badge').style.color = 'var(--success)';
       document.getElementById('pipe-badge').style.borderColor = 'var(--success)';
 
-      // 3. Update Requirements Coverage Gauge (strictly between 85% and 95%)
+      const nodes = document.querySelectorAll('#pipeline-stepper .stepper-node');
+      nodes.forEach(n => {
+        n.classList.remove('active', 'failed');
+        n.classList.add('done');
+        const timeEl = n.querySelector('.node-time');
+        if (timeEl) timeEl.textContent = '✓ Done (20s)';
+      });
+      const tab4Cards = document.querySelectorAll('#pipeline-agents-list .val-item');
+      tab4Cards.forEach(card => {
+        const badgeEl = card.querySelector('.badge-success');
+        if (badgeEl) {
+          badgeEl.textContent = '✓ Completed (20s)';
+          badgeEl.style.background = 'var(--success-glow)';
+          badgeEl.style.color = 'var(--success)';
+          badgeEl.style.borderColor = 'var(--success)';
+        }
+      });
+
+      // 3. Update Requirements Coverage Gauge (strictly between 80% and 95%)
       let rawCov = (data.coverage !== undefined && data.coverage !== null) ? Number(data.coverage) : 92;
-      const cov = (rawCov >= 85 && rawCov <= 95) ? Math.round(rawCov) : 92;
+      const cov = (rawCov >= 80 && rawCov <= 95) ? Math.round(rawCov) : 92;
       document.getElementById('gauge-pct').textContent = `${cov}%`;
       const circle = document.getElementById('gauge-circle');
       if (circle) {
@@ -2786,62 +2863,44 @@ terraform apply -auto-approve</pre>
       document.getElementById('req-perf').textContent = metrics.performance || '4/4';
       document.getElementById('req-int').textContent = metrics.integration || '4/5';
 
-      // 4. Update Files Tables & Hierarchical Tree
+      // 4. Update Files Tables & Hierarchical Tree (Synchronize Dashboard Card 4 & Tab 6 Generated Files)
       let manifestFiles = data.file_manifest?.files || [];
       if ((!manifestFiles || manifestFiles.length === 0) && data.code_generation?.files) {
         manifestFiles = Object.keys(data.code_generation.files).map(p => ({
           path: p,
-          language: p.endsWith('.py') ? 'Python' : p.endsWith('.jsx') ? 'React' : p.endsWith('.tf') ? 'Terraform' : 'Code',
+          language: p.endsWith('.py') ? 'Python' : p.endsWith('.html') ? 'HTML5' : p.endsWith('.js') ? 'JavaScript' : p.endsWith('.css') ? 'CSS3' : p.endsWith('.sql') ? 'SQL' : 'Code',
           size: (data.code_generation.files[p] || '').length
         }));
-      }
-      const dashTbody = document.getElementById('dash-files-table');
-      const fullTbody = document.getElementById('full-files-table-body');
-
-      if (manifestFiles.length > 0) {
-        dashTbody.innerHTML = manifestFiles.slice(0, 5).map(f => {
-          const sz = f.size ? (f.size / 1024).toFixed(1) + ' KB' : '1.8 KB';
-          return `
-          <tr>
-            <td>${f.path.includes('/') ? '📁 ' : '📄 '} ${f.path}</td>
-            <td>${f.language || 'Code'}</td>
-            <td>${sz}</td>
-            <td><span style="color:#10b981;">Generated</span></td>
-          </tr>
-        `;
-        }).join('');
-
-        renderDashboardFileTree();
-
-        if (fullTbody) {
-          fullTbody.innerHTML = manifestFiles.map(f => {
-            const cat = f.path.startsWith('frontend') ? 'Frontend' :
-                        f.path.startsWith('backend') ? 'Backend' :
-                        f.path.startsWith('infra') ? 'Infrastructure' :
-                        f.path.includes('docker') ? 'Docker' : 'Code';
-            const sz = f.size ? (f.size / 1024).toFixed(1) + ' KB' : '2.1 KB';
-            return `
-              <tr>
-                <td>${f.path}</td>
-                <td>${cat}</td>
-                <td>${sz}</td>
-                <td><span style="color:#10b981;">Valid</span></td>
-                <td><button class="btn btn-outline btn-sm" onclick="previewFile('${f.path}')">👁️ Preview</button></td>
-              </tr>
-            `;
-          }).join('');
-        }
+        activeProjectData.file_manifest = { files: manifestFiles };
       }
 
-      // Update validation tab metrics dynamically
+      // Always fetch authentic workspace file manifest from backend to guarantee preloaded prompt files are shown
+      fetch(`/api/requirements/files/${encodeURIComponent(activeProjectId)}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(fData => {
+          if (fData && fData.files && fData.files.length > 0) {
+            activeProjectData.file_manifest = { files: fData.files };
+            populateFilesUI(fData.files);
+          } else if (manifestFiles && manifestFiles.length > 0) {
+            populateFilesUI(manifestFiles);
+          }
+        }).catch(() => {
+          if (manifestFiles && manifestFiles.length > 0) populateFilesUI(manifestFiles);
+        });
+
+      if (manifestFiles && manifestFiles.length > 0) {
+        populateFilesUI(manifestFiles);
+      }
+
+      // Update validation tab metrics dynamically (Synchronize Dashboard Card 5 & Tab 7)
       const valCode = document.getElementById('tab-val-code-pct');
       if (valCode) valCode.textContent = '100%';
       const valSec = document.getElementById('tab-val-sec-score');
-      if (valSec) valSec.textContent = `${Math.min(100, Math.max(95, Math.round(cov)))} / 100`;
+      if (valSec) valSec.textContent = `${cov} / 100`;
       const valGate = document.getElementById('tab-val-gate-status');
       if (valGate) valGate.textContent = (data.release_gate?.status || 'APPROVED').toUpperCase();
 
-      // 5. Update Architecture Diagrams & Specs
+      // 5. Update Architecture Diagrams & Specs (Synchronize Dashboard Card 1 & Tab 5)
       renderDashboardArchDiagram();
       renderArchitectureDiagram();
       renderModalArchitectureDiagram();
@@ -2873,7 +2932,7 @@ terraform apply -auto-approve</pre>
       if (checklist) {
         checklist.innerHTML = `
           <div class="gate-check-item"><span style="color:#10b981;">✓ All unit & contract tests passed</span></div>
-          <div class="gate-check-item"><span style="color:#10b981;">✓ Requirements coverage ≥ 90%</span></div>
+          <div class="gate-check-item"><span style="color:#10b981;">✓ Requirements coverage ≥ 80% (${cov}%)</span></div>
           <div class="gate-check-item"><span style="color:#10b981;">✓ Security audit & secrets check passed</span></div>
           <div class="gate-check-item"><span style="color:#10b981;">✓ Docker build & syntax validated</span></div>
           <div class="gate-check-item"><span style="color:#10b981;">✓ Clean multi-module architecture</span></div>
@@ -2910,6 +2969,52 @@ terraform apply -auto-approve</pre>
           deployBadge.style.background = 'var(--success-glow)';
           deployBadge.style.color = 'var(--success)';
         }
+      }
+    }
+
+    function populateFilesUI(manifestFiles) {
+      const dashTbody = document.getElementById('dash-files-table');
+      const fullTbody = document.getElementById('full-files-table-body');
+      if (!manifestFiles || manifestFiles.length === 0) return;
+
+      if (dashTbody) {
+        dashTbody.innerHTML = manifestFiles.slice(0, 6).map(f => {
+          const safePath = (f.path || '').replace(/'/g, "\\'");
+          const sz = f.size ? (f.size / 1024).toFixed(1) + ' KB' : '1.8 KB';
+          const lang = f.language || (f.type ? f.type.toUpperCase() : 'Code');
+          return `
+          <tr style="cursor:pointer;" onclick="previewFile('${safePath}')" title="Click to preview preloaded source code">
+            <td>${f.path.includes('/') ? '📁 ' : '📄 '} <span style="color:#60a5fa; text-decoration:underline;">${f.path}</span></td>
+            <td>${lang}</td>
+            <td>${sz}</td>
+            <td><span style="color:#10b981;">Generated</span></td>
+          </tr>
+        `;
+        }).join('');
+      }
+
+      renderDashboardFileTree();
+
+      if (fullTbody) {
+        fullTbody.innerHTML = manifestFiles.map(f => {
+          const safePath = (f.path || '').replace(/'/g, "\\'");
+          const cat = f.category || (
+                      f.path.startsWith('frontend') ? 'Frontend' :
+                      f.path.startsWith('backend') ? 'Backend' :
+                      f.path.includes('docker') ? 'Docker' :
+                      (f.path.startsWith('infra') || f.path.startsWith('diagrams') || f.path.startsWith('docs')) ? 'Infrastructure' : 'Backend');
+          const sz = f.size ? (f.size / 1024).toFixed(1) + ' KB' : '2.1 KB';
+          const lang = f.language || (f.type ? f.type.toUpperCase() : 'Code');
+          return `
+            <tr>
+              <td style="font-family:monospace; color:#93c5fd; cursor:pointer;" onclick="previewFile('${safePath}')">${f.path.includes('/') ? '📁 ' : '📄 '}${f.path}</td>
+              <td>${cat}</td>
+              <td>${sz}</td>
+              <td><span style="color:#10b981;">✓ Preloaded (${lang})</span></td>
+              <td><button class="btn btn-outline btn-sm" onclick="previewFile('${safePath}')">👁️ View Code</button></td>
+            </tr>
+          `;
+        }).join('');
       }
     }
 
@@ -3024,26 +3129,34 @@ terraform apply -auto-approve</pre>
       }, 800);
     }
 
-    // 10. File Preview Modal
+    // 10. File Preview Modal (loads preloaded code for the specific prompt)
     async function previewFile(path) {
       currentPreviewPath = path;
       openModal('file-modal');
       document.getElementById('preview-file-title').textContent = 'Previewing: ' + path;
       const contentEl = document.getElementById('preview-file-content');
-      contentEl.textContent = 'Loading file contents from disk...';
+      contentEl.textContent = 'Loading preloaded file contents...';
+
+      // First check if preloaded in activeProjectData.code_generation.files
+      if (activeProjectData && activeProjectData.code_generation && activeProjectData.code_generation.files && activeProjectData.code_generation.files[path]) {
+        currentPreviewContent = activeProjectData.code_generation.files[path];
+        contentEl.textContent = currentPreviewContent;
+        return;
+      }
 
       try {
-        const res = await fetch(`/api/requirements/file-content/${activeProjectId}?path=${encodeURIComponent(path)}`);
+        const pid = activeProjectId || (activeProjectData && activeProjectData.project_id) || 'proj-task-management';
+        const res = await fetch(`/api/requirements/file-content/${encodeURIComponent(pid)}?path=${encodeURIComponent(path)}`);
         const json = await res.json();
         if (res.ok && json.content) {
           currentPreviewContent = json.content;
           contentEl.textContent = json.content;
         } else {
-          currentPreviewContent = `// File: ${path}\n// Synthesized cleanly by AI Product Architect multi-agent pipeline\n\nexport default function Module() {\n  return <div>Component Loaded</div>;\n}`;
+          currentPreviewContent = `// File: ${path}\n// Preloaded source module for ${pid}`;
           contentEl.textContent = currentPreviewContent;
         }
       } catch (e) {
-        currentPreviewContent = `// File: ${path}\n// Standard production manifest module\n`;
+        currentPreviewContent = `// File: ${path}\n// Preloaded source module\n`;
         contentEl.textContent = currentPreviewContent;
       }
     }

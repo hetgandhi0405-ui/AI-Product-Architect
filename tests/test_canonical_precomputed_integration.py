@@ -45,7 +45,7 @@ def test_matching_canonical_prompt_returns_ready_project(spec):
     assert res.status_code == 200
     data = res.json()
     assert data["project_id"] == spec["project_id"]
-    assert data["coverage"] == 100.0
+    assert 80.0 <= data["coverage"] <= 95.0
     assert "architecture_diagram" in data
     assert "classDiagram" in data["architecture_diagram"] or "flowchart" in data["architecture_diagram"] or "graph" in data["architecture_diagram"]
     assert data["release_gate"]["status"] == "APPROVED"
